@@ -1,0 +1,329 @@
+\documentclass[
+    a4paper,
+    11pt,              % verwendete Schriftgroesse (Std: 11pt)
+    DIV10,             % Bestimmt die Groesse des Textbereichs (Std: 10)
+    BCOR12mm,           % Zusaetzlicher Rand auf der Innenseite (Bindekorrektur)
+%    twoside,           % beidseitiger Druck
+    headsepline,       % Kolumnentitel mit horizontaler Trennlinie
+    cleardoublepage=empty,  % Auf Leerseiten kein Kolumnentitel und keine Seitenzahlen
+    listof=totoc,       % Tabellen und Abbildungsverzeichnis ins Inhaltsverzeichnis
+    bibliography=totocnumbered,  % Literaturverzeichnis ins Inhaltverzeichnis
+    % idxtotoc,         % Index ins Inhaltverzeichnis
+    %english,          % oder ngerman
+    chapterprefix,     % Print chapter prefix before each Chapter
+    %nochapterprefix,  % Don't print ``chapter'' prefix
+    appendixprefix,
+    numbers=noenddot,  % appendix verursacht sonst, dass ein punkt hinter die chapters gesetzt wird
+    captions=tableheading,  % Tabellen Beschriftungen ueber der Tabelle
+]{scrbook}             % or scrartcl - KOMA Script
+
+\usepackage[british,ngerman]{babel}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+
+\usepackage[svgnames]{xcolor}
+
+\usepackage{listings}
+
+\usepackage{adjustbox}
+
+
+\usepackage{pgf}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.9}
+
+%\usepackage[ruled,vlined]{algorithm2e}
+
+\usepackage{amssymb}
+
+% \usepackage{glossaries} % for the glossary of cause 
+
+\usepackage[
+    english,
+%     a4paper,
+    %bpagebackref,         % link from bibliography back to citing pages; (incompatible with biblatex)
+    pdfpagelabels,
+    plainpages=false,     % fuer arabische und roemische nummern wichtig
+    hyperindex,
+    hyperfigures,
+    %linktocpage,         % Die Seitennummern als Link im Inhaltsverzeichnis anstatt des Textes
+    colorlinks,           % Text als Link anstatt Box
+    linkcolor=Black, %MidnightBlue,       % Linkfarbe, std=red 
+    citecolor=Black, %MidnightBlue,       % cite Linkfarbe, std=green
+    urlcolor=Black, %MidnightBlue,        % URL Linkfarbe, std=blue (printed version in black, online version in blue)
+    breaklinks,           % Links ueber mehrere Zeilen moeglich
+    bookmarks,            % Acrobat Bookmarks erstellen
+    bookmarksopen=true,   % Acrobat Bookmarks beim oeffnen des Dokumentes anzeigen
+    bookmarksnumbered=true,
+    pdfproducer={LaTeX with hyperref and thumbpdf},
+    pdfstartpage={1},     % Startseite 
+    %pdfstartview={Fit},
+    %pdfview={FitH},
+    %pdffitwindow=true    
+]{hyperref}
+
+\usepackage{needspace} %To prevent line break where I don't want it
+\usepackage{fix-cm} % to build huge font size
+
+
+\usepackage{cite} %Allows citations to be broken at the end of a line
+
+\usepackage{enumerate} %enumerate formating
+
+\usepackage[caption=false]{subfig} %subfloat
+%\usepackage{subfigure}
+%\addtolength{\subfigcapskip}{-0.2in}
+
+\usepackage[boxed]{algorithm}
+\usepackage{algorithmicx,algpseudocode}
+
+\usepackage{longtable}
+
+%Chinese
+%\usepackage{CJK}
+\newcommand{\cninput}[1]{\hspace{-0.3cm}\begin{CJK}{UTF8}{gbsn}#1\end{CJK}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning} 
+\usetikzlibrary{shapes,decorations}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.pathreplacing}
+
+\tikzset{
+    %Define standard arrow tip
+    >=stealth',
+    %Define style for boxes
+    punkt/.style={
+           rectangle,
+           rounded corners,
+           draw=black, very thick,
+           text width=6.5em,
+           minimum height=2em,
+           text centered},
+    % Define arrow style
+    pil/.style={
+           ->,
+           thick,
+           shorten <=2pt,
+           shorten >=2pt,}
+}
+\tikzstyle{word} = [draw, top color=blue!10, bottom color=blue!50, rounded corners=1mm]
+\tikzstyle{wordRed} = [draw, top color=red!10, bottom color=red!90, rounded corners=1mm]
+\tikzstyle{wordGreen} = [draw, top color=green!10, bottom color=green!90, rounded corners=1mm]
+\tikzstyle{wordOrange} = [draw, top color=orange!10, bottom color=orange!90, rounded corners=1mm]
+
+\usepackage{amsmath}
+
+%used for rp helper command
+\usepackage{fp}
+\usepackage{numprint}
+
+\newcommand{\Sig}[1]{\textcolor{blue}{#1}} % significant to 95%
+\newcommand{\sig}[1]{\textcolor{magenta}{#1}} % significant to 90%
+\newcommand{\significanceExplanation}{Significant improvements over the baseline}
+
+\newcommand{\cev}[1]{\rule{0mm}{0mm}\,\,\mathchoice%
+{\reflectbox{$\displaystyle\vec{\reflectbox{$\displaystyle\!\!#1$}}$}}%
+{\reflectbox{$\vec{\reflectbox{$\!\!#1$}}$}}%
+{\reflectbox{$\scriptstyle\vec{\reflectbox{$\scriptstyle\!\!#1$}}$}}%
+{\reflectbox{$\scriptscriptstyle\vec{\reflectbox{$\scriptscriptstyle\!\!#1$}}$}}%
+}
+
+\newcommand{\significanceKey}{
+\begin{flushright}
+\hspace{-1cm}\begin{tabular}{lll}
+  \sig{$p < .1$}  & significance \\
+  \Sig{$p < .05$} & significance \\
+\end{tabular}
+\end{flushright}
+}
+
+% Hurenkinder und Schusterjungen verhindern
+\clubpenalty10000
+\widowpenalty10000
+\displaywidowpenalty=10000
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% own helper functions
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%Rounds numbers to percent
+\newcommand{\rp}[1]{%
+  \FPset{\per}{#1}%
+  \FPmul{\per}{\per}{100}%
+  \FPround{\per}{\per}{1}%
+  \numprint{\per}%
+}%
+
+\newcommand{\percent}[2]{%
+  \FPset{\per}{#1}%
+  \FPdiv{\per}{#1}{#2}
+  \rp{\per}\%
+}%
+
+
+
+\usepackage{theorem}                            % instead of \usepackage{amsthm}
+\theoremstyle{break}
+\theorembodyfont{\itshape}	
+\theoremheaderfont{\scshape}
+\newtheorem{Cor}{Corollary}
+\newtheorem{Def}{Definition}
+\newtheorem{Rmk}{Remark}
+\newtheorem{Theorem}{Theorem}
+
+\newcommand\T{\rule{0pt}{2.2ex}}       % Top strut
+
+% @ environment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{xspace}                             % context sensitive space after macros
+\makeatletter 
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+\def\@onedot{\ifx\@let@token.\else.\null\fi\xspace}
+\def\eg{{e.g}\onedot} \def\Eg{{E.g}\onedot}
+\def\ie{{i.e}\onedot} \def\Ie{{I.e}\onedot}
+\def\cf{{c.f}\onedot} \def\Cf{{C.f}\onedot}
+\def\etc{{etc}\onedot} \def\vs{{vs}\onedot} 
+\def\wrt{w.r.t\onedot} \def\dof{d.o.f\onedot}
+\def\etal{{et al}\onedot}
+\def\zB{z.B\onedot} \def\ZB{Z.B\onedot}
+\def\dh{d.h\onedot} \def\Dh{D.h\onedot}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%TikZ code "illustrating" the new "brace"
+\newcommand{\newbrace}[1][]{
+\begin{tikzpicture}[baseline=-0.5ex]
+\draw[#1] (0,0) -- (0.3,0.3);
+\draw[#1] (0,0) -- (0.3,-0.3);
+\end{tikzpicture}
+}
+
+% the optional argument allows you to select the type of arrow 
+% you can also customize the "new brace"
+\newenvironment{casesnew}[1][->]%
+{\;\newbrace[#1]\;\begin{array}{@{}l@{}}}%
+{\end{array}}
+
+\newcommand{\publicationDate}{1. April 202X}
+\newcommand{\thesisStudyCourse}{Abschlussarbeit im Master-Studiengang Informatik} % EDIT: correct name of study course
+\subject{\thesisStudyCourse}
+\title{Title of work}
+\newcommand{\Surname}{Doe}
+\newcommand{\Firstname}{John}
+\newcommand{\Aachen}{Aachen}
+\newcommand{\studentname}{\Firstname~\Surname}
+\newcommand{\MatrikelNummer}{123456}
+\author{\studentname}
+
+\newcommand{\firstreviewer}{Prof.~M.~Musterprof1,~Ph.~D.} % EDIT: e.g. Sen.~Prof.~Dr.-Ing.~H.~Ney, Priv.-Doz.~Dr.~R.~Schl\"uter, etc.
+\newcommand{\secondreviewer}{Prof.~Dr.~N.~Musterprof2}    % EDIT: e.g. Sen.~Prof.~Dr.-Ing.~H.~Ney, Priv.-Doz.~Dr.~R.~Schl\"uter, etc.
+\newcommand{\supervisor}{Dipl.~Inform.~P.~Musterassi}     % EDIT: your supervisor, use correct title, e.g. Dipl.-Inform. [prefix], M.Sc. Inform. [suffix], etc. 
+
+%Global commands
+%\newcommand{\argmax}{\operatornamewithlimits{arg\,max}}
+%\DeclareMathOperator*{\argmax}{arg\,max} % I'm not sure where the difference is between this one and operatornamewithlimits
+%\DeclareMathOperator*{\argmin}{arg\,min} % I'm not sure where the difference is between this one and operatornamewithlimits
+
+%\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+%\newcommand{\argmin}{\operatornamewithlimits{argmin}}
+\newcommand{\argmax}[1]{\underset{#1}{\operatorname{argmax}}}
+\newcommand{\argmin}[1]{\underset{#1}{\operatorname{argmin}}}
+
+
+\newcommand{\phraseset}[1]{\ensuremath{\mathcal{#1}}}
+\newcommand\BLEU{\textsc{Bleu}\xspace}
+
+\newcommand{\GIZA}{{GIZA\nolinebreak[4]\hspace{-.025em}\raisebox{.2ex}{\small\bf++}}\xspace}
+
+\newcommand{\leftphrasedelim}{\mathlarger{\langle}}
+\newcommand{\rightphrasedelim}{\mathlarger{\rangle}}
+\newcommand{\kstar}{^\star}
+\newcommand{\ntind}[1][]{^{\sim#1}} % ``Non-terminal'' index
+
+\newcommand{\phrasepair}[2]{\ensuremath{\leftphrasedelim}#1, #2\ensuremath{\rightphrasedelim}}
+\newcommand{\rulearrow}{\rightarrow}
+\newcommand{\gap}{\ \ensuremath{\Diamond}\ }
+
+% Indentation
+\newcommand{\ind}{\hspace*{5mm}}
+
+%fix figure placement
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+
+
+
+
+%\input{figures}
+% \makeglossaries
+
+% \usepackage{showframe}
+
+\begin{document}
+
+\cleardoublepage
+\graphicspath{{pictures/}}
+%\include{glossary}
+\frontmatter
+
+\pdfbookmark[0]{Title}{front}
+\input{title}
+
+\selectlanguage{ngerman}
+{
+\renewcommand*\chapterheadstartvskip{\vspace*{-5\topskip}} % the assurance needs more space, so move the title up with this
+\input{assurance}
+} 
+
+\selectlanguage{british}
+\chapter{Abstract}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent at venenatis est, a bibendum enim. Nulla dapibus auctor arcu nec volutpat. Cras commodo dolor sed congue ultricies. Vivamus convallis pharetra accumsan. Nam suscipit diam vitae aliquam efficitur. Nullam id bibendum erat, iaculis rhoncus eros. Quisque iaculis nulla consequat sapien efficitur posuere sed nec dui.
+
+Pellentesque gravida eleifend turpis, quis ultrices ipsum consequat ac. Cras ac ligula a neque mollis sodales. Morbi eleifend tortor et ipsum interdum, vitae vestibulum quam semper. Nam dictum gravida nunc et faucibus. Curabitur egestas elit ut sollicitudin eleifend. Donec facilisis ante quis facilisis ultrices. Nulla ac eros in risus ullamcorper pulvinar ac interdum metus. Curabitur lectus lorem, tempus nec faucibus in, molestie a mi.
+
+Aenean purus mauris, consectetur sed lacinia vel, rhoncus ut mauris. Quisque ac quam sodales sapien efficitur mollis a vel leo. Nulla quis mattis sapien. Aenean at tortor eu leo varius sollicitudin quis sed enim. Vivamus eget neque non mi consectetur tristique. Curabitur vel pellentesque sem. Praesent faucibus erat mi. Proin ornare ipsum erat, et luctus ex bibendum sit amet. Duis in ultricies enim. Aenean mattis, quam ut maximus mollis, lacus nulla euismod dui, eu lacinia nulla turpis quis tellus. Nullam pharetra tortor mi, non pretium mi tempor at.
+
+%\input{acknowledgements}
+
+\pdfbookmark[0]{Contents}{toc} % ziffer fuer ebene
+\tableofcontents
+
+\mainmatter          % Hauptteil (arabische Seitenzahlen)
+
+\chapter{Introduction}
+Sed facilisis mi tellus, id dignissim dui vehicula quis. Nam lobortis blandit lectus vel accumsan. Curabitur gravida dignissim ante, eget congue nisl tempor eu. Aliquam tincidunt congue vestibulum. Ut quam erat, lobortis et placerat eu, fringilla in libero. Nam at mauris nec purus luctus tincidunt. Phasellus ut arcu quis nisl gravida semper in in velit. Nulla lacinia interdum viverra. Integer augue turpis, tempor nec eros quis, dignissim semper nunc. Aenean euismod augue lorem, a luctus nibh euismod nec. Cras lobortis, ipsum id luctus hendrerit, arcu nunc tincidunt velit, sit amet tempor risus augue eu turpis. Morbi tempus nec magna sed egestas. Nulla velit odio, dignissim id ultrices eget, rutrum porta massa. Aenean sed ultricies justo \cite{Gulati+Qin+:2020conformer}.
+
+\section{Related Work}
+Phasellus gravida porttitor viverra. Maecenas dictum dolor vitae eros rutrum, et lacinia urna bibendum. Fusce tristique lorem at mi euismod, vitae venenatis velit varius. Pellentesque viverra placerat nunc ut placerat. Praesent tincidunt dignissim velit. Morbi facilisis felis est, ut tincidunt urna laoreet non. Nulla sit amet facilisis nulla. Aliquam iaculis, tellus eu vestibulum laoreet, leo quam porttitor orci, pharetra commodo tellus lorem sollicitudin massa. Duis massa est, interdum ornare rutrum at, fringilla ut elit. In semper ultricies massa ut scelerisque. Morbi interdum metus ante, vel luctus metus fermentum eu. Aliquam faucibus ornare ipsum, ut eleifend enim pretium eu. Fusce feugiat neque urna, non ornare elit luctus id. Mauris quis ante lorem. Etiam dui velit, euismod quis mauris at, molestie porta purus. Donec ut pulvinar arcu \cite{hinton2012deep}, \cite{Bourlard+Morgan:1993, Renals+Morgan+:1991, WuSchusterChen+16}.
+
+
+\chapter{...}
+Praesent mauris turpis, commodo vitae fringilla at, lobortis a ante. Morbi lorem ex, pulvinar quis fermentum in, vehicula in nisl. Vestibulum sed lacinia tortor. Praesent eget nulla eget mauris venenatis interdum a non purus. Ut scelerisque dignissim libero in sodales. Maecenas nec ante quis velit molestie maximus. Sed dictum sem faucibus eros venenatis, et porta purus sagittis. Etiam ac eros vel turpis egestas dignissim. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean rutrum ex vitae iaculis bibendum. Nullam tempus augue sit amet felis maximus suscipit. Curabitur consequat massa eget quam luctus dignissim. Quisque in pellentesque eros. Aliquam erat urna, imperdiet at augue a, ultricies suscipit erat. Vivamus dictum enim sapien, id vehicula felis condimentum nec.
+
+\chapter{...}
+Praesent mauris turpis, commodo vitae fringilla at, lobortis a ante. Morbi lorem ex, pulvinar quis fermentum in, vehicula in nisl. Vestibulum sed lacinia tortor. Praesent eget nulla eget mauris venenatis interdum a non purus. Ut scelerisque dignissim libero in sodales. Maecenas nec ante quis velit molestie maximus. Sed dictum sem faucibus eros venenatis, et porta purus sagittis. Etiam ac eros vel turpis egestas dignissim. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean rutrum ex vitae iaculis bibendum. Nullam tempus augue sit amet felis maximus suscipit. Curabitur consequat massa eget quam luctus dignissim. Quisque in pellentesque eros. Aliquam erat urna, imperdiet at augue a, ultricies suscipit erat. Vivamus dictum enim sapien, id vehicula felis condimentum nec.
+
+\chapter{Experiments}
+Praesent mauris turpis, commodo vitae fringilla at, lobortis a ante. Morbi lorem ex, pulvinar quis fermentum in, vehicula in nisl. Vestibulum sed lacinia tortor. Praesent eget nulla eget mauris venenatis interdum a non purus. Ut scelerisque dignissim libero in sodales. Maecenas nec ante quis velit molestie maximus. Sed dictum sem faucibus eros venenatis, et porta purus sagittis. Etiam ac eros vel turpis egestas dignissim. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean rutrum ex vitae iaculis bibendum. Nullam tempus augue sit amet felis maximus suscipit. Curabitur consequat massa eget quam luctus dignissim. Quisque in pellentesque eros. Aliquam erat urna, imperdiet at augue a, ultricies suscipit erat. Vivamus dictum enim sapien, id vehicula felis condimentum nec.
+
+\chapter{Conclusion}
+Aenean sagittis lacus quis suscipit finibus. Sed at venenatis erat. Praesent feugiat eleifend sem, nec efficitur augue imperdiet in. In pretium, risus ac dapibus sagittis, tortor nisl congue erat, sit amet venenatis ipsum nibh dapibus mauris. Nullam consequat sit amet diam sit amet luctus. Vivamus nisi quam, euismod non tempor interdum, maximus eget ante. Cras aliquam nisl sed molestie maximus. Nunc non nisl non eros imperdiet ullamcorper aliquam eget ipsum. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque eget sagittis urna, nec aliquam tellus. Proin commodo quis turpis sed hendrerit. Proin tincidunt consectetur ipsum, quis pretium ligula viverra at. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc aliquet, neque ut blandit vulputate, arcu sapien accumsan lorem, ac varius tortor ante sed nisi. Suspendisse scelerisque, odio nec accumsan sollicitudin, lectus nibh lobortis arcu, at dignissim turpis tellus sed libero.
+
+\appendix
+\chapter{Appendix}
+
+\section{Notation}
+
+\backmatter          % Nachspann einleiten (wie frontmatter)
+\listoffigures
+\listoftables
+
+% \nocite{*}
+
+% \printglossaries
+\bibliographystyle{i6bibstyle}
+\bibliography{references}
+
+\end{document}

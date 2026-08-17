@@ -1,0 +1,44 @@
+% Festes Datum
+\date{\publicationDate}
+\thispagestyle{empty}
+\begin{titlepage}
+  \begin{minipage}[h]{14.5cm}
+  \parindent=0pt
+  \raggedleft
+
+  % STRICTLY NO RWTH or CHAIR LOGO!
+  \vspace{0.4cm}
+
+  \Large
+  \thesisStudyCourse\\
+  \textsc{RWTH~Aachen~University}\\
+  Machine Learning and Human Language Technology Group\\
+  Lehrstuhl Informatik 6\\
+  % \rule{0cm}{0cm}
+  \vspace{0.4cm}
+  \rule{\textwidth}{1mm}
+  %\sf
+  \makeatletter \Huge \center
+  \textbf{\@title}\\
+  \rule{\textwidth}{1mm}
+  \raggedleft
+  \vspace{2cm}
+  \Large
+
+  \@date\\
+  \vspace{0.4cm}
+
+  vorgelegt von: % EDIT
+  \\ \studentname
+  \\ Matrikelnummer \MatrikelNummer
+  %\\ E-Mail \href{mailto:NN@rwth-aachen.de}{NN@rwth-aachen.de}
+  \\[2eX]
+  Gutachter:\\ % EDIT: two reviewers, first reviewer first, examples below
+  \firstreviewer\\
+  \secondreviewer\\
+  Betreuer:\\ % assistant supervising the thesis
+  \supervisor
+  \makeatother
+  \vfill\vfill
+  \end{minipage}
+\end{titlepage}
