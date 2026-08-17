@@ -90,46 +90,25 @@
 % use better looking math fonts
 \usefonttheme{professionalfonts}
 
-\renewcommand{\seriesdefault}{\bfdefault} % actually using bold text is really ugly, but someone likes it...
+%\renewcommand{\seriesdefault}{\bfdefault} % actually using bold text is really ugly, but someone likes it...
 %\renewcommand{\mathseriesdefault}{\bfdefault}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\setcounter{tocdepth}{2}                    % acrobat and content numbering untill tocdepth
-%\setbeamertemplate{section in toc}[sections numbered]
-%\setbeamertemplate{subsection in toc}[subsections numbered]
-%\setlength{\leftmargini}{4pt}
-\setbeamersize{text margin left=11mm}
-\setbeamersize{text margin right=11mm}
-
-% http://tex.stackexchange.com/questions/14157/how-to-cross-reference-to-sections-in-beamer
-\renewcommand{\insertframenumber}{\theframenumber}
-\renewcommand{\theframenumber}{\arabic{framenumber}}
-\renewcommand{\thesubsectionslide}{\arabic{framenumber}}
-%\mode<beamer>{\AtBeginSubsection{\setcounter{framenumber}{-1}}}
-%\mode<handout>{
-\AtBeginSection{\setcounter{framenumber}{0}}
-%}
+\setbeamercolor{section in toc}{fg=i6bluedark}
+\setbeamercolor{section in toc shaded}{fg=i6bluedark!25}
+\setbeamertemplate{section in toc}{%
+  \vspace{1.5ex}%
+  {\usebeamercolor[fg]{section in toc}\Large\bfseries\inserttocsection\par}%
+}
+\setbeamertemplate{section in toc shaded}{%
+  \vspace{1.5ex}%
+  {\usebeamercolor[fg]{section in toc shaded}\Large\bfseries\inserttocsection\par}%
+}
 
 \AtBeginSection[]{
-  {
-    \setbeamertemplate{headline}[default] %disable
-   
-\setbeamertemplate{footline}{\hfill\raisebox{5ex}[0mm][0mm]{
-\Acrobatmenu{GoBack}{\includegraphics[height=10mm]{logos/rwth-hks44}\hskip2em}}}
-    %\setbeamercolor{background canvas}{bg=i6blue}
-    %\setbeamertemplate{navigation symbols}{} %disable navigation bar
-
-    %\begin{frame}<*>{Outline}
-      %\vfill
-      %{\LARGE \textcolor{i6blue}{%
-      %    \textbf{\insertsectionhead}\\[-0.5ex]
-      %    \rule{1.2\linewidth}{0.5pt}
-      %    }
-      %}
-      %\tableofcontents[subsectionstyle=show/show/hide]
-      %\vfill
-    %\end{frame}
-  }
+  \begin{frame}
+    \frametitle{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
 }
 
 % \mode<beamer>{
@@ -173,17 +152,30 @@
 \newcommand*{\mainauthoremail}{}   % presenter mail address(es) (used for \FinalPage)
 \newcommand*{\www}{}               % web address (used for \TitlePage _and_ \FinalPage)
 
+\newcommand*{\advisor}[1]{\def\insertadvisor{#1}}
+\newcommand*{\supervisor}[1]{\def\insertsupervisor{#1}}
+\newcommand*{\insertadvisor}{}
+\newcommand*{\insertsupervisor}{}
+
 \setbeamertemplate{title page}
 {
   \vfill
   \begin{center}
-   \Acrobatmenu{FullScreen}{\usebeamerfont{title}{\color{i6bluedark}{\inserttitle}}}\\[2ex]
+   \Acrobatmenu{FullScreen}{\usebeamerfont{title}{\color{i6bluedark}{\inserttitle}}}\\[2.5ex]
    \large
    \insertauthor\\
    \normalsize
-   { \color{i6bluedark} \email }\\[2ex]
-   \insertdate\\[3ex]
-   \insertinstitute\\
+   { \color{i6bluedark} \email }\\[2.5ex]
+   \insertdate\\[2.5ex]
+   \ifx\insertadvisor\empty\else
+     Advisor: \insertadvisor\\[0.5ex]
+   \fi
+   \ifx\insertsupervisor\empty\else
+     Supervisor: \insertsupervisor\\[0.5ex]
+   \fi
+   \ifx\insertinstitute\empty\else
+     \insertinstitute\\
+   \fi
   \end{center}
   \vfill
 }

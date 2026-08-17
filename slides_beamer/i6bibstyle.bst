@@ -1154,7 +1154,10 @@ FUNCTION {calc.label}
   duplicate$ 
  
   "\protect{" swap$ * "}" * % here was citename
-  " " year #3 #20 substring$ * field.or.null purify$ * % substring extended
+  year empty$
+    'skip$
+    { " " * year field.or.null #3 #20 substring$ purify$ * }
+  if$
   'label := 
   year field.or.null purify$ * 
  
