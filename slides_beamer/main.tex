@@ -269,6 +269,7 @@
     \item Study the impacts of offloading various components of the transducer model to device.
     \item Study the actual impact of noise
     \item Performance impact on Lexfree vs Tree searches.
+    \item Argue from a LM POV, impact of LM on CTC-RnnT
   \end{itemize}
 \end{frame}
 
@@ -277,6 +278,7 @@
   \begin{itemize}
     \item Memristor programming (programming table from paper?) and non idealities
     \item Memristor crossbars and bitlines to represent model weights and thus the need of QAT.
+    \item Figure of the model topologies and the components, and the components that can be deployed on device.
   \end{itemize}
 \end{frame}
 
@@ -286,7 +288,7 @@
     \item Our matrix is 3 (model types) x 5 (search types) x 3 'stages' (baseline, qat, memristor)
     \item Primary tables could be 1 for each model type. 
     \item Appendix - Tables across models, but same stages for easy comparison.
-    \item Noise result that you mentioned earlier
+    \item Device deployment changes the interplay between prior/ILM (higher is better) and LM for performance.
   \end{itemize}
 \end{frame}
 
@@ -294,6 +296,10 @@
 \begin{frame}{Future Work}
   \begin{itemize}
     \item Error analysis?
+    \item denoising (using mlp or something else), search params, LM params, softmax temperature.
+    \item ft of model
+    \item comparing across different datasets (Data condition)
+    \item Effect of noise introduction during model training
   \end{itemize}
 \end{frame}
 
