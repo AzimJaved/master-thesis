@@ -1,4 +1,4 @@
-\documentclass[xcolor=table,mathserif,9pt]{beamer}    % ,handout
+\documentclass[xcolor=table,mathserif,9pt,usepdftitle=false]{beamer}    % ,handout
 % colortbl only defines \rowcolor for a single row. xcolor extends this to multiple rows.
 
 \usetheme{Aachen}
@@ -14,6 +14,7 @@
 \usepackage{amsmath}
 \usepackage{lipsum}
 \usepackage{multicol}
+\usepackage{hyperref}
 \setlength{\columnsep}{1cm}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % tables
@@ -193,7 +194,7 @@
 \renewcommand*{\email}{\url{azim.javed@ml.rwth-aachen.de}}  
 % all email address(es) of the authors (used for \TitlePage)
 
-\title[NMT]{Neuromorphic ASR}
+\title[Neuromorphic ASR]{Neuromorphic ASR \\ \large Transducer Models on Memristor Hardware}
 %\subtitle{Presentation Subtitle} % (optional)
 %\setbeamertemplate{section in toc}[sections numbered] 
 %\setbeamertemplate{subsection in toc}[subsections numbered] 
@@ -216,8 +217,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%shit
 % will be set into the PDF document summary
 \hypersetup{
-  pdftitle={\inserttitle}, 
-  pdfauthor={\insertauthor}, 
+  pdftitle={Neuromorphic ASR},
+  pdfauthor={\insertauthor},
   bookmarksdepth=subsubsection,  
   % enable automatic page transitions: for endless loop edit in
   % acrobat reader -> preferences -> full screen -> after every X
@@ -233,6 +234,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}[label=titlepage]
   \titlepage
@@ -247,16 +249,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Related Work}
-\begin{frame} {Related Work}
-  % \begin{itemize}
-
-  % \end{itemize}
-
-
+\begin{frame}{Related Work}
   \begin{itemize}
-    \item
+    \setlength{\itemsep}{8pt}
+    \item Memristive crossbars enable analog in-memory matrix--vector multiplication,
+          promising energy-efficient inference for large neural networks
+          \cite{strukov2008missing, aguirre2024hardware}.
+    \item Most prior memristor ML studies are limited to small networks and tasks
+          (MNIST-level, keyword spotting); common simulators
+          (MemTorch, IBM AIHWKIT) rely on idealized hardware assumptions
+          \cite{rossenbach2025memristor}.
+    \item Rossenbach et al.\ \cite{rossenbach2025memristor} (Interspeech 2025):
+          \begin{itemize}
+            \item First full-scale ASR system (Conformer CTC, TED-LIUMv2) executed on
+                  realistically simulated memristor hardware.
+            \item Simulation via Synaptogen \cite{hennen2024synaptogen}, a device model
+                  fitted to measured programming statistics.
+            \item With QAT down to 3-bit weights: only $\sim$25\% relative WER
+                  degradation on device.
+          \end{itemize}
+    \item Open questions left by \cite{rossenbach2025memristor}: transducer topologies
+          and recurrent components on device --- the subject of this thesis.
   \end{itemize}
-
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -264,74 +278,288 @@
 \section{Motivation}
 \begin{frame}{Motivation}
   \begin{itemize}
-    \item Similar to the Interspeech 2025 paper. https://arxiv.org/pdf/2505.24721
-    \item Curiousity about how a transducer model, more involved than CTC, would behave on memristor.
-    \item Study the impacts of offloading various components of the transducer model to device.
-    \item Study the actual impact of noise
-    \item Performance impact on Lexfree vs Tree searches.
-    \item Argue from a LM POV, impact of LM on CTC-RnnT
+    \setlength{\itemsep}{10pt}
+    \item Starting point: CTC-based Conformer ASR has been shown to run on (simulated)
+          memristor hardware \cite{rossenbach2025memristor}.
+    \item Curiosity: how does a \emph{transducer} model, architecturally more involved
+          than CTC, behave on memristor hardware?
+          \begin{itemize}
+            \item Autoregressive prediction network with an internal language model (ILM).
+            \item Joint network evaluated repeatedly per emitted label.
+          \end{itemize}
+    \item Study the impact of offloading various components of the transducer to the
+          device (encoder only vs.\ encoder + prediction network).
+    \item Study the actual impact of device noise, beyond pure quantization.
+    \item Performance impact on lexicon-free vs.\ tree-based searches.
+    \item LM point of view: how does device deployment change the interplay between
+          prior/ILM correction and the external LM?
   \end{itemize}
 \end{frame}
 
-\section{Some Prerequisites}
-\begin{frame}{Some Prerequisites}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Prerequisites}
+\begin{frame}{Memristors and Crossbar Arrays}
   \begin{itemize}
-    \item Memristor programming (programming table from paper?) and non idealities
-    \item Memristor crossbars and bitlines to represent model weights and thus the need of QAT.
-    \item Figure of the model topologies and the components, and the components that can be deployed on device.
+    \setlength{\itemsep}{8pt}
+    \item Memristor: passive two-terminal device with non-volatile, programmable
+          resistance \cite{strukov2008missing}. A weight is stored as a conductance
+          $G = 1/R$.
+    \item Crossbar array: wordlines (rows) $\times$ bitlines (columns), one memristor
+          per junction.
+          \begin{itemize}
+            \item Inputs applied as voltages $V_j$ on the wordlines.
+            \item By Ohm's law and Kirchhoff's current law, each bitline aggregates a
+                  column: \ $I_i = \sum_j G_{ij} V_j$.
+            \item Matrix--vector multiplication happens in one physical step, in
+                  parallel over all outputs.
+          \end{itemize}
+    \item Signed weights via pairwise encoding \cite{aguirre2024hardware}:
+          $w_{ij} = G^{+}_{ij} - G^{-}_{ij}$ on two bitlines
+          (an $N \times M$ matrix needs an $N \times 2M$ crossbar).
+    \item Only binary programming is precise $\Rightarrow$ multi-bit weights via
+          bit-stacking: a $k$-bit weight is split over $k{-}1$ stacked crossbars
+          (4-bit: levels $-7, \ldots, 7$).
+    \item Inputs/outputs pass 8-bit DAC/ADC converters (input range $\pm 0.6$\,V).
   \end{itemize}
 \end{frame}
+
+\begin{frame}{Non-Idealities and Synaptogen}
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item Ideal crossbars are assumed by many simulators; real devices exhibit:
+          \begin{itemize}
+            \item Device-to-device and cycle-to-cycle programming variability,
+            \item Thermal (Johnson--Nyquist) noise,
+            \item Finite DAC/ADC resolution,
+            \item Imprecise intermediate (non-binary) conductance levels.
+          \end{itemize}
+    \item Synaptogen \cite{hennen2024synaptogen}: generative device model based on a
+          vector autoregression, fitted to 3M+ measured programming cycles of
+          130\,nm memristors (STMicroelectronics).
+    \item In our experiments (PyTorch, SynaptogenML): linear layers are replaced by
+          crossbar simulation, the rest of the network stays conventional.
+  \end{itemize}
+  \vfill
+  \begin{table}[h]
+    \centering
+    \caption{Single crossbar multiplication for target value $1.0 \times X$, over
+             differently programmed devices \cite{rossenbach2025memristor}.}
+    \label{tab:programming-noise}
+    \small
+    \begin{tabular}{l r r r r}
+      \hline
+      Target & \multicolumn{1}{c}{avg} & \multicolumn{1}{c}{std} & \multicolumn{1}{c}{min} & \multicolumn{1}{c}{max} \\
+      \hline
+      $1.0 \times 1$   & $1.016$        & $0.063$         & $0.707$   & $1.270$ \\
+      $1.0 \times 0.5$ & $0.476$        & $0.094$         & $0.109$   & $1.060$ \\
+      $1.0 \times 0$   & $8.5 \cdot 10^{-4}$ & $4.8 \cdot 10^{-2}$ & $-0.275$ & $0.246$ \\
+      \hline
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+\begin{frame}{Quantization-Aware Training}
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item Memristor execution effectively means: low-precision (stacked binary) weights
+          + 8-bit DAC/ADC on activations.
+    \item Post-training quantization (PTQ) collapses at low precision;
+          quantization-aware training (QAT) \cite{gholami2021survey} inserts
+          fake quantization into the training from epoch 1.
+          \begin{itemize}
+            \item Symmetric per-tensor quantization, zero-point fixed to 0
+                  (required by the pairwise encoding).
+          \end{itemize}
+  \end{itemize}
+  \vfill
+  \begin{table}[h]
+    \centering
+    \caption{WER (\%) on TED-LIUMv2 dev, Conformer CTC, 4-gram LM
+             \cite{rossenbach2025memristor}. Memristor: mean $\pm$ std over 10
+             differently programmed devices.}
+    \label{tab:anchor-results}
+    \small
+    \begin{tabular}{l c c c c c c c}
+      \hline
+      Weight bits            & FP32 & 8    & 6    & 5    & 4    & 3    & 2   \\
+      \hline
+      PTQ                    & 7.2  & 7.2  & 7.9  & 8.9  & 11.4 & 30.7 & --  \\
+      QAT                    &      & 7.3  & 7.7  & 7.4  & 7.8  & 8.3  & 22.1 \\
+      Memristor (simulated)  &      & 8.3  & 8.3  & 8.3  & 8.9  & 9.2  & --  \\
+      \hline
+    \end{tabular}
+  \end{table}
+  \vfill
+  \begin{itemize}
+    \item Up to 3-bit weights: $\leq 25\%$ relative WER degradation on device
+          ($9.2$ vs.\ $7.2$).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Model Topologies: What Can Run on Device?}
+  \begin{columns}[t]
+    \begin{column}{0.42\textwidth}
+      \begin{itemize}
+        \setlength{\itemsep}{4pt}
+        \small
+        \item CTC \cite{graves2006connectionist}: encoder only, label-synchronous
+              decoding, conditionally independent outputs.
+        \item Transducer \cite{graves2012sequence}: encoder + prediction network +
+              joint network, autoregressive over labels.
+        \item All linear (matmul) layers map to crossbars (green).
+        \item Parameter-free parts stay conventional: softmax, attention scores,
+              layer norm.
+        \item LSTM prediction network: sequential recurrence, element-wise gating
+              $\Rightarrow$ not crossbar-friendly.
+        \item FFNN prediction network over the previous-label embedding: pure matmul
+              $\Rightarrow$ device-friendly.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.58\textwidth}
+      \centering
+      \begin{tikzpicture}[
+          node distance=0.55cm and 0.55cm,
+          block/.style={
+            rectangle, draw=black!60, thick, align=center, rounded corners=2pt,
+            minimum height=2.6em, minimum width=5.2em, font=\scriptsize
+          },
+          device/.style={block, fill=green!30},
+          conv/.style={block, fill=orange!20},
+          io/.style={font=\scriptsize},
+          arrow/.style={->, thick, >=stealth, black!70}
+        ]
+        % shared encoder path (middle row)
+        \node[io] (x) {$x$ (audio)};
+        \node[device, right=of x] (enc) {Conformer\\Encoder $\times 12$};
+        \node[io, right=of enc] (h) {$h_t$};
+
+        % CTC branch (top row, straight above h)
+        \node[device, above=0.7cm of h] (ctclin) {Linear};
+        \node[conv, right=of ctclin] (ctcsm) {Soft-\\max};
+        \node[io, right=of ctcsm] (ctc) {CTC};
+
+        % transducer branch (bottom row, straight below h)
+        \node[device, below=0.9cm of h] (joint) {Joint\\Network};
+        \node[conv, right=of joint] (jsm) {Soft-\\max};
+        \node[io, right=of jsm] (rnnt) {RNN-T};
+        \node[device, left=of joint] (pred) {Pred.:\\FFNN / LSTM};
+        \node[conv, left=of pred] (emb) {Embed-\\ding};
+        \node[io, left=of emb] (y) {$y_{u-1}$};
+
+        % arrows
+        \draw[arrow] (x) -- (enc);
+        \draw[arrow] (enc) -- (h);
+        \draw[arrow] (h) -- (ctclin);
+        \draw[arrow] (ctclin) -- (ctcsm);
+        \draw[arrow] (ctcsm) -- (ctc);
+        \draw[arrow] (h) -- (joint);
+        \draw[arrow] (y) -- (emb);
+        \draw[arrow] (emb) -- (pred);
+        \draw[arrow] (pred) -- (joint);
+        \draw[arrow] (joint) -- (jsm);
+        \draw[arrow] (jsm) -- (rnnt);
+
+        % legend
+        \node[block, fill=green!30, minimum height=1.6em, minimum width=3.2em,
+              below=0.55cm of emb] (l1) {};
+        \node[io, right=0.15cm of l1, anchor=west]
+          {matrix products $\to$ memristor crossbars};
+        \node[block, fill=orange!20, minimum height=1.6em, minimum width=3.2em,
+              below=0.15cm of l1] (l2) {};
+        \node[io, right=0.15cm of l2, anchor=west]
+          {parameter-free / recurrent $\to$ conventional};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Experiments}
-\begin{frame}{Experiments}
+\begin{frame}{Experimental Setup}
   \begin{itemize}
-    \item Our matrix is 3 (model types) x 5 (search types) x 3 'stages' (baseline, qat, memristor)
-    \item Primary tables could be 1 for each model type. 
-    \item Appendix - Tables across models, but same stages for easy comparison.
-    \item Device deployment changes the interplay between prior/ILM (higher is better) and LM for performance.
+    \setlength{\itemsep}{6pt}
+    \item Data: LibriSpeech \cite{Librispeech} (960\,h), BPE subword targets
+          (128 merges $\to$ 184 labels).
+    \item Features: 80 log-mel filters, 10\,ms frame shift; SpecAugment during training.
+    \item Encoder (shared by all models): 12-layer Conformer
+          \cite{Gulati+Qin+:2020conformer}, 512-dim.
+    \item Model types:
+          \begin{enumerate}
+            \item \emph{CTC} \cite{graves2006connectionist}: encoder only.
+            \item \emph{FFNN-transducer}: prediction network is a 2-layer feed-forward
+                  net (640-dim, tanh) over the previous-label embedding.
+            \item \emph{Full-context transducer} \cite{graves2012sequence}: LSTM
+                  prediction network (standard RNN-T).
+          \end{enumerate}
+    \item Quantization: QAT, per-tensor symmetric, e.g.\ 4-bit weights / 8-bit
+          activations; zero-point 0.
+    \item Stages: (1) FP32 baseline $\to$ (2) QAT (fake quantization) $\to$
+          (3) memristor execution (Synaptogen crossbar simulation, multiple
+          re-programmings per run).
   \end{itemize}
 \end{frame}
+
+\begin{frame}{Experiment Matrix}
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item Full matrix: 3 (model types) $\times$ 5 (search types) $\times$ 3 (stages).
+    \item Search types:
+          \begin{enumerate}
+            \item Lexicon-free, no LM
+            \item Lexicon-free + BPE LSTM LM
+            \item Prefix-tree beam search, no LM
+            \item Prefix-tree beam search + 4-gram LM
+            \item Prefix-tree beam search + BPE LSTM LM
+          \end{enumerate}
+          (+ large-beam tree variants, beam 1024/2048)
+    \item Prior/ILM correction and external LM scales are swept at decoding time.
+    \item Reporting:
+          \begin{itemize}
+            \item Primary tables: one per model type (search types $\times$ stages).
+            \item Appendix: tables across models at the same stage, for easy comparison.
+          \end{itemize}
+    \item Expectation: device deployment changes the interplay between prior/ILM
+          correction and the LM --- quantization and noise reshape the acoustic
+          scores, so the optimal LM weighting should shift.
+  \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Future Work}
 \begin{frame}{Future Work}
   \begin{itemize}
-    \item Error analysis?
-    \item denoising (using mlp or something else), search params, LM params, softmax temperature.
-    \item ft of model
-    \item comparing across different datasets (Data condition)
-    \item Effect of noise introduction during model training
+    \setlength{\itemsep}{10pt}
+    \item Error analysis: which error types does device noise introduce or amplify?
+    \item Countermeasures: denoising (e.g.\ MLP), search parameters, LM parameters,
+          softmax temperature.
+    \item Fine-tuning of the (quantized) model; effect of noise introduction during
+          training.
+    \item Generalization: comparison across different datasets / data conditions.
   \end{itemize}
 \end{frame}
 
-% \begin{frame}{Comparison to Best Systems}
-%   \vspace{20mm}
-%   \resizebox{\linewidth}{!}{
-%     \begin{tabular}{|l|c|c|c|c|c|c|}
-%       \hline
-%               & \multicolumn{2}{c|}{WMT2015 De$\rightarrow$En} & \multicolumn{2}{c|}{WMT2016 En$\rightarrow$Ro} & \multicolumn{2}{c|}{BOLT Zh$\rightarrow$En}                             \\
-%               & \multicolumn{2}{c|}{newstest2014}              & \multicolumn{2}{c|}{newstest2016}              & \multicolumn{2}{c|}{test1}                                              \\
-%       \hline
-%               & \BLEU\%                                        & \TER\%                                         & \BLEU\%                                     & \TER\% & \BLEU\% & \TER\% \\
-%       \hline
-%       Model A & 28.1                                           & 53.2                                           & 24.5                                        & 59.3   & 17.9    & 67.7   \\
-%       Model B & 24.0                                           & 57.2                                           & 26.7                                        & 56.6   & 17.9    & 67.2   \\
-%       Model C & 28.2                                           & 53.0                                           & 25.3                                        & 58.4   & 17.6    & 68.9   \\
-%       \hline
-%       Model D & 29.2                                           & 52.9                                           & 27.1                                        & 55.4   & 21.7    & 63.7   \\
-%       \hline
-%     \end{tabular}
-%   }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%   \vspace{20mm}
-
-%   \begin{itemize}
-%     \item De$\rightarrow$En and Zh$\rightarrow$En:
-%           \begin{itemize}
-%             \item Subwords and LSTM
-%           \end{itemize}
-%   \end{itemize}
-
-% \end{frame}
+\begin{frame}{Summary}
+  \begin{itemize}
+    \setlength{\itemsep}{10pt}
+    \item Extend memristor-based ASR \cite{rossenbach2025memristor} from CTC to
+          transducer models.
+    \item Full matrix on LibriSpeech: 3 model types $\times$ 5 search types $\times$
+          3 stages (baseline / QAT / memristor).
+    \item Key questions: component offloading (encoder vs.\ encoder + prediction),
+          real noise impact, lexfree vs.\ tree search behavior, prior/ILM--LM
+          interplay.
+  \end{itemize}
+  \vfill
+  \begin{center}
+    {\Large \textcolor{i6bluedark}{Thank you for your attention!}}
+  \end{center}
+  \vfill
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
