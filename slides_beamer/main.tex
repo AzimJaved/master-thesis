@@ -101,7 +101,7 @@
 
 % Define box and box title style
 \usepackage{tikz}
-\usetikzlibrary{shapes,positioning,fit}
+\usetikzlibrary{shapes,positioning,fit,decorations.pathreplacing,3d}
 \tikzstyle{bubble} = [ draw=blue, rectangle, rounded corners, inner sep=3pt, inner ysep=
 10 pt]
 \tikzstyle{fancytitle} =[fill=white, text=black]
@@ -203,7 +203,7 @@
 %% author and in []: shortauthorChange the scale of beamer from 3.5 to 1
 \author[A. Javed]{Azim Javed}
 
-\advisor{Dr. Albert Zeyer}
+\advisor{Benedikt Hilmes and Simon Berger}
 \supervisor{Prof. Ralf Schlüter}
 
 \institute[RWTH Aachen University] % (optional)
@@ -248,91 +248,288 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Related Work}
-\begin{frame}{Related Work}
-  \begin{itemize}
-    \setlength{\itemsep}{8pt}
-    \item Memristive crossbars enable analog in-memory matrix--vector multiplication,
-          promising energy-efficient inference for large neural networks
-          \cite{strukov2008missing, aguirre2024hardware}.
-    \item Most prior memristor ML studies are limited to small networks and tasks
-          (MNIST-level, keyword spotting); common simulators
-          (MemTorch, IBM AIHWKIT) rely on idealized hardware assumptions
-          \cite{rossenbach2025memristor}.
-    \item Rossenbach et al.\ \cite{rossenbach2025memristor} (Interspeech 2025):
-          \begin{itemize}
-            \item First full-scale ASR system (Conformer CTC, TED-LIUMv2) executed on
-                  realistically simulated memristor hardware.
-            \item Simulation via Synaptogen \cite{hennen2024synaptogen}, a device model
-                  fitted to measured programming statistics.
-            \item With QAT down to 3-bit weights: only $\sim$25\% relative WER
-                  degradation on device.
-          \end{itemize}
-    \item Open questions left by \cite{rossenbach2025memristor}: transducer topologies
-          and recurrent components on device --- the subject of this thesis.
-  \end{itemize}
+\section{Introduction}
+
+\begin{frame}{In-Memory Computing \cite{rossenbach2025}}
+  \begin{columns}[c]
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \setlength{\itemsep}{3pt}
+        \item Various technologies exist, with varying tradeoffs:
+              \begin{itemize}
+                \item Chip complexity and density
+                \item Energy consumption
+                \item Speed and reliability
+              \end{itemize}
+        \item This talk focuses on \emph{memristive} hardware, in particular \emph{resistive RAM (ReRAM)}:
+              \begin{itemize}
+                \item Key Benefits: low energy consumption, non volatility
+              \end{itemize}
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figures/imc_hierarchy_clean.png}
+    \end{column}
+  \end{columns}
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Overview\cite{rossenbach2025}}
+  \begin{columns}[c]
+    \begin{column}{0.70\textwidth}
+      \begin{itemize}
+        \setlength{\itemsep}{1.5pt}
+        \item A \emph{memristor} is an analog computing device with a programmable resistance states.
+        \item Enables energy-efficient implementation of neural networks.
+              \begin{itemize}
+                \item Vector-matrix-multiplication (VMM) in $\mathcal{O}(1)$
+              \end{itemize}
+        \item Limitations:
+              \begin{itemize}
+                \item High analog inaccuracies, and thus need specific restrictions on mathematical operations.
+                \item Production is still in early stages, experiments are on simulated hardware \cite{synatogenhenne}.
+              \end{itemize}
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.30\textwidth}
+      \centering
+      \includegraphics[width=0.85\linewidth]{figures/resistor_memristor_clean.png}
+    \end{column}
+  \end{columns}
+\end{frame}
 
 \section{Motivation}
 \begin{frame}{Motivation}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
-    \item Starting point: CTC-based Conformer ASR has been shown to run on (simulated)
+    \item CTC-based Conformer ASR has been shown to run on (simulated)
           memristor hardware \cite{rossenbach2025memristor}.
-    \item Curiosity: how does a \emph{transducer} model, architecturally more involved
-          than CTC, behave on memristor hardware?
+    \item How do \emph{transducer} models, with their added complexity compared to CTC, behave on memristor hardware?
           \begin{itemize}
-            \item Autoregressive prediction network with an internal language model (ILM).
+            \item Autoregressive prediction network; internal language model (ILM).
             \item Joint network evaluated repeatedly per emitted label.
           \end{itemize}
-    \item Study the impact of offloading various components of the transducer to the
-          device (encoder only vs.\ encoder + prediction network).
-    \item Study the actual impact of device noise, beyond pure quantization.
-    \item Performance impact on lexicon-free vs.\ tree-based searches.
-    \item LM point of view: how does device deployment change the interplay between
-          prior/ILM correction and the external LM?
+    \item The impact of deploying various components of the model to the
+          device (encoder only vs.\ encoder + prediction network vs.\ full model).
+    \item \emph{Tradeoff}: more offloading $\Rightarrow$ more energy efficiency, but also more noise.
+    \item Performance degradation across search paradigms -
+          \begin{itemize}
+            \item Lexicon-free vs.\ tree search.
+            \item ILM and prior scaling - How does device noise change the optimal LM weighting?
+          \end{itemize}
+          % \item LM point of view: how does device deployment change the interplay between
+          %       prior/ILM correction and the external LM?
   \end{itemize}
 \end{frame}
 
+\begin{frame}{ASR Architectures: CTC vs.\ Transducer}
+  \centering
+  \begin{tikzpicture}[
+      node distance=1.1cm and 1.6cm,
+      block/.style={
+          rectangle, draw=black!70, thick, align=center, rounded corners=3pt,
+          minimum height=2.6em, minimum width=7.2em, font=\small, fill=blue!10
+        },
+      optblock/.style={
+          rectangle, draw=black!60, thick, dashed, align=center, rounded corners=3pt,
+          minimum height=2.6em, minimum width=7.2em, font=\small, fill=teal!12
+        },
+      io/.style={font=\small, align=center},
+      arrow/.style={->, >=stealth, thick, draw=black!80},
+      optarrow/.style={->, >=stealth, thick, dashed, draw=black!60}
+    ]
+
+    % --- Row 1 (Inputs) ---
+    \node[io] (prev_tokens) {Previous Labels\\($y^{<u}_0$)};
+    \node[io, right=3.8cm of prev_tokens] (audio) {Audio Features\\$x_1^T$};
+
+    % --- Row 2 (Prediction Network on left, Encoder on right) ---
+    \node[block, above=1.0cm of prev_tokens, fill=orange!15] (pred) {Prediction Network\\{\footnotesize{(FFNN / LSTM)}}};
+    \node[block, above=1.0cm of audio] (encoder) {Encoder};
+
+    % --- External LM alongside the Encoder (on the right) ---
+    \node[optblock, right=1.2cm of encoder] (extlm) {External LM\\{\footnotesize{(Optional)}}};
+
+    % --- CTC Output directly above Encoder ---
+    \node[io, above=1.6cm of encoder] (ctc) {\textbf{CTC Output}\\$P(a_t \mid x_1^T)$};
+
+    % --- Row 3 (Joint Network placed to the left so it doesn't overlap CTC) ---
+    \path (pred) -- (encoder) coordinate[midway] (mid_pred_enc);
+    \node[block, above=1.6cm of pred, fill=purple!15] (joint) {Joint Network};
+
+    % --- Row 4 (RNN-T Output above Joint) ---
+    \node[io, above=1.0cm of joint] (rnnt) {\textbf{RNN-T Output}\\$P(y_{t,u} \mid x_1^T, y^{<u}_0)$};
+
+    % --- Connections / Arrows ---
+    % Inputs to networks
+    \draw[arrow] (prev_tokens) -- (pred);
+    \draw[arrow] (audio) -- (encoder);
+
+    % Encoder going straight up to CTC Output
+    \draw[arrow] (encoder.north) -- (ctc.south);
+
+    % Pred Net straight up to Joint Network
+    \draw[arrow] (pred.north) -- (joint.south);
+
+    % Encoder to Joint Network (exit left from encoder, go up, and enter right of joint)
+    \draw[arrow] (encoder.west) -- ++(-0.6cm, 0) |- (joint.east);
+
+    % Previous labels to External LM (routing along the bottom)
+    \draw[optarrow] (prev_tokens.south) -- ++(0, -0.45cm) -| (extlm.south);
+
+    % External LM to CTC Output and RNN-T Output
+    \draw[optarrow] (extlm.north) |- (ctc.east);
+    \draw[optarrow] (extlm.north) |- ([yshift=-0.1cm]rnnt.east);
+
+    % Joint to RNN-T output
+    \draw[arrow] (joint) -- (rnnt);
+
+  \end{tikzpicture}
+\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Prerequisites}
-\begin{frame}{Memristors and Crossbar Arrays}
+
+\begin{frame}{Analog In Memory Computing}
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item Multiplication computation done via Ohm's Law:
+          \begin{equation}
+            I = \frac{V}{R}
+          \end{equation}
+    \item Voltage $V$, current $I$ and resistance $R$.
+    \item Possible to rewrite resistance as conductance $G$:
+          \begin{equation}
+            I = G V \quad \text{with} \quad G = \frac{1}{R}
+          \end{equation}
+    \item Addition done via Kirchhoff's Law for any connected node in a circuit:
+          \begin{equation}
+            \sum_{n=0}^{N} I_n = 0 \;\rightarrow\; I_0 = - \sum_{n=1}^{N} I_n
+          \end{equation}
+    \item Currents can be trivially added by simply connecting electric lines.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The ``Memristor''}
+  \begin{columns}[c]
+    \begin{column}{0.52\textwidth}
+      \textbf{Program weights by setting the resistance}:
+      \begin{itemize}
+        \setlength{\itemsep}{3pt}
+        \item Apply $-V > -V_S \;\rightarrow$ set to low resistance
+        \item Apply $\phantom{-}V > \phantom{-}V_R \;\rightarrow$ set to high resistance
+        \item Intermediate states possible
+        \item State is physically stored (non-volatile memory)
+      \end{itemize}
+      \vspace{0.4cm}
+      \textbf{Problems}:
+      \begin{itemize}
+        \setlength{\itemsep}{3pt}
+        \item Resulting resistance state varies with each programming cycle
+        \item Non-linear relation of current and voltage
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figures/memristor_iv_curve.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Memristor Array (1)}
+  \begin{columns}[c]
+    \begin{column}{0.54\textwidth}
+      \begin{itemize}
+        \setlength{\itemsep}{4pt}
+        \item Memristors as connecting element between vertical and horizontal circuit lines
+        \item Each memristor is a weight of a matrix
+        \item Column sum via simple line connection
+        \item Weight matrices are typically fixed during application
+      \end{itemize}
+      \vspace{0.3cm}
+      \textbf{Problems}:
+      \begin{itemize}
+        \setlength{\itemsep}{3pt}
+        \item Only positive, non-zero weights possible
+        \item Current leakage prohibits a true zero
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.46\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figures/memristor_array_1.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Memristor Array (2)}
+  \begin{columns}[c]
+    \begin{column}{0.52\textwidth}
+      \begin{itemize}
+        \setlength{\itemsep}{2pt}
+        \item Use positive and negative bitlines to create memristor pairs
+        \item Each row-wise pair of memristors represents a weight
+        \item[$\rightarrow$] Differential pair allows for negative and zero weight values:
+              \begin{equation*}
+                I_j = \sum_{i=1}^{N} V_i G_{i,j}^{+} - \sum_{i=1}^{N} V_i G_{i,j}^{-}
+              \end{equation*}
+      \end{itemize}
+      \vspace{0.15cm}
+      \textbf{Problems}:
+      \begin{itemize}
+        \setlength{\itemsep}{2pt}
+        \item Cannot set paired memristors to identical conductances
+        \item[$\rightarrow$] Results close to zero, but not guaranteed
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figures/memristor_array_2.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{From Single Memristor to Layer Module: Concepts}
   \begin{itemize}
     \setlength{\itemsep}{8pt}
-    \item Memristor: passive two-terminal device with non-volatile, programmable
-          resistance \cite{strukov2008missing}. A weight is stored as a conductance
-          $G = 1/R$.
-    \item Crossbar array: wordlines (rows) $\times$ bitlines (columns), one memristor
-          per junction.
+    \item \textbf{Multiple concepts to implement mapping}:
           \begin{itemize}
-            \item Inputs applied as voltages $V_j$ on the wordlines.
-            \item By Ohm's law and Kirchhoff's current law, each bitline aggregates a
-                  column: \ $I_i = \sum_j G_{ij} V_j$.
-            \item Matrix--vector multiplication happens in one physical step, in
-                  parallel over all outputs.
+            \setlength{\itemsep}{6pt}
+            \item \textbf{Tiling} of weight matrix:
+                  \begin{itemize}
+                    \item Arbitrary dimensions by tiling into smaller fixed-size arrays
+                    \item E.g., $512 \times 512$ matrix into $16$ crossbar arrays of size $128 \times 128$
+                  \end{itemize}
+            \item \textbf{Slicing} of weight values to memristor states:
+                  \begin{itemize}
+                    \item Currently binary setting (high vs.\ low resistance)
+                    \item Stacking of memristors for each magnitude bit ($k$-bit weight requires $k-1$ arrays)
+                  \end{itemize}
+            \item \textbf{Pairing} of positive ($+$) and negative ($-$) bitlines:
+                  \begin{itemize}
+                    \item Differential pairs represent signed matrix entries
+                  \end{itemize}
           \end{itemize}
-    \item Signed weights via pairwise encoding \cite{aguirre2024hardware}:
-          $w_{ij} = G^{+}_{ij} - G^{-}_{ij}$ on two bitlines
-          (an $N \times M$ matrix needs an $N \times 2M$ crossbar).
-    \item Only binary programming is precise $\Rightarrow$ multi-bit weights via
-          bit-stacking: a $k$-bit weight is split over $k{-}1$ stacked crossbars
-          (4-bit: levels $-7, \ldots, 7$).
-    \item Inputs/outputs pass 8-bit DAC/ADC converters (input range $\pm 0.6$\,V).
   \end{itemize}
+\end{frame}
+
+
+\begin{frame}{From Single Memristor to Layer Module: Mapping}
 \end{frame}
 
 \begin{frame}{Non-Idealities and Synaptogen}
   \begin{itemize}
-    \setlength{\itemsep}{6pt}
+    \setlength{\itemsep}{5pt}
     \item Ideal crossbars are assumed by many simulators; real devices exhibit:
           \begin{itemize}
-            \item Device-to-device and cycle-to-cycle programming variability,
-            \item Thermal (Johnson--Nyquist) noise,
-            \item Finite DAC/ADC resolution,
-            \item Imprecise intermediate (non-binary) conductance levels.
+            \item Device-to-device and cycle-to-cycle programming variability
+            \item Thermal (Johnson--Nyquist) noise
+            \item Finite DAC/ADC resolution
+            \item Imprecise intermediate (non-binary) conductance levels
           \end{itemize}
     \item Synaptogen \cite{hennen2024synaptogen}: generative device model based on a
           vector autoregression, fitted to 3M+ measured programming cycles of
@@ -340,23 +537,6 @@
     \item In our experiments (PyTorch, SynaptogenML): linear layers are replaced by
           crossbar simulation, the rest of the network stays conventional.
   \end{itemize}
-  \vfill
-  \begin{table}[h]
-    \centering
-    \caption{Single crossbar multiplication for target value $1.0 \times X$, over
-             differently programmed devices \cite{rossenbach2025memristor}.}
-    \label{tab:programming-noise}
-    \small
-    \begin{tabular}{l r r r r}
-      \hline
-      Target & \multicolumn{1}{c}{avg} & \multicolumn{1}{c}{std} & \multicolumn{1}{c}{min} & \multicolumn{1}{c}{max} \\
-      \hline
-      $1.0 \times 1$   & $1.016$        & $0.063$         & $0.707$   & $1.270$ \\
-      $1.0 \times 0.5$ & $0.476$        & $0.094$         & $0.109$   & $1.060$ \\
-      $1.0 \times 0$   & $8.5 \cdot 10^{-4}$ & $4.8 \cdot 10^{-2}$ & $-0.275$ & $0.246$ \\
-      \hline
-    \end{tabular}
-  \end{table}
 \end{frame}
 
 \begin{frame}{Quantization-Aware Training}
@@ -376,18 +556,18 @@
   \begin{table}[h]
     \centering
     \caption{WER (\%) on TED-LIUMv2 dev, Conformer CTC, 4-gram LM
-             \cite{rossenbach2025memristor}. Memristor: mean $\pm$ std over 10
-             differently programmed devices.}
+      \cite{rossenbach2025memristor}. Memristor: mean $\pm$ std over 10
+      differently programmed devices.}
     \label{tab:anchor-results}
     \small
     \begin{tabular}{l c c c c c c c}
-      \hline
-      Weight bits            & FP32 & 8    & 6    & 5    & 4    & 3    & 2   \\
-      \hline
-      PTQ                    & 7.2  & 7.2  & 7.9  & 8.9  & 11.4 & 30.7 & --  \\
-      QAT                    &      & 7.3  & 7.7  & 7.4  & 7.8  & 8.3  & 22.1 \\
-      Memristor (simulated)  &      & 8.3  & 8.3  & 8.3  & 8.9  & 9.2  & --  \\
-      \hline
+      \toprule
+      Weight bits           & FP32 & 8   & 6   & 5   & 4    & 3    & 2    \\
+      \midrule
+      PTQ                   & 7.2  & 7.2 & 7.9 & 8.9 & 11.4 & 30.7 & --   \\
+      QAT                   &      & 7.3 & 7.7 & 7.4 & 7.8  & 8.3  & 22.1 \\
+      Memristor (simulated) &      & 8.3 & 8.3 & 8.3 & 8.9  & 9.2  & --   \\
+      \bottomrule
     \end{tabular}
   \end{table}
   \vfill
@@ -396,85 +576,6 @@
           ($9.2$ vs.\ $7.2$).
   \end{itemize}
 \end{frame}
-
-\begin{frame}{Model Topologies: What Can Run on Device?}
-  \begin{columns}[t]
-    \begin{column}{0.42\textwidth}
-      \begin{itemize}
-        \setlength{\itemsep}{4pt}
-        \small
-        \item CTC \cite{graves2006connectionist}: encoder only, label-synchronous
-              decoding, conditionally independent outputs.
-        \item Transducer \cite{graves2012sequence}: encoder + prediction network +
-              joint network, autoregressive over labels.
-        \item All linear (matmul) layers map to crossbars (green).
-        \item Parameter-free parts stay conventional: softmax, attention scores,
-              layer norm.
-        \item LSTM prediction network: sequential recurrence, element-wise gating
-              $\Rightarrow$ not crossbar-friendly.
-        \item FFNN prediction network over the previous-label embedding: pure matmul
-              $\Rightarrow$ device-friendly.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.58\textwidth}
-      \centering
-      \begin{tikzpicture}[
-          node distance=0.55cm and 0.55cm,
-          block/.style={
-            rectangle, draw=black!60, thick, align=center, rounded corners=2pt,
-            minimum height=2.6em, minimum width=5.2em, font=\scriptsize
-          },
-          device/.style={block, fill=green!30},
-          conv/.style={block, fill=orange!20},
-          io/.style={font=\scriptsize},
-          arrow/.style={->, thick, >=stealth, black!70}
-        ]
-        % shared encoder path (middle row)
-        \node[io] (x) {$x$ (audio)};
-        \node[device, right=of x] (enc) {Conformer\\Encoder $\times 12$};
-        \node[io, right=of enc] (h) {$h_t$};
-
-        % CTC branch (top row, straight above h)
-        \node[device, above=0.7cm of h] (ctclin) {Linear};
-        \node[conv, right=of ctclin] (ctcsm) {Soft-\\max};
-        \node[io, right=of ctcsm] (ctc) {CTC};
-
-        % transducer branch (bottom row, straight below h)
-        \node[device, below=0.9cm of h] (joint) {Joint\\Network};
-        \node[conv, right=of joint] (jsm) {Soft-\\max};
-        \node[io, right=of jsm] (rnnt) {RNN-T};
-        \node[device, left=of joint] (pred) {Pred.:\\FFNN / LSTM};
-        \node[conv, left=of pred] (emb) {Embed-\\ding};
-        \node[io, left=of emb] (y) {$y_{u-1}$};
-
-        % arrows
-        \draw[arrow] (x) -- (enc);
-        \draw[arrow] (enc) -- (h);
-        \draw[arrow] (h) -- (ctclin);
-        \draw[arrow] (ctclin) -- (ctcsm);
-        \draw[arrow] (ctcsm) -- (ctc);
-        \draw[arrow] (h) -- (joint);
-        \draw[arrow] (y) -- (emb);
-        \draw[arrow] (emb) -- (pred);
-        \draw[arrow] (pred) -- (joint);
-        \draw[arrow] (joint) -- (jsm);
-        \draw[arrow] (jsm) -- (rnnt);
-
-        % legend
-        \node[block, fill=green!30, minimum height=1.6em, minimum width=3.2em,
-              below=0.55cm of emb] (l1) {};
-        \node[io, right=0.15cm of l1, anchor=west]
-          {matrix products $\to$ memristor crossbars};
-        \node[block, fill=orange!20, minimum height=1.6em, minimum width=3.2em,
-              below=0.15cm of l1] (l2) {};
-        \node[io, right=0.15cm of l2, anchor=west]
-          {parameter-free / recurrent $\to$ conventional};
-      \end{tikzpicture}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Experiments}
 \begin{frame}{Experimental Setup}
@@ -569,4 +670,222 @@
   \bibliography{references}
 \end{frame}
 
-\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\backupbegin
+
+\begin{frame}{Appendix: Device VMM Operation Statistics}
+  \centering
+  \begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{|c|c|c|c|c|}
+      \hline
+      operation & average & std-dev & min & max \\
+      \hline
+      $1.0 \times 1$  & $1.016$           & $0.063$           & $0.707$          & $1.27$ \\
+      $0.1 \times 1$  & $0.989 \cdot 10^{-1}$ & $0.062 \cdot 10^{-1}$ & $0.688 \cdot 10^{-1}$ & $1.24 \cdot 10^{-1}$ \\
+      $0.01 \times 1$ & $0.985 \cdot 10^{-2}$ & $0.069 \cdot 10^{-2}$ & $0.721 \cdot 10^{-2}$ & $1.20 \cdot 10^{-2}$ \\
+      $1.0 \times 0$  & $8.52 \cdot 10^{-4}$  & $4.75 \cdot 10^{-2}$  & $-0.2751$        & $0.2455$ \\
+      $1.0 \times 0.5$& $0.476$           & $0.094$           & $0.109$          & $1.06$ \\
+      \hline
+    \end{tabular}
+    \vspace{0.4cm}
+    \caption{Hardware measurement statistics for simulated memristor VMM operations \cite{rossenbach2025memristor}.}
+  \end{table}
+\end{frame}
+
+\backupend
+
+\end{document}\begin{frame}{From Single Memristor to Layer Module: Mapping}
+  \centering
+  \begin{tikzpicture}[
+      scale=0.96,
+      arr/.style={->, >=stealth, thick, draw=black!75},
+      proj/.style={dashed, draw=black!55, thick}
+    ]
+    % 1. Full Weight Matrix (Top-Left)
+    \begin{scope}[shift={(-4.4, 0.9)}]
+      \draw[thick, fill=blue!5] 
+        (-2.2, -1.1) -- (2.2, -1.1) -- (3.5, 1.1) -- (-0.9, 1.1) -- cycle;
+      
+      % Horizontal grid lines (4 rows)
+      \draw[thin, black!30] (-1.9, -0.55) -- (2.5, -0.55);
+      \draw[thin, black!30] (-1.55, 0.0) -- (2.85, 0.0);
+      \draw[thin, black!30] (-1.25, 0.55) -- (3.15, 0.55);
+
+      % Vertical grid lines (4 columns)
+      \draw[thin, black!30] (-1.1, -1.1) -- (0.2, 1.1);
+      \draw[thin, black!30] (0.0, -1.1) -- (1.3, 1.1);
+      \draw[thin, black!30] (1.1, -1.1) -- (2.4, 1.1);
+
+      % Matrix values
+      \node at (-0.9, 0.825) {\footnotesize -6};
+      \node at (0.2, 0.825)  {\footnotesize -5};
+      \node at (1.3, 0.825)  {\footnotesize 0};
+      \node at (2.4, 0.825)  {\footnotesize 7};
+
+      \node at (-1.2, 0.275) {\footnotesize 1};
+      \node at (-0.1, 0.275) {\footnotesize -1};
+      \node at (1.0, 0.275)  {\footnotesize 5};
+      \node at (2.1, 0.275)  {\footnotesize -2};
+
+      \node at (-1.5, -0.275) {\footnotesize -3};
+      \node at (-0.4, -0.275) {\footnotesize 4};
+      \node at (0.7, -0.275)  {\footnotesize -2};
+      \node at (1.8, -0.275)  {\footnotesize 3};
+
+      \node at (-1.8, -0.825) {\footnotesize -7};
+      \node at (-0.7, -0.825) {\footnotesize 6};
+      \node at (0.4, -0.825)  {\footnotesize 0};
+      \node at (1.5, -0.825)  {\footnotesize -1};
+
+      % Highlight tile (2x2) at top-right
+      \draw[very thick, draw=i6blue, fill=blue!15, fill opacity=0.35]
+        (0.0, 0.0) -- (2.85, 0.0) -- (3.5, 1.1) -- (0.65, 1.1) -- cycle;
+
+      \coordinate (M00) at (-4.4 + 0.0, 0.9 + 0.0);
+      \coordinate (M10) at (-4.4 + 2.85, 0.9 + 0.0);
+      \coordinate (M01) at (-4.4 + 0.65, 0.9 + 1.1);
+      \coordinate (M11) at (-4.4 + 3.5, 0.9 + 1.1);
+    \end{scope}
+
+    % 2. Tiled Submatrix (Middle-Bottom)
+    \begin{scope}[shift={(-0.6, -1.8)}]
+      \draw[very thick, draw=i6blue, fill=white]
+        (0, 0) -- (2.6, 0) -- (3.9, 1.4) -- (1.3, 1.4) -- cycle;
+      
+      % Internal split
+      \draw[thick, black!40] (1.3, 0) -- (2.6, 1.4);
+      \draw[thick, black!40] (0.65, 0.7) -- (3.25, 0.7);
+
+      % Values in 2x2 cells
+      \node[font=\Large] at (1.65, 1.05) {0};
+      \node[font=\Large] at (2.95, 1.05) {7};
+      \node[font=\Large, text=red!80!black] at (0.95, 0.35) {\textbf{5}};
+      \node[font=\Large] at (2.25, 0.35) {-2};
+
+      \coordinate (T00) at (-0.6 + 0.0, -1.8 + 0.0);
+      \coordinate (T10) at (-0.6 + 2.6, -1.8 + 0.0);
+      \coordinate (T01) at (-0.6 + 1.3, -1.8 + 1.4);
+      \coordinate (T11) at (-0.6 + 3.9, -1.8 + 1.4);
+      \coordinate (TRight) at (-0.6 + 3.25, -1.8 + 0.7);
+    \end{scope}
+
+    % Projections from matrix tile to 2x2 tile
+    \draw[proj] (M00) -- (T00);
+    \draw[proj] (M10) -- (T10);
+    \draw[proj] (M01) -- (T01);
+    \draw[proj] (M11) -- (T11);
+
+    % 3. Sliced Crossbar Arrays (Stacked on Right: x4, x2, x1)
+    % Slice x4 (Top-Right)
+    \begin{scope}[shift={(3.6, 1.3)}]
+      \draw[thick, fill=white] 
+        (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
+      
+      % Vertical grid lines (4 columns)
+      \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
+      \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
+      \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
+      % Horizontal grid line
+      \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
+
+      % Column headers +/-
+      \node[font=\footnotesize] at (1.1, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (2.0, 1.25) {hBc$};
+      \node[font=\footnotesize] at (2.9, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (3.8, 1.25) {hBc$};
+
+      % Binary values
+      \node[font=\normalsize] at (1.1, 0.75) {0}; 
+      \node[font=\normalsize] at (2.0, 0.75) {0};
+      \node[font=\normalsize] at (2.9, 0.75) {1}; 
+      \node[font=\normalsize] at (3.8, 0.75) {0};
+      
+      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}}; 
+      \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
+      \node[font=\normalsize] at (2.45, 0.25) {0}; 
+      \node[font=\normalsize] at (3.35, 0.25) {0};
+
+      \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 4$};
+      \coordinate (S4Left) at (3.6 + 0.45, 1.3 + 0.5);
+    \end{scope}
+
+    % Slice x2 (Middle-Right)
+    \begin{scope}[shift={(3.6, -0.3)}]
+      \draw[thick, fill=white] 
+        (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
+      
+      \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
+      \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
+      \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
+      \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
+
+      \node[font=\footnotesize] at (1.1, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (2.0, 1.25) {hBc$};
+      \node[font=\footnotesize] at (2.9, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (3.8, 1.25) {hBc$};
+
+      \node[font=\normalsize] at (1.1, 0.75) {0}; 
+      \node[font=\normalsize] at (2.0, 0.75) {0};
+      \node[font=\normalsize] at (2.9, 0.75) {1}; 
+      \node[font=\normalsize] at (3.8, 0.75) {0};
+
+      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{0}}; 
+      \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
+      \node[font=\normalsize] at (2.45, 0.25) {0}; 
+      \node[font=\normalsize] at (3.35, 0.25) {1};
+
+      \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 2$};
+      \coordinate (S2Left) at (3.6 + 0.45, -0.3 + 0.5);
+    \end{scope}
+
+    % Slice x1 (Bottom-Right)
+    \begin{scope}[shift={(3.6, -1.9)}]
+      \draw[thick, fill=white] 
+        (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
+      
+      \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
+      \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
+      \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
+      \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
+
+      \node[font=\footnotesize] at (1.1, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (2.0, 1.25) {hBc$};
+      \node[font=\footnotesize] at (2.9, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (3.8, 1.25) {hBc$};
+
+      \node[font=\normalsize] at (1.1, 0.75) {0}; 
+      \node[font=\normalsize] at (2.0, 0.75) {0};
+      \node[font=\normalsize] at (2.9, 0.75) {1}; 
+      \node[font=\normalsize] at (3.8, 0.75) {0};
+
+      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}}; 
+      \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
+      \node[font=\normalsize] at (2.45, 0.25) {0}; 
+      \node[font=\normalsize] at (3.35, 0.25) {0};
+
+      \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 1$};
+      \coordinate (S1Left) at (3.6 + 0.45, -1.9 + 0.5);
+
+      % Vin & Iout
+      \node[left=3pt, font=\footnotesize] at (0.2, 0.25) {{\text{in}} \rightarrow$};
+      \node[below=3pt, font=\footnotesize] at (1.8, 0.0) {$\downarrow I_{\text{out}}$};
+    \end{scope}
+
+    % Slicing arrows
+    \draw[arr] (TRight) -- (S4Left);
+    \draw[arr] (TRight) -- (S2Left);
+    \draw[arr] (TRight) -- (S1Left);
+
+    % Labels placed in clear space
+    \node[font=\Large\itshape, text=i6blue] at (-5.0, -0.6) {tiling};
+    \node[font=\Large\itshape, text=i6blue] at (1.4, -0.4) {slicing};
+
+    \node[below=0.1cm, font=\scriptsize, align=center] at (0, -2.6) {
+      \textbf{Figure}: Exemplary mapping of a 4-bit quantized weight (e.g., $+5 = 4\times 1 + 2\times 0 + 1\times 1$)\onto 3 stacked differential memristor crossbars ($+ / -$).
+    };
+  \end{tikzpicture}
+\end{frame}
+
