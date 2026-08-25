@@ -45,6 +45,22 @@
 %figures
 \usepackage{tikz}
 \usepackage{minibox}
+
+% isometric 4x4 crossbar with values per row; top-right 2x2 block highlighted red
+\newcommand{\crossbar}[4]{%
+  \foreach \row/\vals in {0/{#1}, 1/{#2}, 2/{#3}, 3/{#4}} {%
+    \foreach \val [count=\col from 0] in \vals {%
+      \draw[line width=0.3pt] (\col,\row) -- ++(1,0) -- ++(0,1) -- ++(-1,0) -- cycle;
+      \pgfmathtruncatemacro{\isred}{\row==1 && \col==2 ? 1 : 0}%
+      \ifnum\isred=1
+        \node[red, inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (\col+0.5,\row+0.5) {$\val$};
+      \else
+        \node[inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (\col+0.5,\row+0.5) {$\val$};
+      \fi
+    }%
+  }%
+  \draw[line width=0.8pt] (0,0) -- (4,0) -- (4,4) -- (0,4) -- cycle;
+}
 % change the graphic extentions
 %\usepackage{ifpdf}
 %\ifpdf
@@ -248,7 +264,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Introduction}
+\section{Related Work}
+
+\section{Prerequisites}
 
 \begin{frame}{In-Memory Computing \cite{rossenbach2025}}
   \begin{columns}[c]
@@ -300,31 +318,274 @@
   \end{columns}
 \end{frame}
 
+\begin{frame}{Analog In Memory Computing}
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item Multiplication computation done via Ohm's Law:
+          \begin{equation}
+            V = IR
+          \end{equation}
+    \item Voltage $V$, current $I$ and resistance $R$.
+    \item Possible to rewrite resistance as conductance $G$:
+          \begin{equation}
+            I = G V \quad \text{with} \quad G = \frac{1}{R}
+          \end{equation}
+    \item Addition done via Kirchhoff's Law for any connected node in a circuit:
+          \begin{equation}
+            \sum_{n=0}^{N} I_n = 0 \;\rightarrow\; I_0 = - \sum_{n=1}^{N} I_n
+          \end{equation}
+    \item Currents can be trivially added by simply connecting electric lines.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Analog In Memory Computing (2)}
+  \begin{columns}[c]
+    \begin{column}{0.54\textwidth}
+      \begin{itemize}
+        \setlength{\itemsep}{4pt}
+        \item Memristors as connecting element between vertical and horizontal circuit lines
+        \item Each memristor is an element of a constant matrix
+        \item Column sum via simple line connection
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.46\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figures/memristor_array_1.png}
+    \end{column}
+  \end{columns}
+  \hfill
+  \tiny{Could show the resistors here instead of a memristor}
+\end{frame}
+
+\begin{frame}{The Memristor}
+  \begin{columns}[c]
+    \begin{column}{0.52\textwidth}
+      \emph{Key Idea}: Program weights by setting the resistance.
+      \begin{itemize}
+        \setlength{\itemsep}{3pt}
+        \item Apply $-V > -V_S \;\rightarrow$ set to low resistance
+        \item Apply $\phantom{-}V > \phantom{-}V_R \;\rightarrow$ set to high resistance
+        \item Intermediate states possible
+        \item State is physically stored (non-volatile memory)
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figures/memristor_iv_curve.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Limitations}
+  \begin{itemize}
+    \setlength{\itemsep}{3pt}
+    \item[] \emph{Programming Limitations}
+    \item Resulting resistance state varies with each programming cycle
+    \item Non-linear relation of current and voltage
+  \end{itemize}
+  \hfill
+  \begin{itemize}
+    \setlength{\itemsep}{3pt}
+    \item[] \emph{Cannot exactly model weights}
+    \item Only positive, non-zero weights possible
+    \item Current leakage prohibits a true zero
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{(Paired) Memristor Array}
+  \begin{columns}[c]
+    \begin{column}{0.52\textwidth}
+      \begin{itemize}
+        \setlength{\itemsep}{2pt}
+        \item Use positive and negative bitlines to create memristor pairs
+        \item Each row-wise pair of memristors represents a weight
+        \item[$\rightarrow$] Differential pair allows for negative and zero weight values:
+              \begin{equation*}
+                I_j = \sum_{i=1}^{N} V_i G_{i,j}^{+} - \sum_{i=1}^{N} V_i G_{i,j}^{-}
+              \end{equation*}
+      \end{itemize}
+      \vspace{2cm}
+      \emph{Problems}:
+      \begin{itemize}
+        \setlength{\itemsep}{2pt}
+        \item Cannot set paired memristors to identical conductances
+        \item[$\rightarrow$] Difference close to zero, but not guaranteed
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figures/memristor_array_2.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Memristor Neural Layers}
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item \emph{Tile} the weight matrix:
+          \begin{itemize}
+            \item Tile weight matrix with arbitrary dimensions into smaller fixed-size arrays.
+            \item E.g., $512 \times 512$ weight matrix $\rightarrow$ $16$ crossbar arrays of size $128 \times 128$
+          \end{itemize}
+    \item \emph{Slice} weights into memristor states:
+          \begin{itemize}
+            \item Binary setting (high vs.\ low resistance)
+            \item Stacking of memristors for each magnitude bit (\emph{$k$-bit} weight requires $k-1$ arrays)
+          \end{itemize}
+    \item \emph{Pair} positive ($+$) and negative ($-$) bitlines.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Memristor Neural Layers}
+  \centering
+  \includegraphics[width=0.72\linewidth]{figures/weight_slicing_tiling.png}
+  \vspace{0.2cm}
+
+  {\small \textbf{Figure}: Mapping a weight matrix on memristor arrays \cite{rossenbach2025memristor}.}
+\end{frame}
+
+% \begin{frame}{From Single Memristor to Layer Module: Mapping (TikZ)}
+%   \centering
+%   \begin{tikzpicture}[
+%       x={(0.86cm, 0.35cm)}, y={(0.5cm, -0.45cm)}, z={(0cm,1cm)},
+%       line cap=round, line join=round,
+%       bitlbl/.style={inner sep=1pt, font=\fontsize{9}{10}\selectfont},
+%       xlbl/.style={font=\fontsize{11}{12}\selectfont},
+%     ]
+%     \crossbar{-6,-5,0,7}{1,-1,5,-2}{-3,4,-2,3}{-7,6,0,-1}
+%     \begin{scope}[shift={(0.8,-0.8,2.7)}, scale=1.35]
+%       \coordinate (T_TL) at (0,0);
+%       \coordinate (T_TR) at (2,0);
+%       \coordinate (T_BL) at (0,2);
+%       \coordinate (T_BR) at (2,2);
+%       \coordinate (T_MR) at (2,1);
+%     \end{scope}
+%     \draw[dashed, black!55] (2,0,0) -- (T_TL);
+%     \draw[dashed, black!55] (2,2,0) -- (T_BL);
+%     \draw[dashed, black!55] (4,2,0) -- (T_BR);
+%     \begin{scope}[shift={(0.8,-0.8,2.7)}, scale=1.35]
+%       \draw[fill=white, line width=0.8pt] (0,0) -- (2,0) -- (2,2) -- (0,2) -- cycle;
+%       \draw[line width=0.3pt] (1,0) -- (1,2) (0,1) -- (2,1);
+%       \node[inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (0.5,0.5) {$0$};
+%       \node[inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (1.5,0.5) {$7$};
+%       \node[red, inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (0.5,1.5) {$5$};
+%       \node[inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (1.5,1.5) {$-2$};
+%     \end{scope}
+%     \node[font=\fontsize{10}{11}\selectfont\itshape] at (-2.5cm,1.8cm) {tiling};
+%     \begin{scope}[shift={(7.3cm,4.6cm)}, scale=1.15]
+%       \crossbartwofour{0,0,1,0}{1,0,0,0}{1}{2}
+%       \foreach \col/\s in {0/+,1/-,2/+,3/-} {
+%         \node[bitlbl] at (\col+0.5,-0.5) {$\s$};
+%       }
+%       \node[xlbl] at (4.8,1.0) {$\times 4$};
+%       \coordinate (slice4_left) at (0, 1, 0);
+%     \end{scope}
+%     \begin{scope}[shift={(7.3cm,2.2cm)}, scale=1.15]
+%       \crossbartwofour{0,0,1,0}{0,0,0,1}{1}{2}
+%       \foreach \col/\s in {0/+,1/-,2/+,3/-} {
+%         \node[bitlbl] at (\col+0.5,-0.5) {$\s$};
+%       }
+%       \node[xlbl] at (4.8,1.0) {$\times 2$};
+%       \coordinate (slice2_left) at (0, 1, 0);
+%     \end{scope}
+%     \begin{scope}[shift={(7.3cm,-0.2cm)}, scale=1.15]
+%       \crossbartwofour{0,0,1,0}{1,0,0,0}{1}{2}
+%       \foreach \col/\s in {0/+,1/-,2/+,3/-} {
+%         \node[bitlbl] at (\col+0.5,-0.5) {$\s$};
+%       }
+%       \node[xlbl] at (4.8,1.0) {$\times 1$};
+%       \node[xlbl] at (-0.8,1.0) {$V_{\mathrm{in}}$};
+%       \draw[->, line width=0.4pt] (-0.3, 1.0) -- (-0.05, 1.0);
+%       \node[xlbl] at (4.5,2.4) {$I_{\mathrm{out}}$};
+%       \draw[->, line width=0.4pt] (4.0, 2.05) -- (4.0, 2.3);
+%       \coordinate (slice1_left) at (0, 1, 0);
+%     \end{scope}
+%     \draw[->, shorten >=2pt, shorten <=2pt] (T_MR) -- (slice4_left);
+%     \draw[->, shorten >=2pt, shorten <=2pt] (T_MR) -- (slice2_left) node[midway, below=3pt, font=\fontsize{10}{11}\selectfont\itshape] {slicing};
+%     \draw[->, shorten >=2pt, shorten <=2pt] (T_MR) -- (slice1_left);
+%   \end{tikzpicture}
+%   {\small\textbf{Figure}: Exemplary mapping of a 4-bit quantized weight onto 3 memristor arrays.}
+% \end{frame}
+\begin{frame}{Execution of Memristor Layer}
+  \begin{itemize}
+    \setlength{\itemsep}{3pt}
+    \item[\textbf{0.}] Program memristors by applying either a large voltage
+    \item[\textbf{1.}] Normalize input and quantize with the (Digital-Analog Converter) DAC settings
+    \item[\textbf{2.}] Apply input voltage to the cell via simulation function
+    \item[\textbf{3.}] Read current from crossbars
+    \item[\textbf{4.}] Apply ADC (Analog-Digital Converter) conversion back into digital domain
+    \item[\textbf{5.}] Bit-shift and accumulate result
+  \end{itemize}
+
+  \vfill
+
+  \centering
+  \includegraphics[width=0.88\linewidth]{figures/memristor_layer_flowchart.png}
+\end{frame}
+
+\begin{frame}{Quantization}
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item The number of memristors required is proportional to the precision of the weights.
+          \begin{itemize}
+            \item Need to reduce the precision of the weights $\rightarrow$ quantization.
+          \end{itemize}
+    \item Quantization-Aware Training (QAT) peforms better than Post-training Quantization (PTQ), but requires more training time \cite{gholamisurvey}.
+          \begin{itemize}
+            \item[$\rightarrow$] High performance gap at low precision
+          \end{itemize}
+    \item Symmetric per-tensor QAT, zero-point fixed to 0.
+  \end{itemize}
+  \vfill
+  \begin{table}[h]
+    \centering
+    \caption{WER (\%) on TED-LIUMv2 dev, Conformer CTC, 4-gram LM
+      \cite{rossenbach2025memristor}}
+    \label{tab:anchor-results}
+    \small
+    \begin{tabular}{l c c c c c c c}
+      \toprule
+      Weight bits & FP32 & 8   & 6   & 5   & 4    & 3    & 2    \\
+      \midrule
+      PTQ         & 7.2  & 7.2 & 7.9 & 8.9 & 11.4 & 30.7 & --   \\
+      QAT         &      & 7.3 & 7.7 & 7.4 & 7.8  & 8.3  & 22.1 \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+  \vfill
+  \footnotesize{Also need to tell the requirement for observers during training and the memristor programming with observers, scale, ADC, DAC missing. Perhaps need another quantization slide.}
+\end{frame}
+
 \section{Motivation}
 \begin{frame}{Motivation}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
-    \item CTC-based Conformer ASR has been shown to run on (simulated)
-          memristor hardware \cite{rossenbach2025memristor}.
-    \item How do \emph{transducer} models, with their added complexity compared to CTC, behave on memristor hardware?
+    \item CTC-based Conformer shown to run on (simulated) memristor hardware \cite{rossenbach2025memristor}.
+    \item How do \emph{transducer} models, with their added complexity compared to CTC, behave on device?
           \begin{itemize}
             \item Autoregressive prediction network; internal language model (ILM).
             \item Joint network evaluated repeatedly per emitted label.
           \end{itemize}
-    \item The impact of deploying various components of the model to the
-          device (encoder only vs.\ encoder + prediction network vs.\ full model).
-    \item \emph{Tradeoff}: more offloading $\Rightarrow$ more energy efficiency, but also more noise.
     \item Performance degradation across search paradigms -
           \begin{itemize}
             \item Lexicon-free vs.\ tree search.
             \item ILM and prior scaling - How does device noise change the optimal LM weighting?
           \end{itemize}
-          % \item LM point of view: how does device deployment change the interplay between
-          %       prior/ILM correction and the external LM?
   \end{itemize}
 \end{frame}
 
-\begin{frame}{ASR Architectures: CTC vs.\ Transducer}
+\begin{frame}{Motivation}
+  \begin{itemize}
+    \item Performance impact of deploying components of the model on the device?
+          \begin{itemize}
+            \item Encoder only vs.\ encoder + prediction network vs.\ full model (encoder + prediction network + joint network)
+          \end{itemize}
+    \item \emph{Tradeoff}: more offloading $\Rightarrow$ more energy efficiency, but also more noise.
+  \end{itemize}
   \centering
   \begin{tikzpicture}[
       node distance=1.1cm and 1.6cm,
@@ -390,193 +651,6 @@
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Prerequisites}
-
-\begin{frame}{Analog In Memory Computing}
-  \begin{itemize}
-    \setlength{\itemsep}{6pt}
-    \item Multiplication computation done via Ohm's Law:
-          \begin{equation}
-            I = \frac{V}{R}
-          \end{equation}
-    \item Voltage $V$, current $I$ and resistance $R$.
-    \item Possible to rewrite resistance as conductance $G$:
-          \begin{equation}
-            I = G V \quad \text{with} \quad G = \frac{1}{R}
-          \end{equation}
-    \item Addition done via Kirchhoff's Law for any connected node in a circuit:
-          \begin{equation}
-            \sum_{n=0}^{N} I_n = 0 \;\rightarrow\; I_0 = - \sum_{n=1}^{N} I_n
-          \end{equation}
-    \item Currents can be trivially added by simply connecting electric lines.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{The ``Memristor''}
-  \begin{columns}[c]
-    \begin{column}{0.52\textwidth}
-      \textbf{Program weights by setting the resistance}:
-      \begin{itemize}
-        \setlength{\itemsep}{3pt}
-        \item Apply $-V > -V_S \;\rightarrow$ set to low resistance
-        \item Apply $\phantom{-}V > \phantom{-}V_R \;\rightarrow$ set to high resistance
-        \item Intermediate states possible
-        \item State is physically stored (non-volatile memory)
-      \end{itemize}
-      \vspace{0.4cm}
-      \textbf{Problems}:
-      \begin{itemize}
-        \setlength{\itemsep}{3pt}
-        \item Resulting resistance state varies with each programming cycle
-        \item Non-linear relation of current and voltage
-      \end{itemize}
-    \end{column}
-
-    \begin{column}{0.48\textwidth}
-      \centering
-      \includegraphics[width=\linewidth]{figures/memristor_iv_curve.png}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Memristor Array (1)}
-  \begin{columns}[c]
-    \begin{column}{0.54\textwidth}
-      \begin{itemize}
-        \setlength{\itemsep}{4pt}
-        \item Memristors as connecting element between vertical and horizontal circuit lines
-        \item Each memristor is a weight of a matrix
-        \item Column sum via simple line connection
-        \item Weight matrices are typically fixed during application
-      \end{itemize}
-      \vspace{0.3cm}
-      \textbf{Problems}:
-      \begin{itemize}
-        \setlength{\itemsep}{3pt}
-        \item Only positive, non-zero weights possible
-        \item Current leakage prohibits a true zero
-      \end{itemize}
-    \end{column}
-
-    \begin{column}{0.46\textwidth}
-      \centering
-      \includegraphics[width=\linewidth]{figures/memristor_array_1.png}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Memristor Array (2)}
-  \begin{columns}[c]
-    \begin{column}{0.52\textwidth}
-      \begin{itemize}
-        \setlength{\itemsep}{2pt}
-        \item Use positive and negative bitlines to create memristor pairs
-        \item Each row-wise pair of memristors represents a weight
-        \item[$\rightarrow$] Differential pair allows for negative and zero weight values:
-              \begin{equation*}
-                I_j = \sum_{i=1}^{N} V_i G_{i,j}^{+} - \sum_{i=1}^{N} V_i G_{i,j}^{-}
-              \end{equation*}
-      \end{itemize}
-      \vspace{0.15cm}
-      \textbf{Problems}:
-      \begin{itemize}
-        \setlength{\itemsep}{2pt}
-        \item Cannot set paired memristors to identical conductances
-        \item[$\rightarrow$] Results close to zero, but not guaranteed
-      \end{itemize}
-    \end{column}
-
-    \begin{column}{0.48\textwidth}
-      \centering
-      \includegraphics[width=\linewidth]{figures/memristor_array_2.png}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{From Single Memristor to Layer Module: Concepts}
-  \begin{itemize}
-    \setlength{\itemsep}{8pt}
-    \item \textbf{Multiple concepts to implement mapping}:
-          \begin{itemize}
-            \setlength{\itemsep}{6pt}
-            \item \textbf{Tiling} of weight matrix:
-                  \begin{itemize}
-                    \item Arbitrary dimensions by tiling into smaller fixed-size arrays
-                    \item E.g., $512 \times 512$ matrix into $16$ crossbar arrays of size $128 \times 128$
-                  \end{itemize}
-            \item \textbf{Slicing} of weight values to memristor states:
-                  \begin{itemize}
-                    \item Currently binary setting (high vs.\ low resistance)
-                    \item Stacking of memristors for each magnitude bit ($k$-bit weight requires $k-1$ arrays)
-                  \end{itemize}
-            \item \textbf{Pairing} of positive ($+$) and negative ($-$) bitlines:
-                  \begin{itemize}
-                    \item Differential pairs represent signed matrix entries
-                  \end{itemize}
-          \end{itemize}
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}{From Single Memristor to Layer Module: Mapping}
-\end{frame}
-
-\begin{frame}{Non-Idealities and Synaptogen}
-  \begin{itemize}
-    \setlength{\itemsep}{5pt}
-    \item Ideal crossbars are assumed by many simulators; real devices exhibit:
-          \begin{itemize}
-            \item Device-to-device and cycle-to-cycle programming variability
-            \item Thermal (Johnson--Nyquist) noise
-            \item Finite DAC/ADC resolution
-            \item Imprecise intermediate (non-binary) conductance levels
-          \end{itemize}
-    \item Synaptogen \cite{hennen2024synaptogen}: generative device model based on a
-          vector autoregression, fitted to 3M+ measured programming cycles of
-          130\,nm memristors (STMicroelectronics).
-    \item In our experiments (PyTorch, SynaptogenML): linear layers are replaced by
-          crossbar simulation, the rest of the network stays conventional.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Quantization-Aware Training}
-  \begin{itemize}
-    \setlength{\itemsep}{6pt}
-    \item Memristor execution effectively means: low-precision (stacked binary) weights
-          + 8-bit DAC/ADC on activations.
-    \item Post-training quantization (PTQ) collapses at low precision;
-          quantization-aware training (QAT) \cite{gholami2021survey} inserts
-          fake quantization into the training from epoch 1.
-          \begin{itemize}
-            \item Symmetric per-tensor quantization, zero-point fixed to 0
-                  (required by the pairwise encoding).
-          \end{itemize}
-  \end{itemize}
-  \vfill
-  \begin{table}[h]
-    \centering
-    \caption{WER (\%) on TED-LIUMv2 dev, Conformer CTC, 4-gram LM
-      \cite{rossenbach2025memristor}. Memristor: mean $\pm$ std over 10
-      differently programmed devices.}
-    \label{tab:anchor-results}
-    \small
-    \begin{tabular}{l c c c c c c c}
-      \toprule
-      Weight bits           & FP32 & 8   & 6   & 5   & 4    & 3    & 2    \\
-      \midrule
-      PTQ                   & 7.2  & 7.2 & 7.9 & 8.9 & 11.4 & 30.7 & --   \\
-      QAT                   &      & 7.3 & 7.7 & 7.4 & 7.8  & 8.3  & 22.1 \\
-      Memristor (simulated) &      & 8.3 & 8.3 & 8.3 & 8.9  & 9.2  & --   \\
-      \bottomrule
-    \end{tabular}
-  \end{table}
-  \vfill
-  \begin{itemize}
-    \item Up to 3-bit weights: $\leq 25\%$ relative WER degradation on device
-          ($9.2$ vs.\ $7.2$).
-  \end{itemize}
-\end{frame}
-
 \section{Experiments}
 \begin{frame}{Experimental Setup}
   \begin{itemize}
@@ -584,47 +658,366 @@
     \item Data: LibriSpeech \cite{Librispeech} (960\,h), BPE subword targets
           (128 merges $\to$ 184 labels).
     \item Features: 80 log-mel filters, 10\,ms frame shift; SpecAugment during training.
-    \item Encoder (shared by all models): 12-layer Conformer
-          \cite{Gulati+Qin+:2020conformer}, 512-dim.
+    \item Encoder: 12-layer Conformer \cite{Gulati+Qin+:2020conformer}, 512-dim.
     \item Model types:
           \begin{enumerate}
             \item \emph{CTC} \cite{graves2006connectionist}: encoder only.
             \item \emph{FFNN-transducer}: prediction network is a 2-layer feed-forward
-                  net (640-dim, tanh) over the previous-label embedding.
+                  net (640-dim) over the previous-label embedding.
             \item \emph{Full-context transducer} \cite{graves2012sequence}: LSTM
-                  prediction network (standard RNN-T).
+                  prediction network.
           \end{enumerate}
-    \item Quantization: QAT, per-tensor symmetric, e.g.\ 4-bit weights / 8-bit
-          activations; zero-point 0.
-    \item Stages: (1) FP32 baseline $\to$ (2) QAT (fake quantization) $\to$
-          (3) memristor execution (Synaptogen crossbar simulation, multiple
-          re-programmings per run).
+    \item Quantization: QAT, per-tensor symmetric, 8 and 4-bit weights, 8-bit activations; zero-point 0.
+    \item Stages: (1) Full precision baseline $\to$ (2) QAT (fake quantization) $\to$
+          (3) memristor simulation (3-5 runs).
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Experiment Matrix}
-  \begin{itemize}
-    \setlength{\itemsep}{6pt}
-    \item Full matrix: 3 (model types) $\times$ 5 (search types) $\times$ 3 (stages).
-    \item Search types:
-          \begin{enumerate}
-            \item Lexicon-free, no LM
-            \item Lexicon-free + BPE LSTM LM
-            \item Prefix-tree beam search, no LM
-            \item Prefix-tree beam search + 4-gram LM
-            \item Prefix-tree beam search + BPE LSTM LM
-          \end{enumerate}
-          (+ large-beam tree variants, beam 1024/2048)
-    \item Prior/ILM correction and external LM scales are swept at decoding time.
-    \item Reporting:
-          \begin{itemize}
-            \item Primary tables: one per model type (search types $\times$ stages).
-            \item Appendix: tables across models at the same stage, for easy comparison.
-          \end{itemize}
-    \item Expectation: device deployment changes the interplay between prior/ILM
-          correction and the LM --- quantization and noise reshape the acoustic
-          scores, so the optimal LM weighting should shift.
-  \end{itemize}
+\begin{frame}{CTC Experiments}
+  \begin{table}
+    \caption{WER (\%) on LibriSpeech dev-other across CTC configurations}
+    \vspace{2pt}
+    \footnotesize
+    \subtable[Baseline]{
+      \begin{tabular}{l c c c}
+        \toprule
+        & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-4}
+        \textbf{Model} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+        \midrule
+        CTC & 7.1 & 5.0 & 5.2 \\
+        \bottomrule
+      \end{tabular}
+    }
+
+    \vspace{35pt}
+
+    % 2. Side-by-side QAT and Memristor Tables
+    \begin{columns}[T]
+      \begin{column}{0.48\textwidth}
+        \centering
+        \subtable[QAT]{
+          \begin{tabular}{l c c c}
+            \toprule
+            & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \cmidrule(lr){2-3} \cmidrule(lr){4-4}
+            \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \midrule
+            8 & 7.3 & 5.2 & 5.3 \\
+            4 & 8.3 & 5.4 & 5.7 \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+
+      \begin{column}{0.48\textwidth}
+        \centering
+        \subtable[Memristor Simulation]{
+          \begin{tabular}{l c c c}
+            \toprule
+            & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \cmidrule(lr){2-3} \cmidrule(lr){4-4}
+            \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \midrule
+            8 & $13.53 \pm 0.37$ & -- & $6.67 \pm 0.09$ \\
+            4 & $11.85 \pm 0.18$ & -- & $6.77 \pm 0.12$ \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+    \end{columns}
+  \end{table}
+\end{frame}
+
+\begin{frame}{FFNN Transducer Experiments}
+  \begin{table}
+    \caption{WER (\%) on LibriSpeech dev-other across FFNN-Transducer configurations}
+    \vspace{2pt}
+    \footnotesize
+    \subtable[Baseline]{
+      \begin{tabular}{l c c c}
+        \toprule
+        & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-4}
+        \textbf{Model} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+        \midrule
+        FFNN-Transducer & -- & -- & -- \\
+        \bottomrule
+      \end{tabular}
+    }
+
+    \vspace{20pt}
+
+    % 2. Side-by-side QAT and Memristor Tables
+    \setlength{\tabcolsep}{3pt}
+    \begin{columns}[T]
+      \begin{column}{0.49\textwidth}
+        \centering
+        \subtable[QAT]{
+          \begin{tabular}{c c c c c c c}
+            \toprule
+            \multicolumn{3}{c}{\textbf{Quantized}} & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
+            \textbf{Encoder} & \textbf{Prediction} & \textbf{Joiner} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \midrule
+            \checkmark & -- & -- & 8 & -- & -- & -- \\
+            \checkmark & \checkmark & -- & 8 & -- & -- & -- \\
+            \checkmark & \checkmark & \checkmark & 8 & -- & -- & -- \\
+            \midrule
+            \checkmark & -- & -- & 4 & -- & -- & -- \\
+            \checkmark & \checkmark & -- & 4 & -- & -- & -- \\
+            \checkmark & \checkmark & \checkmark & 4 & -- & -- & -- \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+
+      \begin{column}{0.49\textwidth}
+        \centering
+        \subtable[Memristor Simulation]{
+          \begin{tabular}{c c c c c c c}
+            \toprule
+            \multicolumn{3}{c}{\textbf{Quantized}} & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
+            \textbf{Encoder} & \textbf{Prediction} & \textbf{Joiner} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \midrule
+            \checkmark & -- & -- & 8 & -- & -- & -- \\
+            \checkmark & \checkmark & -- & 8 & -- & -- & -- \\
+            \checkmark & \checkmark & \checkmark & 8 & -- & -- & -- \\
+            \midrule
+            \checkmark & -- & -- & 4 & -- & -- & -- \\
+            \checkmark & \checkmark & -- & 4 & -- & -- & -- \\
+            \checkmark & \checkmark & \checkmark & 4 & -- & -- & -- \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+    \end{columns}
+  \end{table}
+\end{frame}
+
+\begin{frame}{FFNN Transducer: Fine-Tuning vs.\ QAT from Scratch}
+  \begin{table}
+    \caption{WER (\%) on LibriSpeech dev-other: Checkpoint fine-tuning vs.\ training from scratch}
+    \vspace{4pt}
+    \footnotesize
+    \setlength{\tabcolsep}{4pt}
+    \begin{columns}[T]
+      % 1. QAT
+      \begin{column}{0.49\textwidth}
+        \centering
+        \subtable[QAT]{
+          \begin{tabular}{l c c c c}
+            \toprule
+            & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \cmidrule(lr){3-4} \cmidrule(lr){5-5}
+            \textbf{Training Scheme} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \midrule
+            Fine-tuned & 8 & -- & -- & -- \\
+            From Scratch & 8 & -- & -- & -- \\
+            \midrule
+            Fine-tuned & 4 & -- & -- & -- \\
+            From Scratch & 4 & -- & -- & -- \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+
+      % 2. Memristor Simulation
+      \begin{column}{0.49\textwidth}
+        \centering
+        \subtable[Memristor Simulation]{
+          \begin{tabular}{l c c c c}
+            \toprule
+            & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \cmidrule(lr){3-4} \cmidrule(lr){5-5}
+            \textbf{Training Scheme} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \midrule
+            Fine-tuned & 8 & -- & -- & -- \\
+            From Scratch & 8 & -- & -- & -- \\
+            \midrule
+            Fine-tuned & 4 & -- & -- & -- \\
+            From Scratch & 4 & -- & -- & -- \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+    \end{columns}
+  \end{table}
+\end{frame}
+
+\begin{frame}{Full Context Transducer Experiments}
+  \begin{table}
+    \caption{WER (\%) on LibriSpeech dev-other across Full-Context Transducer configurations}
+    \vspace{2pt}
+    \footnotesize
+    \subtable[Baseline]{
+      \begin{tabular}{l c c c}
+        \toprule
+        & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-4}
+        \textbf{Model} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+        \midrule
+        Full-Context Transducer & -- & -- & -- \\
+        \bottomrule
+      \end{tabular}
+    }
+
+    \vspace{20pt}
+
+    % 2. Side-by-side QAT and Memristor Tables
+    \setlength{\tabcolsep}{3pt}
+    \begin{columns}[T]
+      \begin{column}{0.49\textwidth}
+        \centering
+        \subtable[QAT]{
+          \begin{tabular}{c c c c c c c}
+            \toprule
+            \multicolumn{3}{c}{\textbf{Quantized}} & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
+            \textbf{Encoder} & \textbf{Prediction} & \textbf{Joiner} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \midrule
+            \checkmark & -- & -- & 8 & -- & -- & -- \\
+            \checkmark & \checkmark & -- & 8 & -- & -- & -- \\
+            \checkmark & \checkmark & \checkmark & 8 & -- & -- & -- \\
+            \midrule
+            \checkmark & -- & -- & 4 & -- & -- & -- \\
+            \checkmark & \checkmark & -- & 4 & -- & -- & -- \\
+            \checkmark & \checkmark & \checkmark & 4 & -- & -- & -- \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+
+      \begin{column}{0.49\textwidth}
+        \centering
+        \subtable[Memristor Simulation]{
+          \begin{tabular}{c c c c c c c}
+            \toprule
+            \multicolumn{3}{c}{\textbf{Quantized}} & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
+            \textbf{Encoder} & \textbf{Prediction} & \textbf{Joiner} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \midrule
+            \checkmark & -- & -- & 8 & -- & -- & -- \\
+            \checkmark & \checkmark & -- & 8 & -- & -- & -- \\
+            \checkmark & \checkmark & \checkmark & 8 & -- & -- & -- \\
+            \midrule
+            \checkmark & -- & -- & 4 & -- & -- & -- \\
+            \checkmark & \checkmark & -- & 4 & -- & -- & -- \\
+            \checkmark & \checkmark & \checkmark & 4 & -- & -- & -- \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+    \end{columns}
+  \end{table}
+\end{frame}
+
+\begin{frame}{Optimal Parameters during QAT and Memristor Simulation}
+  \begin{table}
+    \caption{Impact of quantization and device noise on optimal LM scales (LibriSpeech dev-other)}
+    \vspace{4pt}
+    \footnotesize
+    \setlength{\tabcolsep}{4pt}
+    \begin{columns}[T]
+      % 1. Baseline
+      \begin{column}{0.32\textwidth}
+        \centering
+        \subtable[Baseline (FP32)]{
+          \begin{tabular}{c c c}
+            \toprule
+            \textbf{ILM Scale} & \textbf{ELM Scale} & \textbf{WER (\%)} \\
+            \midrule
+            0.1 & 0.2 & -- \\
+            0.2 & 0.3 & -- \\
+            \rowcolor{i6blueShaded}
+            \textbf{0.2} & \textbf{0.4} & \textbf{--} \\
+            0.3 & 0.4 & -- \\
+            0.4 & 0.5 & -- \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+
+      % 2. QAT
+      \begin{column}{0.32\textwidth}
+        \centering
+        \subtable[QAT]{
+          \begin{tabular}{c c c}
+            \toprule
+            \textbf{ILM Scale} & \textbf{ELM Scale} & \textbf{WER (\%)} \\
+            \midrule
+            0.1 & 0.2 & -- \\
+            0.2 & 0.3 & -- \\
+            0.2 & 0.4 & -- \\
+            \rowcolor{i6blueShaded}
+            \textbf{0.3} & \textbf{0.4} & \textbf{--} \\
+            0.4 & 0.5 & -- \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+
+      % 3. Memristor Simulation
+      \begin{column}{0.32\textwidth}
+        \centering
+        \subtable[Memristor Simulation]{
+          \begin{tabular}{c c c}
+            \toprule
+            \textbf{ILM Scale} & \textbf{ELM Scale} & \textbf{WER (\%)} \\
+            \midrule
+            0.1 & 0.2 & -- \\
+            0.2 & 0.3 & -- \\
+            0.2 & 0.4 & -- \\
+            \rowcolor{i6blueShaded}
+            \textbf{0.3} & \textbf{0.4} & \textbf{--} \\
+            0.4 & 0.5 & -- \\
+            \bottomrule
+          \end{tabular}
+        }
+      \end{column}
+    \end{columns}
+  \end{table}
+
+  \vfill
+  \raggedright
+  \scriptsize \textbf{ILM}: Internal Language Model, \textbf{ELM}: External Language Model
+\end{frame}
+
+\begin{frame}{RTF - Memristor Simulation}
+  \begin{table}
+    \caption{Real-Time Factor (RTF) on simulated memristor hardware (8-bit quantization, dev-other)}
+    \vspace{4pt}
+    \footnotesize
+    \subtable[Standard Evaluation]{
+      \begin{tabular}{l c}
+        \toprule
+        \textbf{Model} & \textbf{RTF (Tree 4-Gram)} \\
+        \midrule
+        CTC & -- \\
+        FFNN-Transducer & -- \\
+        Full-Context Transducer & -- \\
+        \bottomrule
+      \end{tabular}
+    }
+
+    \vspace{14pt}
+
+    \subtable[Optimizations under relaxed simulation assumptions]{
+      \begin{tabular}{l l c}
+        \toprule
+        \textbf{Model} & \textbf{Caching Scheme} & \textbf{RTF (Tree 4-Gram)} \\
+        \midrule
+        FFNN-Transducer & Prediction network output cached & -- \\
+        Full-Context Transducer & LSTM input layer cached & -- \\
+        \bottomrule
+      \end{tabular}
+    }
+  \end{table}
+
+  \vfill
+  \raggedright
+  \scriptsize \textbf{RTF}: Real-Time Factor ($\text{RTF} < 1.0$ indicates real-time processing).
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -633,28 +1026,27 @@
 \begin{frame}{Future Work}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
-    \item Error analysis: which error types does device noise introduce or amplify?
-    \item Countermeasures: denoising (e.g.\ MLP), search parameters, LM parameters,
-          softmax temperature.
-    \item Fine-tuning of the (quantized) model; effect of noise introduction during
-          training.
-    \item Generalization: comparison across different datasets / data conditions.
+    \item \emph{Error Analysis}: Which error types does device noise introduce or amplify?
+    \begin{itemize}
+      \item Substitutions, insertions, deletions; 
+      \item Worse degradation across certain search paradigms (lexicon-free)
+    \end{itemize}
+    \item \emph{Countermeasures}: 
+    \begin{itemize}
+      \item Denoising (e.g.\ MLP), 
+      \item Tuning search parameters, LM parameters, softmax temperature etc.
+    \end{itemize}
+    \item Fine-tuning of the (quantized) model
+    \begin{itemize}
+      \item Introduction of device-like noise during QAT training.
+    \end{itemize}
+    \item \emph{Generalization}: Test models with different datasets and conditions.
   \end{itemize}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Summary}
-  \begin{itemize}
-    \setlength{\itemsep}{10pt}
-    \item Extend memristor-based ASR \cite{rossenbach2025memristor} from CTC to
-          transducer models.
-    \item Full matrix on LibriSpeech: 3 model types $\times$ 5 search types $\times$
-          3 stages (baseline / QAT / memristor).
-    \item Key questions: component offloading (encoder vs.\ encoder + prediction),
-          real noise impact, lexfree vs.\ tree search behavior, prior/ILM--LM
-          interplay.
-  \end{itemize}
+\begin{frame}
   \vfill
   \begin{center}
     {\Large \textcolor{i6bluedark}{Thank you for your attention!}}
@@ -681,13 +1073,13 @@
     \small
     \begin{tabular}{|c|c|c|c|c|}
       \hline
-      operation & average & std-dev & min & max \\
+      operation        & average               & std-dev               & min                   & max                  \\
       \hline
-      $1.0 \times 1$  & $1.016$           & $0.063$           & $0.707$          & $1.27$ \\
-      $0.1 \times 1$  & $0.989 \cdot 10^{-1}$ & $0.062 \cdot 10^{-1}$ & $0.688 \cdot 10^{-1}$ & $1.24 \cdot 10^{-1}$ \\
-      $0.01 \times 1$ & $0.985 \cdot 10^{-2}$ & $0.069 \cdot 10^{-2}$ & $0.721 \cdot 10^{-2}$ & $1.20 \cdot 10^{-2}$ \\
-      $1.0 \times 0$  & $8.52 \cdot 10^{-4}$  & $4.75 \cdot 10^{-2}$  & $-0.2751$        & $0.2455$ \\
-      $1.0 \times 0.5$& $0.476$           & $0.094$           & $0.109$          & $1.06$ \\
+      $1.0 \times 1$   & $1.016$               & $0.063$               & $0.707$               & $1.27$               \\
+      $0.1 \times 1$   & $0.989 \cdot 10^{-1}$ & $0.062 \cdot 10^{-1}$ & $0.688 \cdot 10^{-1}$ & $1.24 \cdot 10^{-1}$ \\
+      $0.01 \times 1$  & $0.985 \cdot 10^{-2}$ & $0.069 \cdot 10^{-2}$ & $0.721 \cdot 10^{-2}$ & $1.20 \cdot 10^{-2}$ \\
+      $1.0 \times 0$   & $8.52 \cdot 10^{-4}$  & $4.75 \cdot 10^{-2}$  & $-0.2751$             & $0.2455$             \\
+      $1.0 \times 0.5$ & $0.476$               & $0.094$               & $0.109$               & $1.06$               \\
       \hline
     \end{tabular}
     \vspace{0.4cm}
@@ -706,9 +1098,9 @@
     ]
     % 1. Full Weight Matrix (Top-Left)
     \begin{scope}[shift={(-4.4, 0.9)}]
-      \draw[thick, fill=blue!5] 
-        (-2.2, -1.1) -- (2.2, -1.1) -- (3.5, 1.1) -- (-0.9, 1.1) -- cycle;
-      
+      \draw[thick, fill=blue!5]
+      (-2.2, -1.1) -- (2.2, -1.1) -- (3.5, 1.1) -- (-0.9, 1.1) -- cycle;
+
       % Horizontal grid lines (4 rows)
       \draw[thin, black!30] (-1.9, -0.55) -- (2.5, -0.55);
       \draw[thin, black!30] (-1.55, 0.0) -- (2.85, 0.0);
@@ -742,7 +1134,7 @@
 
       % Highlight tile (2x2) at top-right
       \draw[very thick, draw=i6blue, fill=blue!15, fill opacity=0.35]
-        (0.0, 0.0) -- (2.85, 0.0) -- (3.5, 1.1) -- (0.65, 1.1) -- cycle;
+      (0.0, 0.0) -- (2.85, 0.0) -- (3.5, 1.1) -- (0.65, 1.1) -- cycle;
 
       \coordinate (M00) at (-4.4 + 0.0, 0.9 + 0.0);
       \coordinate (M10) at (-4.4 + 2.85, 0.9 + 0.0);
@@ -753,8 +1145,8 @@
     % 2. Tiled Submatrix (Middle-Bottom)
     \begin{scope}[shift={(-0.6, -1.8)}]
       \draw[very thick, draw=i6blue, fill=white]
-        (0, 0) -- (2.6, 0) -- (3.9, 1.4) -- (1.3, 1.4) -- cycle;
-      
+      (0, 0) -- (2.6, 0) -- (3.9, 1.4) -- (1.3, 1.4) -- cycle;
+
       % Internal split
       \draw[thick, black!40] (1.3, 0) -- (2.6, 1.4);
       \draw[thick, black!40] (0.65, 0.7) -- (3.25, 0.7);
@@ -781,9 +1173,9 @@
     % 3. Sliced Crossbar Arrays (Stacked on Right: x4, x2, x1)
     % Slice x4 (Top-Right)
     \begin{scope}[shift={(3.6, 1.3)}]
-      \draw[thick, fill=white] 
-        (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
-      
+      \draw[thick, fill=white]
+      (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
+
       % Vertical grid lines (4 columns)
       \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
       \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
@@ -792,20 +1184,20 @@
       \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
 
       % Column headers +/-
-      \node[font=\footnotesize] at (1.1, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (1.1, 1.25) {$+$};
       \node[font=\footnotesize] at (2.0, 1.25) {hBc$};
-      \node[font=\footnotesize] at (2.9, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (2.9, 1.25) {$+$};
       \node[font=\footnotesize] at (3.8, 1.25) {hBc$};
 
       % Binary values
-      \node[font=\normalsize] at (1.1, 0.75) {0}; 
+      \node[font=\normalsize] at (1.1, 0.75) {0};
       \node[font=\normalsize] at (2.0, 0.75) {0};
-      \node[font=\normalsize] at (2.9, 0.75) {1}; 
+      \node[font=\normalsize] at (2.9, 0.75) {1};
       \node[font=\normalsize] at (3.8, 0.75) {0};
-      
-      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}}; 
+
+      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}};
       \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
-      \node[font=\normalsize] at (2.45, 0.25) {0}; 
+      \node[font=\normalsize] at (2.45, 0.25) {0};
       \node[font=\normalsize] at (3.35, 0.25) {0};
 
       \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 4$};
@@ -814,27 +1206,27 @@
 
     % Slice x2 (Middle-Right)
     \begin{scope}[shift={(3.6, -0.3)}]
-      \draw[thick, fill=white] 
-        (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
-      
+      \draw[thick, fill=white]
+      (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
+
       \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
       \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
       \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
       \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
 
-      \node[font=\footnotesize] at (1.1, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (1.1, 1.25) {$+$};
       \node[font=\footnotesize] at (2.0, 1.25) {hBc$};
-      \node[font=\footnotesize] at (2.9, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (2.9, 1.25) {$+$};
       \node[font=\footnotesize] at (3.8, 1.25) {hBc$};
 
-      \node[font=\normalsize] at (1.1, 0.75) {0}; 
+      \node[font=\normalsize] at (1.1, 0.75) {0};
       \node[font=\normalsize] at (2.0, 0.75) {0};
-      \node[font=\normalsize] at (2.9, 0.75) {1}; 
+      \node[font=\normalsize] at (2.9, 0.75) {1};
       \node[font=\normalsize] at (3.8, 0.75) {0};
 
-      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{0}}; 
+      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{0}};
       \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
-      \node[font=\normalsize] at (2.45, 0.25) {0}; 
+      \node[font=\normalsize] at (2.45, 0.25) {0};
       \node[font=\normalsize] at (3.35, 0.25) {1};
 
       \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 2$};
@@ -843,27 +1235,27 @@
 
     % Slice x1 (Bottom-Right)
     \begin{scope}[shift={(3.6, -1.9)}]
-      \draw[thick, fill=white] 
-        (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
-      
+      \draw[thick, fill=white]
+      (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
+
       \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
       \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
       \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
       \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
 
-      \node[font=\footnotesize] at (1.1, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (1.1, 1.25) {$+$};
       \node[font=\footnotesize] at (2.0, 1.25) {hBc$};
-      \node[font=\footnotesize] at (2.9, 1.25) {$+$}; 
+      \node[font=\footnotesize] at (2.9, 1.25) {$+$};
       \node[font=\footnotesize] at (3.8, 1.25) {hBc$};
 
-      \node[font=\normalsize] at (1.1, 0.75) {0}; 
+      \node[font=\normalsize] at (1.1, 0.75) {0};
       \node[font=\normalsize] at (2.0, 0.75) {0};
-      \node[font=\normalsize] at (2.9, 0.75) {1}; 
+      \node[font=\normalsize] at (2.9, 0.75) {1};
       \node[font=\normalsize] at (3.8, 0.75) {0};
 
-      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}}; 
+      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}};
       \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
-      \node[font=\normalsize] at (2.45, 0.25) {0}; 
+      \node[font=\normalsize] at (2.45, 0.25) {0};
       \node[font=\normalsize] at (3.35, 0.25) {0};
 
       \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 1$};
@@ -887,5 +1279,23 @@
       \textbf{Figure}: Exemplary mapping of a 4-bit quantized weight (e.g., $+5 = 4\times 1 + 2\times 0 + 1\times 1$)\onto 3 stacked differential memristor crossbars ($+ / -$).
     };
   \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Non-Idealities and Synaptogen}
+  \begin{itemize}
+    \setlength{\itemsep}{5pt}
+    \item Ideal crossbars are assumed by many simulators; real devices exhibit:
+          \begin{itemize}
+            \item Device-to-device and cycle-to-cycle programming variability
+            \item Thermal (Johnson--Nyquist) noise
+            \item Finite DAC/ADC resolution
+            \item Imprecise intermediate (non-binary) conductance levels
+          \end{itemize}
+    \item Synaptogen \cite{hennen2024synaptogen}: generative device model based on a
+          vector autoregression, fitted to 3M+ measured programming cycles of
+          130\,nm memristors (STMicroelectronics).
+    \item In our experiments (PyTorch, SynaptogenML): linear layers are replaced by
+          crossbar simulation, the rest of the network stays conventional.
+  \end{itemize}
 \end{frame}
 
