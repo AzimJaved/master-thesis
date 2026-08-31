@@ -27,6 +27,7 @@
 %\usepackage{bbold}
 \usefonttheme[onlymath]{serif}
 \boldmath
+\setbeamertemplate{caption}{\centering\usebeamerfont{caption}{\usebeamercolor[fg]{caption name}\insertcaptionname:}\space{\usebeamercolor[fg]{caption}\insertcaption}\par}
 
 
 % misc
@@ -117,7 +118,7 @@
 
 % Define box and box title style
 \usepackage{tikz}
-\usetikzlibrary{shapes,positioning,fit,decorations.pathreplacing,3d}
+\usetikzlibrary{shapes,positioning,fit,decorations.pathreplacing,3d,arrows.meta,calc}
 \tikzstyle{bubble} = [ draw=blue, rectangle, rounded corners, inner sep=3pt, inner ysep=
 10 pt]
 \tikzstyle{fancytitle} =[fill=white, text=black]
@@ -224,6 +225,7 @@
 
 \institute[RWTH Aachen University] % (optional)
 {
+ \vspace{20px} 
  \strut Human Language Technology and Pattern Recognition\\
  \strut Computer Science Department, RWTH Aachen University
 }
@@ -268,7 +270,7 @@
 
 \section{Prerequisites}
 
-\begin{frame}{In-Memory Computing \cite{rossenbach2025}}
+\begin{frame}{In-Memory Computing \cite{rossenbach2025memristor}}
   \begin{columns}[c]
     \begin{column}{0.48\textwidth}
       \begin{itemize}
@@ -287,38 +289,45 @@
     \end{column}
 
     \begin{column}{0.52\textwidth}
-      \centering
-      \includegraphics[width=\linewidth]{figures/imc_hierarchy_clean.png}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{figures/imc_hierarchy_clean.png}
+        \caption{Taxonomy of In-Memory Computing technologies}
+      \end{figure}
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Overview\cite{rossenbach2025}}
+\begin{frame}{Overview \cite{rossenbach2025memristor}}
   \begin{columns}[c]
     \begin{column}{0.70\textwidth}
       \begin{itemize}
         \setlength{\itemsep}{1.5pt}
-        \item A \emph{memristor} is an analog computing device with a programmable resistance states.
-        \item Enables energy-efficient implementation of neural networks.
+        \item A \emph{memristor} is an analog computing device with a programmable resistance state \cite{strukov2008MM}.
+        \item Enables fast, energy-efficient implementation of Vector-Matrix Multiplication (VMM) \cite{wan2022compute} -
               \begin{itemize}
-                \item Vector-matrix-multiplication (VMM) in $\mathcal{O}(1)$
+                \item[$\rightarrow$] and thus neural networks.
               \end{itemize}
         \item Limitations:
               \begin{itemize}
-                \item High analog inaccuracies, and thus need specific restrictions on mathematical operations.
-                \item Production is still in early stages, experiments are on simulated hardware \cite{synatogenhenne}.
+                \item High analog inaccuracies, and thus need specific restrictions on mathematical operations \cite{wouters2016reliability}.
+                \item Production is still in early stages \cite{infineon2022rram}.
+                \item Current experiments are simulated using SynaptogenML \cite{hennen2024synaptogen} \cite{rossenbach2025memristor}.
               \end{itemize}
       \end{itemize}
     \end{column}
 
     \begin{column}{0.30\textwidth}
-      \centering
-      \includegraphics[width=0.85\linewidth]{figures/resistor_memristor_clean.png}
+      \begin{figure}
+        \centering
+        \includegraphics[width=0.85\linewidth]{figures/resistor_memristor_clean.png}
+        \caption{Resistor and Memristor schematics}
+      \end{figure}
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Analog In Memory Computing}
+\begin{frame}{Analog In Memory Computing \cite{aguirre2024hardware}}
   \begin{itemize}
     \setlength{\itemsep}{6pt}
     \item Multiplication computation done via Ohm's Law:
@@ -338,27 +347,126 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Analog In Memory Computing (2)}
+\begin{frame}{Analog In Memory Computing \cite{rossenbach2025memristor}}
   \begin{columns}[c]
     \begin{column}{0.54\textwidth}
       \begin{itemize}
         \setlength{\itemsep}{4pt}
-        \item Memristors as connecting element between vertical and horizontal circuit lines
-        \item Each memristor is an element of a constant matrix
-        \item Column sum via simple line connection
+        \item Resistors ($\square$) as connecting element between vertical and horizontal circuit lines
+        \item Each resistor's conductance is an element of a constant matrix
+        \item Column sum simplely via line connection
       \end{itemize}
     \end{column}
 
     \begin{column}{0.46\textwidth}
-      \centering
-      \includegraphics[width=\linewidth]{figures/memristor_array_1.png}
+      \begin{figure}
+        \centering
+        \resizebox{0.78\linewidth}{!}{%
+          \begin{tikzpicture}[line cap=round, line join=round]
+            % Define resistor symbol macro (lean & clean)
+            \def\drawresistor{
+              % White background fill to occlude background arrows/lines
+              \fill[white] (-0.38,-0.14) rectangle (0.38,0.14);
+              % Outer box
+              \draw[line width=0.7pt] (-0.38,-0.14) rectangle (0.38,0.14);
+            }
+
+            % Horizontal wire lines
+            \draw[line width=0.7pt] (0.2, 2.5) -- (3.5, 2.5);
+            \draw[line width=0.7pt] (0.2, 1.25) -- (3.5, 1.25);
+
+            % Vertical wire lines - Top black segments
+            \draw[line width=0.7pt] (1.35, 2.75) -- (1.35, 1.5);
+            \draw[line width=0.7pt] (3.15, 2.75) -- (3.15, 1.5);
+
+            % Vertical wire lines - Column 1 (Red arrows / current segments)
+            \draw[line width=0.7pt] (1.35, 1.5) -- (1.35, 0.25);
+            \draw[line width=1.3pt, red, -{Triangle[length=5pt, width=5.5pt]}] (1.35, 1.5) -- (1.35, 0.85);
+            \draw[line width=0.7pt] (1.35, 0.25) -- (1.35, -0.35);
+            \draw[line width=1.3pt, red, -{Triangle[length=5pt, width=5.5pt]}] (1.35, 0.25) -- (1.35, -0.3);
+            \draw[line width=0.7pt] (1.35, -0.35) -- (1.35, -0.55);
+
+            % Vertical wire lines - Column 2 (Red arrows / current segments)
+            \draw[line width=0.7pt] (3.15, 1.5) -- (3.15, 0.25);
+            \draw[line width=1.3pt, red, -{Triangle[length=5pt, width=5.5pt]}] (3.15, 1.5) -- (3.15, 0.85);
+            \draw[line width=0.7pt] (3.15, 0.25) -- (3.15, -0.35);
+            \draw[line width=1.3pt, red, -{Triangle[length=5pt, width=5.5pt]}] (3.15, 0.25) -- (3.15, -0.3);
+            \draw[line width=0.7pt] (3.15, -0.35) -- (3.15, -0.55);
+
+            % Input labels and arrows on the left
+            \node[anchor=east, font=\fontsize{7.5}{9}\sffamily\bfseries, inner sep=1.5pt] (v1lbl) at (-0.15, 2.5) {V\textsubscript{1}};
+            \draw[line width=1.0pt, -{Triangle[length=4.2pt, width=5.5pt]}] (v1lbl.east) -- (0.18, 2.5);
+
+            \node[anchor=east, font=\fontsize{7.5}{9}\sffamily\bfseries, inner sep=1.5pt] (v2lbl) at (-0.15, 1.25) {V\textsubscript{2}};
+            \draw[line width=1.0pt, -{Triangle[length=4.2pt, width=5.5pt]}] (v2lbl.east) -- (0.18, 1.25);
+
+            % Title "Resistors" and dashed pointing arrows
+            \node[anchor=south, font=\fontsize{7.5}{9}\sffamily\bfseries] (memtitle) at (2.05, 3.0) {Resistors};
+
+            % Left pair of dotted arrows
+            \coordinate (left_start) at (1.85, 3.0);
+            \draw[line width=0.5pt, densely dashed, -{Triangle[length=2.8pt, width=2.8pt]}] (left_start) -- (0.95, 2.15);
+            \draw[line width=0.5pt, densely dashed, -{Triangle[length=2.8pt, width=2.8pt]}] (left_start) -- (0.98, 0.9);
+
+            % Right pair of dotted arrows
+            \coordinate (right_start) at (2.6, 3.0);
+            \draw[line width=0.5pt, densely dashed, -{Triangle[length=2.8pt, width=2.8pt]}] (right_start) -- (2.75, 2.25);
+            \draw[line width=0.5pt, densely dashed, -{Triangle[length=2.8pt, width=2.8pt]}] (right_start) -- (2.7, 1.05);
+
+            % Resistor Cell (1,1)
+            \draw[line width=0.7pt] (0.35, 2.5) -- (0.85 - 0.38*0.7071, 2.0 + 0.38*0.7071);
+            \begin{scope}[shift={(0.85, 2.0)}, rotate=-45]
+              \drawresistor
+            \end{scope}
+            \draw[line width=0.7pt] (0.85 + 0.38*0.7071, 2.0 - 0.38*0.7071) -- (1.35, 1.5);
+            \node[font=\fontsize{7.5}{9}\sffamily\bfseries, rotate=-45] at (0.54, 1.82) {G\textsubscript{1,1}};
+
+            % Resistor Cell (1,2)
+            \draw[line width=0.7pt] (2.15, 2.5) -- (2.65 - 0.38*0.7071, 2.0 + 0.38*0.7071);
+            \begin{scope}[shift={(2.65, 2.0)}, rotate=-45]
+              \drawresistor
+            \end{scope}
+            \draw[line width=0.7pt] (2.65 + 0.38*0.7071, 2.0 - 0.38*0.7071) -- (3.15, 1.5);
+            \node[font=\fontsize{7.5}{9}\sffamily\bfseries, rotate=-45] at (2.34, 1.82) {G\textsubscript{1,2}};
+
+            % Resistor Cell (2,1)
+            \draw[line width=0.7pt] (0.35, 1.25) -- (0.85 - 0.38*0.7071, 0.75 + 0.38*0.7071);
+            \begin{scope}[shift={(0.85, 0.75)}, rotate=-45]
+              \drawresistor
+            \end{scope}
+            \draw[line width=0.7pt] (0.85 + 0.38*0.7071, 0.75 - 0.38*0.7071) -- (1.35, 0.25);
+            \node[font=\fontsize{7.5}{9}\sffamily\bfseries, rotate=-45] at (0.54, 0.57) {G\textsubscript{2,1}};
+
+            % Resistor Cell (2,2)
+            \draw[line width=0.7pt] (2.15, 1.25) -- (2.65 - 0.38*0.7071, 0.75 + 0.38*0.7071);
+            \begin{scope}[shift={(2.65, 0.75)}, rotate=-45]
+              \drawresistor
+            \end{scope}
+            \draw[line width=0.7pt] (2.65 + 0.38*0.7071, 0.75 - 0.38*0.7071) -- (3.15, 0.25);
+            \node[font=\fontsize{7.5}{9}\sffamily\bfseries, rotate=-45] at (2.34, 0.57) {G\textsubscript{2,2}};
+
+            % Output formulas at bottom
+            \node[anchor=north, align=center, font=\fontsize{7.5}{9}\sffamily\bfseries] at (0.85, -0.45) {
+              I\textsubscript{1} =\\
+              (V\textsubscript{1} $\times$ G\textsubscript{1,1}) +\\
+              (V\textsubscript{2} $\times$ G\textsubscript{2,1})
+            };
+
+            \node[anchor=north, align=center, font=\fontsize{7.5}{9}\sffamily\bfseries] at (2.95, -0.45) {
+              I\textsubscript{2} =\\
+              (V\textsubscript{1} $\times$ G\textsubscript{1,2}) +\\
+              (V\textsubscript{2} $\times$ G\textsubscript{2,2})
+            };
+          \end{tikzpicture}%
+        }
+        \caption{Crossbar array performing analog VMM \cite{rossenbach2025memristor}}
+      \end{figure}
     \end{column}
   \end{columns}
   \hfill
-  \tiny{Could show the resistors here instead of a memristor}
 \end{frame}
 
-\begin{frame}{The Memristor}
+\begin{frame}{The Memristor \cite{hennen2024synaptogen}}
   \begin{columns}[c]
     \begin{column}{0.52\textwidth}
       \emph{Key Idea}: Program weights by setting the resistance.
@@ -366,20 +474,23 @@
         \setlength{\itemsep}{3pt}
         \item Apply $-V > -V_S \;\rightarrow$ set to low resistance
         \item Apply $\phantom{-}V > \phantom{-}V_R \;\rightarrow$ set to high resistance
-        \item Intermediate states possible
+        \item Intermediate states possible, but difficult to program reliably
         \item State is physically stored (non-volatile memory)
       \end{itemize}
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \centering
-      \includegraphics[width=\linewidth]{figures/memristor_iv_curve.png}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{figures/memristor_iv_curve.png}
+        \caption{I-V characteristic curve of a memristor \cite{hennen2024synaptogen}}
+      \end{figure}
     \end{column}
   \end{columns}
 \end{frame}
 
 
-\begin{frame}{Limitations}
+\begin{frame}{Limitations \cite{rossenbach2025memristor}}
   \begin{itemize}
     \setlength{\itemsep}{3pt}
     \item[] \emph{Programming Limitations}
@@ -395,7 +506,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{(Paired) Memristor Array}
+\begin{frame}{(Paired) Memristor Array \cite{aguirre2024hardware}}
   \begin{columns}[c]
     \begin{column}{0.52\textwidth}
       \begin{itemize}
@@ -417,13 +528,16 @@
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \centering
-      \includegraphics[width=\linewidth]{figures/memristor_array_2.png}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{figures/memristor_array_2.png}
+        \caption{Paired memristor array structure \cite{aguirre2024hardware}}
+      \end{figure}
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Memristor Neural Layers}
+\begin{frame}{Memristor Neural Layers \cite{rossenbach2025memristor}}
   \begin{itemize}
     \setlength{\itemsep}{6pt}
     \item \emph{Tile} the weight matrix:
@@ -441,11 +555,11 @@
 \end{frame}
 
 \begin{frame}{Memristor Neural Layers}
-  \centering
-  \includegraphics[width=0.72\linewidth]{figures/weight_slicing_tiling.png}
-  \vspace{0.2cm}
-
-  {\small \textbf{Figure}: Mapping a weight matrix on memristor arrays \cite{rossenbach2025memristor}.}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.72\linewidth]{figures/weight_slicing_tiling.png}
+    \caption{Mapping a weight matrix on memristor arrays \cite{rossenbach2025memristor}}
+  \end{figure}
 \end{frame}
 
 % \begin{frame}{From Single Memristor to Layer Module: Mapping (TikZ)}
@@ -510,22 +624,7 @@
 %   \end{tikzpicture}
 %   {\small\textbf{Figure}: Exemplary mapping of a 4-bit quantized weight onto 3 memristor arrays.}
 % \end{frame}
-\begin{frame}{Execution of Memristor Layer}
-  \begin{itemize}
-    \setlength{\itemsep}{3pt}
-    \item[\textbf{0.}] Program memristors by applying either a large voltage
-    \item[\textbf{1.}] Normalize input and quantize with the (Digital-Analog Converter) DAC settings
-    \item[\textbf{2.}] Apply input voltage to the cell via simulation function
-    \item[\textbf{3.}] Read current from crossbars
-    \item[\textbf{4.}] Apply ADC (Analog-Digital Converter) conversion back into digital domain
-    \item[\textbf{5.}] Bit-shift and accumulate result
-  \end{itemize}
 
-  \vfill
-
-  \centering
-  \includegraphics[width=0.88\linewidth]{figures/memristor_layer_flowchart.png}
-\end{frame}
 
 \begin{frame}{Quantization}
   \begin{itemize}
@@ -534,13 +633,11 @@
           \begin{itemize}
             \item Need to reduce the precision of the weights $\rightarrow$ quantization.
           \end{itemize}
-    \item Quantization-Aware Training (QAT) peforms better than Post-training Quantization (PTQ), but requires more training time \cite{gholamisurvey}.
+    \item Quantization-Aware Training (QAT) peforms better than Post-training Quantization (PTQ), but requires more training time \cite{gholami2021survey}.
           \begin{itemize}
             \item[$\rightarrow$] High performance gap at low precision
           \end{itemize}
-    \item Symmetric per-tensor QAT, zero-point fixed to 0.
   \end{itemize}
-  \vfill
   \begin{table}[h]
     \centering
     \caption{WER (\%) on TED-LIUMv2 dev, Conformer CTC, 4-gram LM
@@ -556,8 +653,6 @@
       \bottomrule
     \end{tabular}
   \end{table}
-  \vfill
-  \footnotesize{Also need to tell the requirement for observers during training and the memristor programming with observers, scale, ADC, DAC missing. Perhaps need another quantization slide.}
 \end{frame}
 
 \section{Motivation}
@@ -580,74 +675,81 @@
 
 \begin{frame}{Motivation}
   \begin{itemize}
+    \setlength{\itemsep}{2pt}
     \item Performance impact of deploying components of the model on the device?
           \begin{itemize}
             \item Encoder only vs.\ encoder + prediction network vs.\ full model (encoder + prediction network + joint network)
           \end{itemize}
     \item \emph{Tradeoff}: more offloading $\Rightarrow$ more energy efficiency, but also more noise.
   \end{itemize}
-  \centering
-  \begin{tikzpicture}[
-      node distance=1.1cm and 1.6cm,
-      block/.style={
-          rectangle, draw=black!70, thick, align=center, rounded corners=3pt,
-          minimum height=2.6em, minimum width=7.2em, font=\small, fill=blue!10
-        },
-      optblock/.style={
-          rectangle, draw=black!60, thick, dashed, align=center, rounded corners=3pt,
-          minimum height=2.6em, minimum width=7.2em, font=\small, fill=teal!12
-        },
-      io/.style={font=\small, align=center},
-      arrow/.style={->, >=stealth, thick, draw=black!80},
-      optarrow/.style={->, >=stealth, thick, dashed, draw=black!60}
-    ]
+  \begin{figure}
+    \centering
+    \resizebox{!}{0.6\textheight}{%
+      \begin{tikzpicture}[
+          node distance=1.1cm and 1.6cm,
+          block/.style={
+              rectangle, draw=black!70, thick, align=center, rounded corners=3pt,
+              minimum height=2.6em, minimum width=7.2em, font=\small, fill=blue!10
+            },
+          optblock/.style={
+              rectangle, draw=black!60, thick, dashed, align=center, rounded corners=3pt,
+              minimum height=2.6em, minimum width=7.2em, font=\small, fill=teal!12
+            },
+          io/.style={font=\small, align=center},
+          arrow/.style={->, >=stealth, thick, draw=black!80},
+          optarrow/.style={->, >=stealth, thick, dashed, draw=black!60}
+        ]
 
-    % --- Row 1 (Inputs) ---
-    \node[io] (prev_tokens) {Previous Labels\\($y^{<u}_0$)};
-    \node[io, right=3.8cm of prev_tokens] (audio) {Audio Features\\$x_1^T$};
+        % --- Row 1 (Inputs) ---
+        \node[io] (prev_tokens) {Previous Labels\\($y^{<u}_0$)};
+        \node[io, right=3.8cm of prev_tokens] (audio) {Audio Features\\$x_1^T$};
 
-    % --- Row 2 (Prediction Network on left, Encoder on right) ---
-    \node[block, above=1.0cm of prev_tokens, fill=orange!15] (pred) {Prediction Network\\{\footnotesize{(FFNN / LSTM)}}};
-    \node[block, above=1.0cm of audio] (encoder) {Encoder};
+        % --- Row 2 (Prediction Network on left, Encoder on right) ---
+        \node[block, above=1.0cm of prev_tokens, fill=orange!15] (pred) {Prediction Network\\{\footnotesize{(FFNN / LSTM)}}};
+        \node[block, above=1.0cm of audio] (encoder) {Encoder};
 
-    % --- External LM alongside the Encoder (on the right) ---
-    \node[optblock, right=1.2cm of encoder] (extlm) {External LM\\{\footnotesize{(Optional)}}};
+        % --- External LM alongside the Encoder (on the right) ---
+        \node[optblock, right=1.2cm of encoder] (extlm) {External LM\\{\footnotesize{(Optional)}}};
 
-    % --- CTC Output directly above Encoder ---
-    \node[io, above=1.6cm of encoder] (ctc) {\textbf{CTC Output}\\$P(a_t \mid x_1^T)$};
+        % --- CTC Output directly above Encoder ---
+        \node[io, above=1.6cm of encoder] (ctc) {\textbf{CTC Output}\\$P(a_t \mid x_1^T)$};
 
-    % --- Row 3 (Joint Network placed to the left so it doesn't overlap CTC) ---
-    \path (pred) -- (encoder) coordinate[midway] (mid_pred_enc);
-    \node[block, above=1.6cm of pred, fill=purple!15] (joint) {Joint Network};
+        % --- Row 3 (Joint Network placed to the left so it doesn't overlap CTC) ---
+        \path (pred) -- (encoder) coordinate[midway] (mid_pred_enc);
+        \node[block, above=1.6cm of pred, fill=purple!15] (joint) {Joint Network};
 
-    % --- Row 4 (RNN-T Output above Joint) ---
-    \node[io, above=1.0cm of joint] (rnnt) {\textbf{RNN-T Output}\\$P(y_{t,u} \mid x_1^T, y^{<u}_0)$};
+        % --- Row 4 (RNN-T Output above Joint) ---
+        \node[io, above=1.0cm of joint] (rnnt) {\textbf{RNN-T Output}\\$P(y_{t,u} \mid x_1^T, y^{<u}_0)$};
 
-    % --- Connections / Arrows ---
-    % Inputs to networks
-    \draw[arrow] (prev_tokens) -- (pred);
-    \draw[arrow] (audio) -- (encoder);
+        % --- Connections / Arrows ---
+        % Inputs to networks
+        \draw[arrow] (prev_tokens) -- (pred);
+        \draw[arrow] (audio) -- (encoder);
 
-    % Encoder going straight up to CTC Output
-    \draw[arrow] (encoder.north) -- (ctc.south);
+        % Encoder going straight up to CTC Output
+        \draw[arrow] (encoder.north) -- (ctc.south);
 
-    % Pred Net straight up to Joint Network
-    \draw[arrow] (pred.north) -- (joint.south);
+        % Pred Net straight up to Joint Network
+        \draw[arrow] (pred.north) -- (joint.south);
 
-    % Encoder to Joint Network (exit left from encoder, go up, and enter right of joint)
-    \draw[arrow] (encoder.west) -- ++(-0.6cm, 0) |- (joint.east);
+        % Encoder to Joint Network (exit left from encoder, go up, and enter right of joint)
+        \draw[arrow] (encoder.west) -- ++(-0.6cm, 0) |- (joint.east);
 
-    % Previous labels to External LM (routing along the bottom)
-    \draw[optarrow] (prev_tokens.south) -- ++(0, -0.45cm) -| (extlm.south);
+        % Previous labels to External LM (routing along the bottom)
+        \draw[optarrow] (prev_tokens.south) -- ++(0, -0.45cm) -| (extlm.south);
 
-    % External LM to CTC Output and RNN-T Output
-    \draw[optarrow] (extlm.north) |- (ctc.east);
-    \draw[optarrow] (extlm.north) |- ([yshift=-0.1cm]rnnt.east);
+        % External LM to CTC Output and RNN-T Output
+        \draw[optarrow] (extlm.north) |- (ctc.east);
+        \draw[optarrow] (extlm.north) |- ([yshift=-0.1cm]rnnt.east);
 
-    % Joint to RNN-T output
-    \draw[arrow] (joint) -- (rnnt);
+        % Joint to RNN-T output
+        \draw[arrow] (joint) -- (rnnt);
 
-  \end{tikzpicture}
+      \end{tikzpicture}%
+    }
+    \vspace{-2pt}
+    \caption{CTC vs.\ Transducer architecture components}
+  \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -662,10 +764,10 @@
     \item Model types:
           \begin{enumerate}
             \item \emph{CTC} \cite{graves2006connectionist}: encoder only.
-            \item \emph{FFNN-transducer}: prediction network is a 2-layer feed-forward
-                  net (640-dim) over the previous-label embedding.
+            \item \emph{FFNN-transducer} \cite{graves2012sequence}: prediction network is a 2-layer feed-forward
+                  net (640-dim) over the previous-label embedding; monotonic alignments \cite{tripathi2019monotonic}.
             \item \emph{Full-context transducer} \cite{graves2012sequence}: LSTM
-                  prediction network.
+                  prediction network; monotonic alignments \cite{tripathi2019monotonic}.
           \end{enumerate}
     \item Quantization: QAT, per-tensor symmetric, 8 and 4-bit weights, 8-bit activations; zero-point 0.
     \item Stages: (1) Full precision baseline $\to$ (2) QAT (fake quantization) $\to$
@@ -681,11 +783,11 @@
     \subtable[Baseline]{
       \begin{tabular}{l c c c}
         \toprule
-        & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+                       & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
         \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-        \textbf{Model} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+        \textbf{Model} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
         \midrule
-        CTC & 7.1 & 5.0 & 5.2 \\
+        CTC            & 7.1                                   & 5.0           & 5.2             \\
         \bottomrule
       \end{tabular}
     }
@@ -699,12 +801,12 @@
         \subtable[QAT]{
           \begin{tabular}{l c c c}
             \toprule
-            & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+                          & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
             \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-            \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \textbf{Bits} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
             \midrule
-            8 & 7.3 & 5.2 & 5.3 \\
-            4 & 8.3 & 5.4 & 5.7 \\
+            8             & 7.3                                   & 5.2           & 5.3             \\
+            4             & 8.3                                   & 5.4           & 5.7             \\
             \bottomrule
           \end{tabular}
         }
@@ -715,12 +817,12 @@
         \subtable[Memristor Simulation]{
           \begin{tabular}{l c c c}
             \toprule
-            & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+                          & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
             \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-            \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \textbf{Bits} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
             \midrule
-            8 & $13.53 \pm 0.37$ & -- & $6.67 \pm 0.09$ \\
-            4 & $11.85 \pm 0.18$ & -- & $6.77 \pm 0.12$ \\
+            8             & $13.53 \pm 0.37$                      & --            & $6.67 \pm 0.09$ \\
+            4             & $11.85 \pm 0.18$                      & --            & $6.77 \pm 0.12$ \\
             \bottomrule
           \end{tabular}
         }
@@ -737,11 +839,11 @@
     \subtable[Baseline]{
       \begin{tabular}{l c c c}
         \toprule
-        & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+                        & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
         \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-        \textbf{Model} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+        \textbf{Model}  & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
         \midrule
-        FFNN-Transducer & -- & -- & -- \\
+        FFNN-Transducer & --                                    & --            & --              \\
         \bottomrule
       \end{tabular}
     }
@@ -756,17 +858,17 @@
         \subtable[QAT]{
           \begin{tabular}{c c c c c c c}
             \toprule
-            \multicolumn{3}{c}{\textbf{Quantized}} & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \multicolumn{3}{c}{\textbf{Quantized}} &                     & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                                                    \\
             \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
-            \textbf{Encoder} & \textbf{Prediction} & \textbf{Joiner} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \textbf{Encoder}                       & \textbf{Prediction} & \textbf{Joiner}                       & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
             \midrule
-            \checkmark & -- & -- & 8 & -- & -- & -- \\
-            \checkmark & \checkmark & -- & 8 & -- & -- & -- \\
-            \checkmark & \checkmark & \checkmark & 8 & -- & -- & -- \\
+            \checkmark                             & --                  & --                                    & 8             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & --                                    & 8             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & \checkmark                            & 8             & --             & --            & --              \\
             \midrule
-            \checkmark & -- & -- & 4 & -- & -- & -- \\
-            \checkmark & \checkmark & -- & 4 & -- & -- & -- \\
-            \checkmark & \checkmark & \checkmark & 4 & -- & -- & -- \\
+            \checkmark                             & --                  & --                                    & 4             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & --                                    & 4             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & \checkmark                            & 4             & --             & --            & --              \\
             \bottomrule
           \end{tabular}
         }
@@ -777,17 +879,17 @@
         \subtable[Memristor Simulation]{
           \begin{tabular}{c c c c c c c}
             \toprule
-            \multicolumn{3}{c}{\textbf{Quantized}} & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \multicolumn{3}{c}{\textbf{Quantized}} &                     & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                                                    \\
             \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
-            \textbf{Encoder} & \textbf{Prediction} & \textbf{Joiner} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \textbf{Encoder}                       & \textbf{Prediction} & \textbf{Joiner}                       & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
             \midrule
-            \checkmark & -- & -- & 8 & -- & -- & -- \\
-            \checkmark & \checkmark & -- & 8 & -- & -- & -- \\
-            \checkmark & \checkmark & \checkmark & 8 & -- & -- & -- \\
+            \checkmark                             & --                  & --                                    & 8             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & --                                    & 8             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & \checkmark                            & 8             & --             & --            & --              \\
             \midrule
-            \checkmark & -- & -- & 4 & -- & -- & -- \\
-            \checkmark & \checkmark & -- & 4 & -- & -- & -- \\
-            \checkmark & \checkmark & \checkmark & 4 & -- & -- & -- \\
+            \checkmark                             & --                  & --                                    & 4             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & --                                    & 4             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & \checkmark                            & 4             & --             & --            & --              \\
             \bottomrule
           \end{tabular}
         }
@@ -809,15 +911,15 @@
         \subtable[QAT]{
           \begin{tabular}{l c c c c}
             \toprule
-            & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+                                     &               & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
             \cmidrule(lr){3-4} \cmidrule(lr){5-5}
-            \textbf{Training Scheme} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \textbf{Training Scheme} & \textbf{Bits} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
             \midrule
-            Fine-tuned & 8 & -- & -- & -- \\
-            From Scratch & 8 & -- & -- & -- \\
+            Fine-tuned               & 8             & --                                    & --            & --              \\
+            From Scratch             & 8             & --                                    & --            & --              \\
             \midrule
-            Fine-tuned & 4 & -- & -- & -- \\
-            From Scratch & 4 & -- & -- & -- \\
+            Fine-tuned               & 4             & --                                    & --            & --              \\
+            From Scratch             & 4             & --                                    & --            & --              \\
             \bottomrule
           \end{tabular}
         }
@@ -829,15 +931,15 @@
         \subtable[Memristor Simulation]{
           \begin{tabular}{l c c c c}
             \toprule
-            & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+                                     &               & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
             \cmidrule(lr){3-4} \cmidrule(lr){5-5}
-            \textbf{Training Scheme} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \textbf{Training Scheme} & \textbf{Bits} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
             \midrule
-            Fine-tuned & 8 & -- & -- & -- \\
-            From Scratch & 8 & -- & -- & -- \\
+            Fine-tuned               & 8             & --                                    & --            & --              \\
+            From Scratch             & 8             & --                                    & --            & --              \\
             \midrule
-            Fine-tuned & 4 & -- & -- & -- \\
-            From Scratch & 4 & -- & -- & -- \\
+            Fine-tuned               & 4             & --                                    & --            & --              \\
+            From Scratch             & 4             & --                                    & --            & --              \\
             \bottomrule
           \end{tabular}
         }
@@ -854,18 +956,17 @@
     \subtable[Baseline]{
       \begin{tabular}{l c c c}
         \toprule
-        & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+                                & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
         \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-        \textbf{Model} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+        \textbf{Model}          & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
         \midrule
-        Full-Context Transducer & -- & -- & -- \\
+        Full-Context Transducer & --                                    & --            & --              \\
         \bottomrule
       \end{tabular}
     }
 
     \vspace{20pt}
 
-    % 2. Side-by-side QAT and Memristor Tables
     \setlength{\tabcolsep}{3pt}
     \begin{columns}[T]
       \begin{column}{0.49\textwidth}
@@ -873,17 +974,17 @@
         \subtable[QAT]{
           \begin{tabular}{c c c c c c c}
             \toprule
-            \multicolumn{3}{c}{\textbf{Quantized}} & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \multicolumn{3}{c}{\textbf{Quantized}} &                     & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                                                    \\
             \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
-            \textbf{Encoder} & \textbf{Prediction} & \textbf{Joiner} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \textbf{Encoder}                       & \textbf{Prediction} & \textbf{Joiner}                       & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
             \midrule
-            \checkmark & -- & -- & 8 & -- & -- & -- \\
-            \checkmark & \checkmark & -- & 8 & -- & -- & -- \\
-            \checkmark & \checkmark & \checkmark & 8 & -- & -- & -- \\
+            \checkmark                             & --                  & --                                    & 8             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & --                                    & 8             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & \checkmark                            & 8             & --             & --            & --              \\
             \midrule
-            \checkmark & -- & -- & 4 & -- & -- & -- \\
-            \checkmark & \checkmark & -- & 4 & -- & -- & -- \\
-            \checkmark & \checkmark & \checkmark & 4 & -- & -- & -- \\
+            \checkmark                             & --                  & --                                    & 4             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & --                                    & 4             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & \checkmark                            & 4             & --             & --            & --              \\
             \bottomrule
           \end{tabular}
         }
@@ -894,17 +995,17 @@
         \subtable[Memristor Simulation]{
           \begin{tabular}{c c c c c c c}
             \toprule
-            \multicolumn{3}{c}{\textbf{Quantized}} & & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree} \\
+            \multicolumn{3}{c}{\textbf{Quantized}} &                     & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                                                    \\
             \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
-            \textbf{Encoder} & \textbf{Prediction} & \textbf{Joiner} & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
+            \textbf{Encoder}                       & \textbf{Prediction} & \textbf{Joiner}                       & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
             \midrule
-            \checkmark & -- & -- & 8 & -- & -- & -- \\
-            \checkmark & \checkmark & -- & 8 & -- & -- & -- \\
-            \checkmark & \checkmark & \checkmark & 8 & -- & -- & -- \\
+            \checkmark                             & --                  & --                                    & 8             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & --                                    & 8             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & \checkmark                            & 8             & --             & --            & --              \\
             \midrule
-            \checkmark & -- & -- & 4 & -- & -- & -- \\
-            \checkmark & \checkmark & -- & 4 & -- & -- & -- \\
-            \checkmark & \checkmark & \checkmark & 4 & -- & -- & -- \\
+            \checkmark                             & --                  & --                                    & 4             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & --                                    & 4             & --             & --            & --              \\
+            \checkmark                             & \checkmark          & \checkmark                            & 4             & --             & --            & --              \\
             \bottomrule
           \end{tabular}
         }
@@ -928,12 +1029,12 @@
             \toprule
             \textbf{ILM Scale} & \textbf{ELM Scale} & \textbf{WER (\%)} \\
             \midrule
-            0.1 & 0.2 & -- \\
-            0.2 & 0.3 & -- \\
+            0.1                & 0.2                & --                \\
+            0.2                & 0.3                & --                \\
             \rowcolor{i6blueShaded}
-            \textbf{0.2} & \textbf{0.4} & \textbf{--} \\
-            0.3 & 0.4 & -- \\
-            0.4 & 0.5 & -- \\
+            \textbf{0.2}       & \textbf{0.4}       & \textbf{--}       \\
+            0.3                & 0.4                & --                \\
+            0.4                & 0.5                & --                \\
             \bottomrule
           \end{tabular}
         }
@@ -947,12 +1048,12 @@
             \toprule
             \textbf{ILM Scale} & \textbf{ELM Scale} & \textbf{WER (\%)} \\
             \midrule
-            0.1 & 0.2 & -- \\
-            0.2 & 0.3 & -- \\
-            0.2 & 0.4 & -- \\
+            0.1                & 0.2                & --                \\
+            0.2                & 0.3                & --                \\
+            0.2                & 0.4                & --                \\
             \rowcolor{i6blueShaded}
-            \textbf{0.3} & \textbf{0.4} & \textbf{--} \\
-            0.4 & 0.5 & -- \\
+            \textbf{0.3}       & \textbf{0.4}       & \textbf{--}       \\
+            0.4                & 0.5                & --                \\
             \bottomrule
           \end{tabular}
         }
@@ -966,12 +1067,12 @@
             \toprule
             \textbf{ILM Scale} & \textbf{ELM Scale} & \textbf{WER (\%)} \\
             \midrule
-            0.1 & 0.2 & -- \\
-            0.2 & 0.3 & -- \\
-            0.2 & 0.4 & -- \\
+            0.1                & 0.2                & --                \\
+            0.2                & 0.3                & --                \\
+            0.2                & 0.4                & --                \\
             \rowcolor{i6blueShaded}
-            \textbf{0.3} & \textbf{0.4} & \textbf{--} \\
-            0.4 & 0.5 & -- \\
+            \textbf{0.3}       & \textbf{0.4}       & \textbf{--}       \\
+            0.4                & 0.5                & --                \\
             \bottomrule
           \end{tabular}
         }
@@ -984,63 +1085,68 @@
   \scriptsize \textbf{ILM}: Internal Language Model, \textbf{ELM}: External Language Model
 \end{frame}
 
-\begin{frame}{RTF - Memristor Simulation}
-  \begin{table}
-    \caption{Real-Time Factor (RTF) on simulated memristor hardware (8-bit quantization, dev-other)}
-    \vspace{4pt}
-    \footnotesize
-    \subtable[Standard Evaluation]{
-      \begin{tabular}{l c}
-        \toprule
-        \textbf{Model} & \textbf{RTF (Tree 4-Gram)} \\
-        \midrule
-        CTC & -- \\
-        FFNN-Transducer & -- \\
-        Full-Context Transducer & -- \\
-        \bottomrule
-      \end{tabular}
-    }
-
-    \vspace{14pt}
-
-    \subtable[Optimizations under relaxed simulation assumptions]{
-      \begin{tabular}{l l c}
-        \toprule
-        \textbf{Model} & \textbf{Caching Scheme} & \textbf{RTF (Tree 4-Gram)} \\
-        \midrule
-        FFNN-Transducer & Prediction network output cached & -- \\
-        Full-Context Transducer & LSTM input layer cached & -- \\
-        \bottomrule
-      \end{tabular}
-    }
-  \end{table}
-
-  \vfill
-  \raggedright
-  \scriptsize \textbf{RTF}: Real-Time Factor ($\text{RTF} < 1.0$ indicates real-time processing).
-\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Future Work}
-\begin{frame}{Future Work}
+
+\begin{frame}{Future Work: Error Analysis}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
-    \item \emph{Error Analysis}: Which error types does device noise introduce or amplify?
-    \begin{itemize}
-      \item Substitutions, insertions, deletions; 
-      \item Worse degradation across certain search paradigms (lexicon-free)
-    \end{itemize}
-    \item \emph{Countermeasures}: 
-    \begin{itemize}
-      \item Denoising (e.g.\ MLP), 
-      \item Tuning search parameters, LM parameters, softmax temperature etc.
-    \end{itemize}
-    \item Fine-tuning of the (quantized) model
-    \begin{itemize}
-      \item Introduction of device-like noise during QAT training.
-    \end{itemize}
-    \item \emph{Generalization}: Test models with different datasets and conditions.
+    \item \emph{Error Analysis}:
+          \begin{itemize}
+            \item Substitutions vs.\ insertions vs.\ deletions.
+                  \begin{itemize}
+                    \item[$\rightarrow$] Why does lexicon-free decoding degrade faster than tree search?
+                  \end{itemize}
+            \item Acoustic posterior distortion and score calibration with external LMs.
+          \end{itemize}
+    \item \emph{Generalization}:
+          \begin{itemize}
+            \item Evaluation and training on larger/out-of-domain datasets.
+          \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Future Work: Search Spaces}
+  \begin{itemize}
+    \setlength{\itemsep}{10pt}
+    \item \emph{Decoding Parameter Adjustments}:
+          \begin{itemize}
+            \item Explore penalties for blank emissions.
+            \item Tune softmax temperature to sharpen or soften posterior peaks under noise.
+          \end{itemize}
+    \item \emph{Search Space vs.\ Model \& QAT Level}:
+          \begin{itemize}
+            \item Current search space is large $\rightarrow$ hurts Real-Time Factor (RTF).
+            \item Study the impact of restricing the search space on WER and RTF.
+                  \begin{itemize}
+                    \item[$\rightarrow$] How many more hypotheses are needed for on-device vs 4-bit vs.\ 8-bit vs.\ FP32 runs?
+                    \item[$\rightarrow$] Compare hypothesis expansion across CTC and Transducer variants.
+                  \end{itemize}
+          \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Future Work: Robust Training \& Countermeasures}
+  \begin{itemize}
+    \setlength{\itemsep}{10pt}
+    \item \emph{Noise-Aware QAT}:
+          \begin{itemize}
+            \item Inject simulated crossbar conductance noise directly into training forward pass.
+          \end{itemize}
+    \item \emph{Selective Layer Mapping}:
+          \begin{itemize}
+            \item Deal with noise in noise-sensitive components (e.g., joint network).
+          \end{itemize}
+    \item \emph{Denoising \& Output Compensation}:
+          \begin{itemize}
+            \item Post-processing to correct analog inaccuracies.
+                  \begin{itemize}
+                    \item[$\rightarrow$] Train a small neural network to denoise the memristor output.
+                    \item[$\rightarrow$] Use a small calibration dataset to learn a linear transformation to correct the output.
+                  \end{itemize}
+          \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -1089,213 +1195,215 @@
 
 \backupend
 
-\end{document}\begin{frame}{From Single Memristor to Layer Module: Mapping}
-  \centering
-  \begin{tikzpicture}[
-      scale=0.96,
-      arr/.style={->, >=stealth, thick, draw=black!75},
-      proj/.style={dashed, draw=black!55, thick}
-    ]
-    % 1. Full Weight Matrix (Top-Left)
-    \begin{scope}[shift={(-4.4, 0.9)}]
-      \draw[thick, fill=blue!5]
-      (-2.2, -1.1) -- (2.2, -1.1) -- (3.5, 1.1) -- (-0.9, 1.1) -- cycle;
+% \begin{frame}{From Single Memristor to Layer Module: Mapping}
+%   \centering
+%   \begin{tikzpicture}[
+%       scale=0.96,
+%       arr/.style={->, >=stealth, thick, draw=black!75},
+%       proj/.style={dashed, draw=black!55, thick}
+%     ]
+%     % 1. Full Weight Matrix (Top-Left)
+%     \begin{scope}[shift={(-4.4, 0.9)}]
+%       \draw[thick, fill=blue!5]
+%       (-2.2, -1.1) -- (2.2, -1.1) -- (3.5, 1.1) -- (-0.9, 1.1) -- cycle;
 
-      % Horizontal grid lines (4 rows)
-      \draw[thin, black!30] (-1.9, -0.55) -- (2.5, -0.55);
-      \draw[thin, black!30] (-1.55, 0.0) -- (2.85, 0.0);
-      \draw[thin, black!30] (-1.25, 0.55) -- (3.15, 0.55);
+%       % Horizontal grid lines (4 rows)
+%       \draw[thin, black!30] (-1.9, -0.55) -- (2.5, -0.55);
+%       \draw[thin, black!30] (-1.55, 0.0) -- (2.85, 0.0);
+%       \draw[thin, black!30] (-1.25, 0.55) -- (3.15, 0.55);
 
-      % Vertical grid lines (4 columns)
-      \draw[thin, black!30] (-1.1, -1.1) -- (0.2, 1.1);
-      \draw[thin, black!30] (0.0, -1.1) -- (1.3, 1.1);
-      \draw[thin, black!30] (1.1, -1.1) -- (2.4, 1.1);
+%       % Vertical grid lines (4 columns)
+%       \draw[thin, black!30] (-1.1, -1.1) -- (0.2, 1.1);
+%       \draw[thin, black!30] (0.0, -1.1) -- (1.3, 1.1);
+%       \draw[thin, black!30] (1.1, -1.1) -- (2.4, 1.1);
 
-      % Matrix values
-      \node at (-0.9, 0.825) {\footnotesize -6};
-      \node at (0.2, 0.825)  {\footnotesize -5};
-      \node at (1.3, 0.825)  {\footnotesize 0};
-      \node at (2.4, 0.825)  {\footnotesize 7};
+%       % Matrix values
+%       \node at (-0.9, 0.825) {\footnotesize -6};
+%       \node at (0.2, 0.825)  {\footnotesize -5};
+%       \node at (1.3, 0.825)  {\footnotesize 0};
+%       \node at (2.4, 0.825)  {\footnotesize 7};
 
-      \node at (-1.2, 0.275) {\footnotesize 1};
-      \node at (-0.1, 0.275) {\footnotesize -1};
-      \node at (1.0, 0.275)  {\footnotesize 5};
-      \node at (2.1, 0.275)  {\footnotesize -2};
+%       \node at (-1.2, 0.275) {\footnotesize 1};
+%       \node at (-0.1, 0.275) {\footnotesize -1};
+%       \node at (1.0, 0.275)  {\footnotesize 5};
+%       \node at (2.1, 0.275)  {\footnotesize -2};
 
-      \node at (-1.5, -0.275) {\footnotesize -3};
-      \node at (-0.4, -0.275) {\footnotesize 4};
-      \node at (0.7, -0.275)  {\footnotesize -2};
-      \node at (1.8, -0.275)  {\footnotesize 3};
+%       \node at (-1.5, -0.275) {\footnotesize -3};
+%       \node at (-0.4, -0.275) {\footnotesize 4};
+%       \node at (0.7, -0.275)  {\footnotesize -2};
+%       \node at (1.8, -0.275)  {\footnotesize 3};
 
-      \node at (-1.8, -0.825) {\footnotesize -7};
-      \node at (-0.7, -0.825) {\footnotesize 6};
-      \node at (0.4, -0.825)  {\footnotesize 0};
-      \node at (1.5, -0.825)  {\footnotesize -1};
+%       \node at (-1.8, -0.825) {\footnotesize -7};
+%       \node at (-0.7, -0.825) {\footnotesize 6};
+%       \node at (0.4, -0.825)  {\footnotesize 0};
+%       \node at (1.5, -0.825)  {\footnotesize -1};
 
-      % Highlight tile (2x2) at top-right
-      \draw[very thick, draw=i6blue, fill=blue!15, fill opacity=0.35]
-      (0.0, 0.0) -- (2.85, 0.0) -- (3.5, 1.1) -- (0.65, 1.1) -- cycle;
+%       % Highlight tile (2x2) at top-right
+%       \draw[very thick, draw=i6blue, fill=blue!15, fill opacity=0.35]
+%       (0.0, 0.0) -- (2.85, 0.0) -- (3.5, 1.1) -- (0.65, 1.1) -- cycle;
 
-      \coordinate (M00) at (-4.4 + 0.0, 0.9 + 0.0);
-      \coordinate (M10) at (-4.4 + 2.85, 0.9 + 0.0);
-      \coordinate (M01) at (-4.4 + 0.65, 0.9 + 1.1);
-      \coordinate (M11) at (-4.4 + 3.5, 0.9 + 1.1);
-    \end{scope}
+%       \coordinate (M00) at (-4.4 + 0.0, 0.9 + 0.0);
+%       \coordinate (M10) at (-4.4 + 2.85, 0.9 + 0.0);
+%       \coordinate (M01) at (-4.4 + 0.65, 0.9 + 1.1);
+%       \coordinate (M11) at (-4.4 + 3.5, 0.9 + 1.1);
+%     \end{scope}
 
-    % 2. Tiled Submatrix (Middle-Bottom)
-    \begin{scope}[shift={(-0.6, -1.8)}]
-      \draw[very thick, draw=i6blue, fill=white]
-      (0, 0) -- (2.6, 0) -- (3.9, 1.4) -- (1.3, 1.4) -- cycle;
+%     % 2. Tiled Submatrix (Middle-Bottom)
+%     \begin{scope}[shift={(-0.6, -1.8)}]
+%       \draw[very thick, draw=i6blue, fill=white]
+%       (0, 0) -- (2.6, 0) -- (3.9, 1.4) -- (1.3, 1.4) -- cycle;
 
-      % Internal split
-      \draw[thick, black!40] (1.3, 0) -- (2.6, 1.4);
-      \draw[thick, black!40] (0.65, 0.7) -- (3.25, 0.7);
+%       % Internal split
+%       \draw[thick, black!40] (1.3, 0) -- (2.6, 1.4);
+%       \draw[thick, black!40] (0.65, 0.7) -- (3.25, 0.7);
 
-      % Values in 2x2 cells
-      \node[font=\Large] at (1.65, 1.05) {0};
-      \node[font=\Large] at (2.95, 1.05) {7};
-      \node[font=\Large, text=red!80!black] at (0.95, 0.35) {\textbf{5}};
-      \node[font=\Large] at (2.25, 0.35) {-2};
+%       % Values in 2x2 cells
+%       \node[font=\Large] at (1.65, 1.05) {0};
+%       \node[font=\Large] at (2.95, 1.05) {7};
+%       \node[font=\Large, text=red!80!black] at (0.95, 0.35) {\textbf{5}};
+%       \node[font=\Large] at (2.25, 0.35) {-2};
 
-      \coordinate (T00) at (-0.6 + 0.0, -1.8 + 0.0);
-      \coordinate (T10) at (-0.6 + 2.6, -1.8 + 0.0);
-      \coordinate (T01) at (-0.6 + 1.3, -1.8 + 1.4);
-      \coordinate (T11) at (-0.6 + 3.9, -1.8 + 1.4);
-      \coordinate (TRight) at (-0.6 + 3.25, -1.8 + 0.7);
-    \end{scope}
+%       \coordinate (T00) at (-0.6 + 0.0, -1.8 + 0.0);
+%       \coordinate (T10) at (-0.6 + 2.6, -1.8 + 0.0);
+%       \coordinate (T01) at (-0.6 + 1.3, -1.8 + 1.4);
+%       \coordinate (T11) at (-0.6 + 3.9, -1.8 + 1.4);
+%       \coordinate (TRight) at (-0.6 + 3.25, -1.8 + 0.7);
+%     \end{scope}
 
-    % Projections from matrix tile to 2x2 tile
-    \draw[proj] (M00) -- (T00);
-    \draw[proj] (M10) -- (T10);
-    \draw[proj] (M01) -- (T01);
-    \draw[proj] (M11) -- (T11);
+%     % Projections from matrix tile to 2x2 tile
+%     \draw[proj] (M00) -- (T00);
+%     \draw[proj] (M10) -- (T10);
+%     \draw[proj] (M01) -- (T01);
+%     \draw[proj] (M11) -- (T11);
 
-    % 3. Sliced Crossbar Arrays (Stacked on Right: x4, x2, x1)
-    % Slice x4 (Top-Right)
-    \begin{scope}[shift={(3.6, 1.3)}]
-      \draw[thick, fill=white]
-      (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
+%     % 3. Sliced Crossbar Arrays (Stacked on Right: x4, x2, x1)
+%     % Slice x4 (Top-Right)
+%     \begin{scope}[shift={(3.6, 1.3)}]
+%       \draw[thick, fill=white]
+%       (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
 
-      % Vertical grid lines (4 columns)
-      \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
-      \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
-      \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
-      % Horizontal grid line
-      \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
+%       % Vertical grid lines (4 columns)
+%       \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
+%       \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
+%       \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
+%       % Horizontal grid line
+%       \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
 
-      % Column headers +/-
-      \node[font=\footnotesize] at (1.1, 1.25) {$+$};
-      \node[font=\footnotesize] at (2.0, 1.25) {hBc$};
-      \node[font=\footnotesize] at (2.9, 1.25) {$+$};
-      \node[font=\footnotesize] at (3.8, 1.25) {hBc$};
+%       % Column headers +/-
+%       \node[font=\footnotesize] at (1.1, 1.25) {$+$};
+%       \node[font=\footnotesize] at (2.0, 1.25) {$-$};
+%       \node[font=\footnotesize] at (2.9, 1.25) {$+$};
+%       \node[font=\footnotesize] at (3.8, 1.25) {$-$};
 
-      % Binary values
-      \node[font=\normalsize] at (1.1, 0.75) {0};
-      \node[font=\normalsize] at (2.0, 0.75) {0};
-      \node[font=\normalsize] at (2.9, 0.75) {1};
-      \node[font=\normalsize] at (3.8, 0.75) {0};
+%       % Binary values
+%       \node[font=\normalsize] at (1.1, 0.75) {0};
+%       \node[font=\normalsize] at (2.0, 0.75) {0};
+%       \node[font=\normalsize] at (2.9, 0.75) {1};
+%       \node[font=\normalsize] at (3.8, 0.75) {0};
 
-      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}};
-      \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
-      \node[font=\normalsize] at (2.45, 0.25) {0};
-      \node[font=\normalsize] at (3.35, 0.25) {0};
+%       \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}};
+%       \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
+%       \node[font=\normalsize] at (2.45, 0.25) {0};
+%       \node[font=\normalsize] at (3.35, 0.25) {0};
 
-      \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 4$};
-      \coordinate (S4Left) at (3.6 + 0.45, 1.3 + 0.5);
-    \end{scope}
+%       \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 4$};
+%       \coordinate (S4Left) at (3.6 + 0.45, 1.3 + 0.5);
+%     \end{scope}
 
-    % Slice x2 (Middle-Right)
-    \begin{scope}[shift={(3.6, -0.3)}]
-      \draw[thick, fill=white]
-      (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
+%     % Slice x2 (Middle-Right)
+%     \begin{scope}[shift={(3.6, -0.3)}]
+%       \draw[thick, fill=white]
+%       (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
 
-      \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
-      \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
-      \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
-      \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
+%       \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
+%       \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
+%       \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
+%       \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
 
-      \node[font=\footnotesize] at (1.1, 1.25) {$+$};
-      \node[font=\footnotesize] at (2.0, 1.25) {hBc$};
-      \node[font=\footnotesize] at (2.9, 1.25) {$+$};
-      \node[font=\footnotesize] at (3.8, 1.25) {hBc$};
+%       \node[font=\footnotesize] at (1.1, 1.25) {$+$};
+%       \node[font=\footnotesize] at (2.0, 1.25) {$-$};
+%       \node[font=\footnotesize] at (2.9, 1.25) {$+$};
+%       \node[font=\footnotesize] at (3.8, 1.25) {$-$};
 
-      \node[font=\normalsize] at (1.1, 0.75) {0};
-      \node[font=\normalsize] at (2.0, 0.75) {0};
-      \node[font=\normalsize] at (2.9, 0.75) {1};
-      \node[font=\normalsize] at (3.8, 0.75) {0};
+%       \node[font=\normalsize] at (1.1, 0.75) {0};
+%       \node[font=\normalsize] at (2.0, 0.75) {0};
+%       \node[font=\normalsize] at (2.9, 0.75) {1};
+%       \node[font=\normalsize] at (3.8, 0.75) {0};
 
-      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{0}};
-      \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
-      \node[font=\normalsize] at (2.45, 0.25) {0};
-      \node[font=\normalsize] at (3.35, 0.25) {1};
+%       \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{0}};
+%       \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
+%       \node[font=\normalsize] at (2.45, 0.25) {0};
+%       \node[font=\normalsize] at (3.35, 0.25) {1};
 
-      \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 2$};
-      \coordinate (S2Left) at (3.6 + 0.45, -0.3 + 0.5);
-    \end{scope}
+%       \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 2$};
+%       \coordinate (S2Left) at (3.6 + 0.45, -0.3 + 0.5);
+%     \end{scope}
 
-    % Slice x1 (Bottom-Right)
-    \begin{scope}[shift={(3.6, -1.9)}]
-      \draw[thick, fill=white]
-      (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
+%     % Slice x1 (Bottom-Right)
+%     \begin{scope}[shift={(3.6, -1.9)}]
+%       \draw[thick, fill=white]
+%       (0, 0) -- (3.6, 0) -- (4.5, 1.0) -- (0.9, 1.0) -- cycle;
 
-      \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
-      \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
-      \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
-      \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
+%       \draw[thin, black!35] (0.9, 0) -- (1.8, 1.0);
+%       \draw[thin, black!35] (1.8, 0) -- (2.7, 1.0);
+%       \draw[thin, black!35] (2.7, 0) -- (3.6, 1.0);
+%       \draw[thin, black!35] (0.45, 0.5) -- (4.05, 0.5);
 
-      \node[font=\footnotesize] at (1.1, 1.25) {$+$};
-      \node[font=\footnotesize] at (2.0, 1.25) {hBc$};
-      \node[font=\footnotesize] at (2.9, 1.25) {$+$};
-      \node[font=\footnotesize] at (3.8, 1.25) {hBc$};
+%       \node[font=\footnotesize] at (1.1, 1.25) {$+$};
+%       \node[font=\footnotesize] at (2.0, 1.25) {$-$};
+%       \node[font=\footnotesize] at (2.9, 1.25) {$+$};
+%       \node[font=\footnotesize] at (3.8, 1.25) {$-$};
 
-      \node[font=\normalsize] at (1.1, 0.75) {0};
-      \node[font=\normalsize] at (2.0, 0.75) {0};
-      \node[font=\normalsize] at (2.9, 0.75) {1};
-      \node[font=\normalsize] at (3.8, 0.75) {0};
+%       \node[font=\normalsize] at (1.1, 0.75) {0};
+%       \node[font=\normalsize] at (2.0, 0.75) {0};
+%       \node[font=\normalsize] at (2.9, 0.75) {1};
+%       \node[font=\normalsize] at (3.8, 0.75) {0};
 
-      \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}};
-      \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
-      \node[font=\normalsize] at (2.45, 0.25) {0};
-      \node[font=\normalsize] at (3.35, 0.25) {0};
+%       \node[font=\normalsize, text=red!80!black] at (0.65, 0.25) {\textbf{1}};
+%       \node[font=\normalsize, text=red!80!black] at (1.55, 0.25) {\textbf{0}};
+%       \node[font=\normalsize] at (2.45, 0.25) {0};
+%       \node[font=\normalsize] at (3.35, 0.25) {0};
 
-      \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 1$};
-      \coordinate (S1Left) at (3.6 + 0.45, -1.9 + 0.5);
+%       \node[right=4pt, font=\normalsize\bfseries] at (4.3, 0.5) {$\times 1$};
+%       \coordinate (S1Left) at (3.6 + 0.45, -1.9 + 0.5);
 
-      % Vin & Iout
-      \node[left=3pt, font=\footnotesize] at (0.2, 0.25) {{\text{in}} \rightarrow$};
-      \node[below=3pt, font=\footnotesize] at (1.8, 0.0) {$\downarrow I_{\text{out}}$};
-    \end{scope}
+%       % Vin & Iout
+%       \node[left=3pt, font=\footnotesize] at (0.2, 0.25) {$V_{\text{in}} \rightarrow$};
+%       \node[below=3pt, font=\footnotesize] at (1.8, 0.0) {$\downarrow I_{\text{out}}$};
+%     \end{scope}
 
-    % Slicing arrows
-    \draw[arr] (TRight) -- (S4Left);
-    \draw[arr] (TRight) -- (S2Left);
-    \draw[arr] (TRight) -- (S1Left);
+%     % Slicing arrows
+%     \draw[arr] (TRight) -- (S4Left);
+%     \draw[arr] (TRight) -- (S2Left);
+%     \draw[arr] (TRight) -- (S1Left);
 
-    % Labels placed in clear space
-    \node[font=\Large\itshape, text=i6blue] at (-5.0, -0.6) {tiling};
-    \node[font=\Large\itshape, text=i6blue] at (1.4, -0.4) {slicing};
+%     % Labels placed in clear space
+%     \node[font=\Large\itshape, text=i6blue] at (-5.0, -0.6) {tiling};
+%     \node[font=\Large\itshape, text=i6blue] at (1.4, -0.4) {slicing};
 
-    \node[below=0.1cm, font=\scriptsize, align=center] at (0, -2.6) {
-      \textbf{Figure}: Exemplary mapping of a 4-bit quantized weight (e.g., $+5 = 4\times 1 + 2\times 0 + 1\times 1$)\onto 3 stacked differential memristor crossbars ($+ / -$).
-    };
-  \end{tikzpicture}
-\end{frame}
+%     \node[below=0.1cm, font=\scriptsize, align=center] at (0, -2.6) {
+%       \textbf{Figure}: Exemplary mapping of a 4-bit quantized weight (e.g., $+5 = 4\times 1 + 2\times 0 + 1\times 1$) onto 3 stacked differential memristor crossbars ($+ / -$).
+%     };
+%   \end{tikzpicture}
+% \end{frame}
 
-\begin{frame}{Non-Idealities and Synaptogen}
-  \begin{itemize}
-    \setlength{\itemsep}{5pt}
-    \item Ideal crossbars are assumed by many simulators; real devices exhibit:
-          \begin{itemize}
-            \item Device-to-device and cycle-to-cycle programming variability
-            \item Thermal (Johnson--Nyquist) noise
-            \item Finite DAC/ADC resolution
-            \item Imprecise intermediate (non-binary) conductance levels
-          \end{itemize}
-    \item Synaptogen \cite{hennen2024synaptogen}: generative device model based on a
-          vector autoregression, fitted to 3M+ measured programming cycles of
-          130\,nm memristors (STMicroelectronics).
-    \item In our experiments (PyTorch, SynaptogenML): linear layers are replaced by
-          crossbar simulation, the rest of the network stays conventional.
-  \end{itemize}
-\end{frame}
+% \begin{frame}{Non-Idealities and Synaptogen}
+%   \begin{itemize}
+%     \setlength{\itemsep}{5pt}
+%     \item Ideal crossbars are assumed by many simulators; real devices exhibit:
+%           \begin{itemize}
+%             \item Device-to-device and cycle-to-cycle programming variability
+%             \item Thermal (Johnson--Nyquist) noise
+%             \item Finite DAC/ADC resolution
+%             \item Imprecise intermediate (non-binary) conductance levels
+%           \end{itemize}
+%     \item Synaptogen \cite{hennen2024synaptogen}: generative device model based on a
+%           vector autoregression, fitted to 3M+ measured programming cycles of
+%           130\,nm memristors (STMicroelectronics).
+%     \item In our experiments (PyTorch, SynaptogenML): linear layers are replaced by
+%           crossbar simulation, the rest of the network stays conventional.
+%   \end{itemize}
+% \end{frame}
+
+\end{document}
 
