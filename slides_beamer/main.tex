@@ -770,7 +770,7 @@
                   prediction network; monotonic alignments \cite{tripathi2019monotonic}.
           \end{enumerate}
     \item Quantization: QAT, per-tensor symmetric, 8 and 4-bit weights, 8-bit activations; zero-point 0.
-    \item Stages: (1) Full precision baseline $\to$ (2) QAT (fake quantization) $\to$
+    \item Stages: (1) Full precision baseline $\to$ (2) Full Pre-training with QAT (fake quantization) $\to$
           (3) memristor simulation (3-5 runs).
   \end{itemize}
 \end{frame}
@@ -831,258 +831,206 @@
   \end{table}
 \end{frame}
 
-\begin{frame}{FFNN Transducer Experiments}
+\newcommand{\resultsTableFontSize}{\footnotesize}
+
+\begin{frame}{FFNN Transducer Experiments: 8-bit Quantization}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other across FFNN-Transducer configurations}
-    \vspace{2pt}
-    \footnotesize
-    \subtable[Baseline]{
-      \begin{tabular}{l c c c}
-        \toprule
-                        & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
-        \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-        \textbf{Model}  & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
-        \midrule
-        FFNN-Transducer & --                                    & --            & --              \\
-        \bottomrule
-      \end{tabular}
-    }
+    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ Baseline)}
+    \vspace{6pt}
+    \resultsTableFontSize
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabular}{c c c c c c}
+      \toprule
+      \multicolumn{3}{c}{\textbf{Modules Quantized}}          & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                        \\
+      \cmidrule(lr){1-3} \cmidrule(lr){4-4} \cmidrule(lr){5-6}
+      \textbf{Encoder}                                        & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}   & \textbf{No LM}  & \textbf{4-gram} \\
+      \midrule
+      \multicolumn{3}{l}{\textbf{Baseline -- Full Precision}} & 5.9                & 5.8                               & 4.8                                                  \\
+      \midrule
+      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                        \\
+      \checkmark                                              & --                 & --                                & 6.3              & 6.1             & 4.9             \\
+      \checkmark                                              & \checkmark         & --                                & 6.4              & 6.2             & 5.0             \\
+      \checkmark                                              & \checkmark         & \checkmark                        & 6.4              & 6.2             & 4.9             \\
+      \midrule
+      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                       \\
+      \checkmark                                              & --                 & --                                & 9.76 $\pm$ 0.06  & 8.74 $\pm$ 0.03 & 6.70 $\pm$ 0.07 \\
+      \checkmark                                              & \checkmark         & --                                & 10.72 $\pm$ 0.10 & 8.86 $\pm$ 0.11 & 6.67 $\pm$ 0.04 \\
+      \checkmark                                              & \checkmark         & \checkmark                        & **               & **              & **              \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
 
-    \vspace{20pt}
-
-    % 2. Side-by-side QAT and Memristor Tables
-    \setlength{\tabcolsep}{3pt}
-    \begin{columns}[T]
-      \begin{column}{0.49\textwidth}
-        \centering
-        \subtable[QAT]{
-          \begin{tabular}{c c c c c c c}
-            \toprule
-            \multicolumn{3}{c}{\textbf{Quantized}} &                     & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                                                    \\
-            \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
-            \textbf{Encoder}                       & \textbf{Prediction} & \textbf{Joiner}                       & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
-            \midrule
-            \checkmark                             & --                  & --                                    & 8             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & --                                    & 8             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & \checkmark                            & 8             & --             & --            & --              \\
-            \midrule
-            \checkmark                             & --                  & --                                    & 4             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & --                                    & 4             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & \checkmark                            & 4             & --             & --            & --              \\
-            \bottomrule
-          \end{tabular}
-        }
-      \end{column}
-
-      \begin{column}{0.49\textwidth}
-        \centering
-        \subtable[Memristor Simulation]{
-          \begin{tabular}{c c c c c c c}
-            \toprule
-            \multicolumn{3}{c}{\textbf{Quantized}} &                     & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                                                    \\
-            \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
-            \textbf{Encoder}                       & \textbf{Prediction} & \textbf{Joiner}                       & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
-            \midrule
-            \checkmark                             & --                  & --                                    & 8             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & --                                    & 8             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & \checkmark                            & 8             & --             & --            & --              \\
-            \midrule
-            \checkmark                             & --                  & --                                    & 4             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & --                                    & 4             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & \checkmark                            & 4             & --             & --            & --              \\
-            \bottomrule
-          \end{tabular}
-        }
-      \end{column}
-    \end{columns}
+\begin{frame}{FFNN Transducer Experiments: 4-bit Quantization}
+  \begin{table}
+    \caption{WER (\%) on LibriSpeech dev-other (4-bit Quantization vs.\ Baseline)}
+    \vspace{6pt}
+    \resultsTableFontSize
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabular}{c c c c c c}
+      \toprule
+      \multicolumn{3}{c}{\textbf{Modules Quantized}}          & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                        \\
+      \cmidrule(lr){1-3} \cmidrule(lr){4-4} \cmidrule(lr){5-6}
+      \textbf{Encoder}                                        & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}   & \textbf{No LM}  & \textbf{4-gram} \\
+      \midrule
+      \multicolumn{3}{l}{\textbf{Baseline -- Full Precision}} & 5.9                & 5.8                               & 4.8                                                  \\
+      \midrule
+      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                        \\
+      \checkmark                                              & --                 & --                                & 7.2              & 6.8             & 5.2             \\
+      \checkmark                                              & \checkmark         & --                                & --               & --              & --              \\
+      \checkmark                                              & \checkmark         & \checkmark                        & --               & --              & --              \\
+      \midrule
+      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                       \\
+      \checkmark                                              & --                 & --                                & 10.09 $\pm$ 0.05 & 9.07 $\pm$ 0.11 & 6.65 $\pm$ 0.07 \\
+      \checkmark                                              & \checkmark         & --                                & --               & --              & --              \\
+      \checkmark                                              & \checkmark         & \checkmark                        & --               & --              & --              \\
+      \bottomrule
+    \end{tabular}
   \end{table}
 \end{frame}
 
 \begin{frame}{FFNN Transducer: Fine-Tuning vs.\ QAT from Scratch}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other: Checkpoint fine-tuning vs.\ training from scratch}
+    \caption{WER (\%) on LibriSpeech dev-other: Checkpoint fine-tuning vs.\ Full Pre-training (PTN). Configuration - FFNN Transducer with Encoder under QAT}
     \vspace{4pt}
     \footnotesize
     \setlength{\tabcolsep}{4pt}
     \begin{columns}[T]
       % 1. QAT
-      \begin{column}{0.49\textwidth}
+      \begin{column}{0.45\textwidth}
         \centering
         \subtable[QAT]{
           \begin{tabular}{l c c c c}
             \toprule
-                                     &               & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
-            \cmidrule(lr){3-4} \cmidrule(lr){5-5}
-            \textbf{Training Scheme} & \textbf{Bits} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
+                              &               & \textbf{Lex-Free} & \multicolumn{2}{c}{\textbf{Tree}}                   \\
+            \cmidrule(lr){3-3} \cmidrule(lr){4-5}
+            \textbf{Training} & \textbf{Bits} & \textbf{No LM}    & \textbf{No LM}                    & \textbf{4-gram} \\
             \midrule
-            Fine-tuned               & 8             & --                                    & --            & --              \\
-            From Scratch             & 8             & --                                    & --            & --              \\
+            Fine-tuned        & 8             & 6.6               & 6.3                               & 5.0             \\
+            Full PTN          & 8             & 6.5               & 6.2                               & 5.1             \\
             \midrule
-            Fine-tuned               & 4             & --                                    & --            & --              \\
-            From Scratch             & 4             & --                                    & --            & --              \\
+            Fine-tuned        & 4             & 7.2               & 7.0                               & 5.1             \\
+            Full PTN          & 4             & 7.2               & 6.8                               & 5.2             \\
             \bottomrule
           \end{tabular}
         }
       \end{column}
 
       % 2. Memristor Simulation
-      \begin{column}{0.49\textwidth}
+      \begin{column}{0.55\textwidth}
         \centering
         \subtable[Memristor Simulation]{
           \begin{tabular}{l c c c c}
             \toprule
-                                     &               & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
-            \cmidrule(lr){3-4} \cmidrule(lr){5-5}
-            \textbf{Training Scheme} & \textbf{Bits} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
+                              &               & \textbf{Lex-Free} & \multicolumn{2}{c}{\textbf{Tree}}                   \\
+            \cmidrule(lr){3-3} \cmidrule(lr){4-5}
+            \textbf{Training} & \textbf{Bits} & \textbf{No LM}    & \textbf{No LM}                    & \textbf{4-gram} \\
             \midrule
-            Fine-tuned               & 8             & --                                    & --            & --              \\
-            From Scratch             & 8             & --                                    & --            & --              \\
+            Fine-tuned        & 8             & 8.11 $\pm$ 0.06   & 7.53 $\pm$ 0.07                   & 5.81 $\pm$ 0.08 \\
+            Full PTN          & 8             & 9.76 $\pm$ 0.06   & 8.74 $\pm$ 0.03                   & 6.70 $\pm$ 0.07 \\
             \midrule
-            Fine-tuned               & 4             & --                                    & --            & --              \\
-            From Scratch             & 4             & --                                    & --            & --              \\
+            Fine-tuned**      & 4             & 13.09 $\pm$ 0.06  & 11.24 $\pm$ 0.10                  & 7.18 $\pm$ 0.05 \\
+            Full PTN          & 4             & 10.09 $\pm$ 0.05  & \phantom{0}9.07 $\pm$ 0.11        & 6.65 $\pm$ 0.07 \\
             \bottomrule
           \end{tabular}
         }
       \end{column}
     \end{columns}
   \end{table}
+  \vfill
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item[$\rightarrow$] Fine-tuning from a full-precision checkpoint is more effective than training from scratch, for memristor simulation.
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Full Context Transducer Experiments}
+\begin{frame}{Full Context Transducer Experiments: 8-bit Quantization}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other across Full-Context Transducer configurations}
+    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ Baseline)}
+    \vspace{6pt}
+    \resultsTableFontSize
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabular}{c c c c c c}
+      \toprule
+      \multicolumn{3}{c}{\textbf{Modules Quantized}}          & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                       \\
+      \cmidrule(lr){1-3} \cmidrule(lr){4-4} \cmidrule(lr){5-6}
+      \textbf{Encoder}                                        & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}  & \textbf{No LM}  & \textbf{4-gram} \\
+      \midrule
+      \multicolumn{3}{l}{\textbf{Baseline -- Full Precision}} & 5.8                & 5.6                               & 4.9                                                 \\
+      \midrule
+      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                       \\
+      \checkmark                                              & --                 & --                                & 5.9             & 5.7             & 5.2             \\
+      \checkmark                                              & \checkmark         & --                                & 6.1             & 5.9             & 5.2             \\
+      \checkmark                                              & \checkmark         & \checkmark                        & 6.1             & 5.9             & 5.2             \\
+      \midrule
+      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                      \\
+      \checkmark                                              & --                 & --                                & 8.96 $\pm$ 0.29 & 8.06 $\pm$ 0.16 & 7.11 $\pm$ 0.07 \\
+      \checkmark                                              & \checkmark         & --                                & --              & --              & --              \\
+      \checkmark                                              & \checkmark         & \checkmark                        & --              & --              & --              \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+% \begin{frame}{Full Context Transducer Experiments: 4-bit Quantization}
+%   \begin{table}
+%     \caption{WER (\%) on LibriSpeech dev-other (4-bit Quantization vs.\ Baseline)}
+%     \vspace{6pt}
+%     \resultsTableFontSize
+%     \setlength{\tabcolsep}{8pt}
+%     \begin{tabular}{c c c c c c}
+%       \toprule
+%       \multicolumn{3}{c}{\textbf{Modules Quantized}}          & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                     \\
+%       \cmidrule(lr){1-3} \cmidrule(lr){4-4} \cmidrule(lr){5-6}
+%       \textbf{Encoder}                                        & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM} & \textbf{No LM} & \textbf{4-gram} \\
+%       \midrule
+%       \multicolumn{3}{l}{\textbf{Baseline -- Full Precision}} & 5.8                & 5.6                               & 4.9                                               \\
+%       \midrule
+%       \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                     \\
+%       \checkmark                                              & --                 & --                                & --             & --             & --              \\
+%       \checkmark                                              & \checkmark         & --                                & --             & --             & --              \\
+%       \checkmark                                              & \checkmark         & \checkmark                        & --             & --             & --              \\
+%       \midrule
+%       \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                    \\
+%       \checkmark                                              & --                 & --                                & --             & --             & --              \\
+%       \checkmark                                              & \checkmark         & --                                & --             & --             & --              \\
+%       \checkmark                                              & \checkmark         & \checkmark                        & --             & --             & --              \\
+%       \bottomrule
+%     \end{tabular}
+%   \end{table}
+% \end{frame}
+
+\begin{frame}{Optimal Search Parameters under Noise}
+  \begin{table}
+    \caption{Optimal LM scales for recognitions for FFNN Transducer (Tree + 4-Gram LM search, LibriSpeech dev-other).}
     \vspace{2pt}
     \footnotesize
-    \subtable[Baseline]{
-      \begin{tabular}{l c c c}
-        \toprule
-                                & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
-        \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-        \textbf{Model}          & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
-        \midrule
-        Full-Context Transducer & --                                    & --            & --              \\
-        \bottomrule
-      \end{tabular}
-    }
-
-    \vspace{20pt}
-
-    \setlength{\tabcolsep}{3pt}
-    \begin{columns}[T]
-      \begin{column}{0.49\textwidth}
-        \centering
-        \subtable[QAT]{
-          \begin{tabular}{c c c c c c c}
-            \toprule
-            \multicolumn{3}{c}{\textbf{Quantized}} &                     & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                                                    \\
-            \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
-            \textbf{Encoder}                       & \textbf{Prediction} & \textbf{Joiner}                       & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
-            \midrule
-            \checkmark                             & --                  & --                                    & 8             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & --                                    & 8             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & \checkmark                            & 8             & --             & --            & --              \\
-            \midrule
-            \checkmark                             & --                  & --                                    & 4             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & --                                    & 4             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & \checkmark                            & 4             & --             & --            & --              \\
-            \bottomrule
-          \end{tabular}
-        }
-      \end{column}
-
-      \begin{column}{0.49\textwidth}
-        \centering
-        \subtable[Memristor Simulation]{
-          \begin{tabular}{c c c c c c c}
-            \toprule
-            \multicolumn{3}{c}{\textbf{Quantized}} &                     & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                                                    \\
-            \cmidrule(lr){1-3} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
-            \textbf{Encoder}                       & \textbf{Prediction} & \textbf{Joiner}                       & \textbf{Bits} & \textbf{No LM} & \textbf{LSTM} & \textbf{4-gram} \\
-            \midrule
-            \checkmark                             & --                  & --                                    & 8             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & --                                    & 8             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & \checkmark                            & 8             & --             & --            & --              \\
-            \midrule
-            \checkmark                             & --                  & --                                    & 4             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & --                                    & 4             & --             & --            & --              \\
-            \checkmark                             & \checkmark          & \checkmark                            & 4             & --             & --            & --              \\
-            \bottomrule
-          \end{tabular}
-        }
-      \end{column}
-    \end{columns}
+    \setlength{\tabcolsep}{3.5pt}
+    \begin{tabular}{l l c c c c}
+      \toprule
+                        & \textbf{ILM Scale} & 0.1              & 0.2              & 0.3                      & 0.4                      \\
+                        & \textbf{ELM Scale} & 0.6              & 0.7              & 0.5                      & 0.5                      \\
+      \midrule
+      \textbf{Baseline} & WER (\%)           & \textbf{4.8}     & 4.8              & 4.9**                    & 4.96                     \\
+      \midrule
+      \multirow{2}{*}{\shortstack[l]{\textbf{QAT Encoder}}}
+                        & QAT                & 5.2              & \textbf{5.0}     & 5.2**                    & --                       \\
+                        & Memristor          & 17.42 $\pm$ 1.60 & 11.95 $\pm$ 0.74 & \textbf{6.69 $\pm$ 0.07} & --                       \\
+      \midrule
+      \multirow{2}{*}{\shortstack[l]{\textbf{QAT Encoder \& Predictor}}}
+                        & QAT                & 5.00             & \textbf{4.98}    & --                       & 5.19                     \\
+                        & Memristor          & 18.67 $\pm$ 1.58 & 12.80 $\pm$ 0.55 & --                       & \textbf{6.68 $\pm$ 0.04} \\
+      \bottomrule
+    \end{tabular}
   \end{table}
-\end{frame}
-
-\begin{frame}{Optimal Parameters during QAT and Memristor Simulation}
-  \begin{table}
-    \caption{Impact of quantization and device noise on optimal LM scales (LibriSpeech dev-other)}
-    \vspace{4pt}
-    \footnotesize
-    \setlength{\tabcolsep}{4pt}
-    \begin{columns}[T]
-      % 1. Baseline
-      \begin{column}{0.32\textwidth}
-        \centering
-        \subtable[Baseline (FP32)]{
-          \begin{tabular}{c c c}
-            \toprule
-            \textbf{ILM Scale} & \textbf{ELM Scale} & \textbf{WER (\%)} \\
-            \midrule
-            0.1                & 0.2                & --                \\
-            0.2                & 0.3                & --                \\
-            \rowcolor{i6blueShaded}
-            \textbf{0.2}       & \textbf{0.4}       & \textbf{--}       \\
-            0.3                & 0.4                & --                \\
-            0.4                & 0.5                & --                \\
-            \bottomrule
-          \end{tabular}
-        }
-      \end{column}
-
-      % 2. QAT
-      \begin{column}{0.32\textwidth}
-        \centering
-        \subtable[QAT]{
-          \begin{tabular}{c c c}
-            \toprule
-            \textbf{ILM Scale} & \textbf{ELM Scale} & \textbf{WER (\%)} \\
-            \midrule
-            0.1                & 0.2                & --                \\
-            0.2                & 0.3                & --                \\
-            0.2                & 0.4                & --                \\
-            \rowcolor{i6blueShaded}
-            \textbf{0.3}       & \textbf{0.4}       & \textbf{--}       \\
-            0.4                & 0.5                & --                \\
-            \bottomrule
-          \end{tabular}
-        }
-      \end{column}
-
-      % 3. Memristor Simulation
-      \begin{column}{0.32\textwidth}
-        \centering
-        \subtable[Memristor Simulation]{
-          \begin{tabular}{c c c}
-            \toprule
-            \textbf{ILM Scale} & \textbf{ELM Scale} & \textbf{WER (\%)} \\
-            \midrule
-            0.1                & 0.2                & --                \\
-            0.2                & 0.3                & --                \\
-            0.2                & 0.4                & --                \\
-            \rowcolor{i6blueShaded}
-            \textbf{0.3}       & \textbf{0.4}       & \textbf{--}       \\
-            0.4                & 0.5                & --                \\
-            \bottomrule
-          \end{tabular}
-        }
-      \end{column}
-    \end{columns}
-  \end{table}
+  {\scriptsize\textbf{ILM}: Internal Language Model, \textbf{ELM}: External Language Model}
 
   \vfill
-  \raggedright
-  \scriptsize \textbf{ILM}: Internal Language Model, \textbf{ELM}: External Language Model
+  \vspace{4pt}
+  \begin{itemize}
+    \item[$\rightarrow$] As the model gets noisier, the optimal LM scale increases to compensate for the distortion.
+  \end{itemize}
+
 \end{frame}
 
 
@@ -1093,6 +1041,10 @@
 \begin{frame}{Future Work: Error Analysis}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
+    \item \emph{Finetuning}:
+          \begin{itemize}
+            \item Finetuning from a full precision checkpoint for other configurations to improve WER.
+          \end{itemize}
     \item \emph{Error Analysis}:
           \begin{itemize}
             \item Substitutions vs.\ insertions vs.\ deletions.
@@ -1172,6 +1124,62 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 \backupbegin
+
+\begin{frame}{Appendix: Alternative Table Formats (FFNN Transducer)}
+  \begin{table}
+    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ Baseline)}
+    \vspace{4pt}
+    \footnotesize
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabular}{l c c c}
+      \toprule
+                                   & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
+      \cmidrule(lr){2-3} \cmidrule(lr){4-4}
+      \textbf{Quantized Modules}   & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
+      \midrule
+      Baseline (Full Precision)    & --                                    & --            & --              \\
+      \midrule
+      \multicolumn{4}{l}{\textbf{QAT}}                                                                       \\
+      Encoder                      & --                                    & --            & --              \\
+      Encoder + Predictor          & --                                    & --            & --              \\
+      Encoder + Predictor + Joiner & --                                    & --            & --              \\
+      \midrule
+      \multicolumn{4}{l}{\textbf{Memristor Simulation}}                                                      \\
+      Encoder                      & --                                    & --            & --              \\
+      Encoder + Predictor          & --                                    & --            & --              \\
+      Encoder + Predictor + Joiner & --                                    & --            & --              \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+\begin{frame}{Appendix: Alternative Table Formats (Additive Labels)}
+  \begin{table}
+    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ Baseline)}
+    \vspace{4pt}
+    \footnotesize
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabular}{l c c c}
+      \toprule
+                                              & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
+      \cmidrule(lr){2-3} \cmidrule(lr){4-4}
+      \textbf{Quantized Modules}              & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
+      \midrule
+      Baseline (Full Precision)               & --                                    & --            & --              \\
+      \midrule
+      \multicolumn{4}{l}{\textbf{QAT}}                                                                                  \\
+      Encoder                                 & --                                    & --            & --              \\
+      \hphantom{Encoder }+ Predictor          & --                                    & --            & --              \\
+      \hphantom{Encoder + Predictor }+ Joiner & --                                    & --            & --              \\
+      \midrule
+      \multicolumn{4}{l}{\textbf{Memristor Simulation}}                                                                 \\
+      Encoder                                 & --                                    & --            & --              \\
+      \hphantom{Encoder }+ Predictor          & --                                    & --            & --              \\
+      \hphantom{Encoder + Predictor }+ Joiner & --                                    & --            & --              \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
 
 \begin{frame}{Appendix: Device VMM Operation Statistics}
   \centering
