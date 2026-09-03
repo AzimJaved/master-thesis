@@ -777,17 +777,17 @@
 
 \begin{frame}{CTC Experiments}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other across CTC configurations}
+    \caption{WER (\%) on LibriSpeech dev-other - CTC}
     \vspace{2pt}
     \footnotesize
     \subtable[Baseline]{
       \begin{tabular}{l c c c}
         \toprule
-                       & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
-        \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-        \textbf{Model} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
+                       & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                    \\
+        \cmidrule(lr){2-2} \cmidrule(lr){3-4}
+        \textbf{Model} & \textbf{No LM}                        & \textbf{No LM} & \textbf{4-gram} \\
         \midrule
-        CTC            & 7.1                                   & 5.0           & 5.2             \\
+        CTC            & 7.1                                   & 5.0            & 5.2             \\
         \bottomrule
       \end{tabular}
     }
@@ -801,12 +801,12 @@
         \subtable[QAT]{
           \begin{tabular}{l c c c}
             \toprule
-                          & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
-            \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-            \textbf{Bits} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
+                          & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                    \\
+            \cmidrule(lr){2-2} \cmidrule(lr){3-4}
+            \textbf{Bits} & \textbf{No LM}                        & \textbf{No LM} & \textbf{4-gram} \\
             \midrule
-            8             & 7.3                                   & 5.2           & 5.3             \\
-            4             & 8.3                                   & 5.4           & 5.7             \\
+            8             & 7.3                                   & 5.2            & 5.3             \\
+            4             & 8.3                                   & 5.4            & 5.7             \\
             \bottomrule
           \end{tabular}
         }
@@ -817,12 +817,12 @@
         \subtable[Memristor Simulation]{
           \begin{tabular}{l c c c}
             \toprule
-                          & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                   \\
-            \cmidrule(lr){2-3} \cmidrule(lr){4-4}
-            \textbf{Bits} & \textbf{No LM}                        & \textbf{LSTM} & \textbf{4-gram} \\
+                          & \multicolumn{2}{c}{\textbf{Lex-Free}} & \textbf{Tree}                      \\
+            \cmidrule(lr){2-2} \cmidrule(lr){3-4}
+            \textbf{Bits} & \textbf{No LM}                        & \textbf{No LM}   & \textbf{4-gram} \\
             \midrule
-            8             & $13.53 \pm 0.37$                      & --            & $6.67 \pm 0.09$ \\
-            4             & $11.85 \pm 0.18$                      & --            & $6.77 \pm 0.12$ \\
+            8             & 13.53 $\pm$ 0.37                      & 10.35 $\pm$ 0.20 & 6.67 $\pm$ 0.09 \\
+            4             & 11.85 $\pm$ 0.18                      & TBD              & 6.77 $\pm$ 0.12 \\
             \bottomrule
           \end{tabular}
         }
@@ -855,7 +855,7 @@
       \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                       \\
       \checkmark                                              & --                 & --                                & 9.76 $\pm$ 0.06  & 8.74 $\pm$ 0.03 & 6.70 $\pm$ 0.07 \\
       \checkmark                                              & \checkmark         & --                                & 10.72 $\pm$ 0.10 & 8.86 $\pm$ 0.11 & 6.67 $\pm$ 0.04 \\
-      \checkmark                                              & \checkmark         & \checkmark                        & **               & **              & **              \\
+      \checkmark                                              & \checkmark         & \checkmark                        & TBD              & TBD             & TBD             \\
       \bottomrule
     \end{tabular}
   \end{table}
@@ -877,13 +877,13 @@
       \midrule
       \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                        \\
       \checkmark                                              & --                 & --                                & 7.2              & 6.8             & 5.2             \\
-      \checkmark                                              & \checkmark         & --                                & --               & --              & --              \\
-      \checkmark                                              & \checkmark         & \checkmark                        & --               & --              & --              \\
+      \checkmark                                              & \checkmark         & --                                & TBD              & TBD             & TBD             \\
+      \checkmark                                              & \checkmark         & \checkmark                        & TBD              & TBD             & TBD             \\
       \midrule
       \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                       \\
       \checkmark                                              & --                 & --                                & 10.09 $\pm$ 0.05 & 9.07 $\pm$ 0.11 & 6.65 $\pm$ 0.07 \\
-      \checkmark                                              & \checkmark         & --                                & --               & --              & --              \\
-      \checkmark                                              & \checkmark         & \checkmark                        & --               & --              & --              \\
+      \checkmark                                              & \checkmark         & --                                & TBD              & TBD             & TBD             \\
+      \checkmark                                              & \checkmark         & \checkmark                        & TBD              & TBD             & TBD             \\
       \bottomrule
     \end{tabular}
   \end{table}
@@ -937,6 +937,7 @@
       \end{column}
     \end{columns}
   \end{table}
+  {\footnotesize **Tentative results, to be updated}
   \vfill
   \begin{itemize}
     \setlength{\itemsep}{6pt}
@@ -965,8 +966,8 @@
       \midrule
       \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                      \\
       \checkmark                                              & --                 & --                                & 8.96 $\pm$ 0.29 & 8.06 $\pm$ 0.16 & 7.11 $\pm$ 0.07 \\
-      \checkmark                                              & \checkmark         & --                                & --              & --              & --              \\
-      \checkmark                                              & \checkmark         & \checkmark                        & --              & --              & --              \\
+      \checkmark                                              & \checkmark         & --                                & TBD             & TBD             & TBD             \\
+      \checkmark                                              & \checkmark         & \checkmark                        & TBD             & TBD             & TBD             \\
       \bottomrule
     \end{tabular}
   \end{table}
@@ -1060,10 +1061,10 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Future Work: Search Spaces}
+\begin{frame}{Future Work: Search}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
-    \item \emph{Decoding Parameter Adjustments}:
+    \item \emph{Decoder Parameters}:
           \begin{itemize}
             \item Explore penalties for blank emissions.
             \item Tune softmax temperature to sharpen or soften posterior peaks under noise.
@@ -1073,9 +1074,13 @@
             \item Current search space is large $\rightarrow$ hurts Real-Time Factor (RTF).
             \item Study the impact of restricing the search space on WER and RTF.
                   \begin{itemize}
-                    \item[$\rightarrow$] How many more hypotheses are needed for on-device vs 4-bit vs.\ 8-bit vs.\ FP32 runs?
+                    \item[$\rightarrow$] How many more hypotheses are needed for on-device vs 4-bit vs.\ 8-bit vs.\ Full precision runs?
                     \item[$\rightarrow$] Compare hypothesis expansion across CTC and Transducer variants.
                   \end{itemize}
+          \end{itemize}
+    \item \emph{Search Paradigms}:
+          \begin{itemize}
+            \item Explore alternative search algorithms and language model combinations (e.g. Lexicon-free with LSTM/Transformer based LM).
           \end{itemize}
   \end{itemize}
 \end{frame}
