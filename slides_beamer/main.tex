@@ -283,7 +283,7 @@
               \end{itemize}
         \item This talk focuses on \emph{memristive} hardware, in particular \emph{resistive RAM (ReRAM)}:
               \begin{itemize}
-                \item Key Benefits: low energy consumption, non volatility
+                \item Key benefits: low energy consumption, non-volatility
               \end{itemize}
       \end{itemize}
     \end{column}
@@ -304,13 +304,13 @@
       \begin{itemize}
         \setlength{\itemsep}{1.5pt}
         \item A \emph{memristor} is an analog computing device with a programmable resistance state \cite{strukov2008MM}.
-        \item Enables fast, energy-efficient implementation of Vector-Matrix Multiplication (VMM) \cite{wan2022compute} -
+        \item Enables fast, energy-efficient implementation of Vector-Matrix Multiplication (VMM) \cite{wan2022compute} {---}
               \begin{itemize}
                 \item[$\rightarrow$] and thus neural networks.
               \end{itemize}
         \item Limitations:
               \begin{itemize}
-                \item High analog inaccuracies, and thus need specific restrictions on mathematical operations \cite{wouters2016reliability}.
+                \item High analog inaccuracies and thus need specific restrictions on mathematical operations \cite{wouters2016reliability}.
                 \item Production is still in early stages \cite{infineon2022rram}.
                 \item Current experiments are simulated using SynaptogenML \cite{hennen2024synaptogen} \cite{rossenbach2025memristor}.
               \end{itemize}
@@ -321,25 +321,25 @@
       \begin{figure}
         \centering
         \includegraphics[width=0.85\linewidth]{figures/resistor_memristor_clean.png}
-        \caption{Resistor and Memristor schematics}
+        \caption{Resistor and memristor schematics}
       \end{figure}
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Analog In Memory Computing \cite{aguirre2024hardware}}
+\begin{frame}{Analog In-Memory Computing \cite{aguirre2024hardware}}
   \begin{itemize}
     \setlength{\itemsep}{6pt}
-    \item Multiplication computation done via Ohm's Law:
+    \item Multiplication computation done via Ohm's law:
           \begin{equation}
             V = IR
           \end{equation}
-    \item Voltage $V$, current $I$ and resistance $R$.
+    \item Voltage $V$, current $I$, and resistance $R$.
     \item Possible to rewrite resistance as conductance $G$:
           \begin{equation}
             I = G V \quad \text{with} \quad G = \frac{1}{R}
           \end{equation}
-    \item Addition done via Kirchhoff's Law for any connected node in a circuit:
+    \item Addition done via Kirchhoff's law for any connected node in a circuit:
           \begin{equation}
             \sum_{n=0}^{N} I_n = 0 \;\rightarrow\; I_0 = - \sum_{n=1}^{N} I_n
           \end{equation}
@@ -347,14 +347,14 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Analog In Memory Computing \cite{rossenbach2025memristor}}
+\begin{frame}{Analog In-Memory Computing \cite{rossenbach2025memristor}}
   \begin{columns}[c]
     \begin{column}{0.54\textwidth}
       \begin{itemize}
         \setlength{\itemsep}{4pt}
         \item Resistors ($\square$) as connecting element between vertical and horizontal circuit lines
         \item Each resistor's conductance is an element of a constant matrix
-        \item Column sum simplely via line connection
+        \item Column sum simply via line connection
       \end{itemize}
     \end{column}
 
@@ -483,7 +483,7 @@
       \begin{figure}
         \centering
         \includegraphics[width=\linewidth]{figures/memristor_iv_curve.png}
-        \caption{I-V characteristic curve of a memristor \cite{hennen2024synaptogen}}
+        \caption{I{--}V characteristic curve of a memristor \cite{hennen2024synaptogen}}
       \end{figure}
     \end{column}
   \end{columns}
@@ -543,12 +543,12 @@
     \item \emph{Tile} the weight matrix:
           \begin{itemize}
             \item Tile weight matrix with arbitrary dimensions into smaller fixed-size arrays.
-            \item E.g., $512 \times 512$ weight matrix $\rightarrow$ $16$ crossbar arrays of size $128 \times 128$
+            \item E.g., $512 \times 512$ weight matrix $\rightarrow$ $16$ crossbar arrays of size $128 \times 128$.
           \end{itemize}
     \item \emph{Slice} weights into memristor states:
           \begin{itemize}
-            \item Binary setting (high vs.\ low resistance)
-            \item Stacking of memristors for each magnitude bit (\emph{$k$-bit} weight requires $k-1$ arrays)
+            \item Binary setting (high vs.\ low resistance).
+            \item Stacking of memristors for each magnitude bit (\emph{$k$-bit} weight requires $k-1$ arrays).
           \end{itemize}
     \item \emph{Pair} positive ($+$) and negative ($-$) bitlines.
   \end{itemize}
@@ -633,7 +633,7 @@
           \begin{itemize}
             \item Need to reduce the precision of the weights $\rightarrow$ quantization.
           \end{itemize}
-    \item Quantization-Aware Training (QAT) peforms better than Post-training Quantization (PTQ), but requires more training time \cite{gholami2021survey}.
+    \item Quantization-Aware Training (QAT) performs better than Post-Training Quantization (PTQ), but requires more training time \cite{gholami2021survey}.
           \begin{itemize}
             \item[$\rightarrow$] High performance gap at low precision
           \end{itemize}
@@ -665,10 +665,10 @@
             \item Autoregressive prediction network; internal language model (ILM).
             \item Joint network evaluated repeatedly per emitted label.
           \end{itemize}
-    \item Performance degradation across search paradigms -
+    \item Performance degradation across search paradigms:
           \begin{itemize}
             \item Lexicon-free vs.\ tree search.
-            \item ILM and prior scaling - How does device noise change the optimal LM weighting?
+            \item ILM and prior scaling {---} How does device noise change the optimal LM weighting?
           \end{itemize}
   \end{itemize}
 \end{frame}
@@ -769,15 +769,15 @@
             \item \emph{Full-context transducer} \cite{graves2012sequence}: LSTM
                   prediction network; monotonic alignments \cite{tripathi2019monotonic}.
           \end{enumerate}
-    \item Quantization: QAT, per-tensor symmetric, 8 and 4-bit weights, 8-bit activations; zero-point 0.
-    \item Stages: (1) Full precision baseline $\to$ (2) Full Pre-training with QAT (fake quantization) $\to$
-          (3) memristor simulation (3-5 runs).
+    \item Quantization: QAT, per-tensor symmetric, 8- and 4-bit weights, 8-bit activations; zero-point 0.
+    \item Stages: (1) Full-precision baseline $\to$ (2) Full pre-training with QAT (fake quantization) $\to$
+          (3) memristor simulation (3{--}5 runs).
   \end{itemize}
 \end{frame}
 
 \begin{frame}{CTC Experiments}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other - CTC}
+    \caption{WER (\%) on LibriSpeech dev-other {--} CTC}
     \vspace{2pt}
     \footnotesize
     \subtable[Baseline]{
@@ -835,7 +835,7 @@
 
 \begin{frame}{FFNN Transducer Experiments: 8-bit Quantization}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ Baseline)}
+    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ baseline)}
     \vspace{6pt}
     \resultsTableFontSize
     \setlength{\tabcolsep}{8pt}
@@ -864,28 +864,28 @@
 
 \begin{frame}{FFNN Transducer Experiments: 4-bit Quantization}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other (4-bit Quantization vs.\ Baseline)}
+    \caption{WER (\%) on LibriSpeech dev-other (4-bit Quantization vs.\ baseline)}
     \vspace{6pt}
     \resultsTableFontSize
     \setlength{\tabcolsep}{8pt}
     \begin{tabular}{c c c c c c}
       \toprule
-      \multicolumn{3}{c}{\textbf{Modules Quantized}}          & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                      \\
+      \multicolumn{3}{c}{\textbf{Modules Quantized}} & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                      \\
       \cmidrule(lr){1-3} \cmidrule(lr){4-4} \cmidrule(lr){5-6}
-      \textbf{Encoder}                                        & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}  & \textbf{No LM} & \textbf{4-gram} \\
+      \textbf{Encoder}                               & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}  & \textbf{No LM} & \textbf{4-gram} \\
       \midrule
-      \multicolumn{6}{l}{\textbf{Baseline}}                                                                                                \\
-      --                                                      & --                 & --                                & 5.9             & 5.8            & 4.8             \\
+      \multicolumn{6}{l}{\textbf{Baseline}}                                                                                                                        \\
+      --                                             & --                 & --                                & 5.9             & 5.8            & 4.8             \\
       \midrule
-      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                      \\
-      \checkmark                                              & --                 & --                                & 7.2             & 6.8            & 5.2             \\
-      \checkmark                                              & \checkmark         & --                                & TBD             & TBD            & TBD             \\
-      \checkmark                                              & \checkmark         & \checkmark                        & TBD             & TBD            & TBD             \\
+      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                             \\
+      \checkmark                                     & --                 & --                                & 7.2             & 6.8            & 5.2             \\
+      \checkmark                                     & \checkmark         & --                                & TBD             & TBD            & TBD             \\
+      \checkmark                                     & \checkmark         & \checkmark                        & TBD             & TBD            & TBD             \\
       \midrule
-      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                     \\
-      \checkmark                                              & --                 & --                                & 10.1 $\pm$ 0.05 & 9.1 $\pm$ 0.11 & 6.7 $\pm$ 0.07  \\
-      \checkmark                                              & \checkmark         & --                                & TBD             & TBD            & TBD             \\
-      \checkmark                                              & \checkmark         & \checkmark                        & TBD             & TBD            & TBD             \\
+      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                            \\
+      \checkmark                                     & --                 & --                                & 10.1 $\pm$ 0.05 & 9.1 $\pm$ 0.11 & 6.7 $\pm$ 0.07  \\
+      \checkmark                                     & \checkmark         & --                                & TBD             & TBD            & TBD             \\
+      \checkmark                                     & \checkmark         & \checkmark                        & TBD             & TBD            & TBD             \\
       \bottomrule
     \end{tabular}
   \end{table}
@@ -893,7 +893,7 @@
 
 \begin{frame}{FFNN Transducer: Fine-Tuning vs.\ QAT from Scratch}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other: Checkpoint fine-tuning vs.\ Full Pre-training (PTN). Configuration - FFNN Transducer with Encoder under QAT}
+    \caption{WER (\%) on LibriSpeech dev-other: Checkpoint fine-tuning vs.\ full pre-training (PTN). Configuration {--} FFNN Transducer with Encoder under QAT}
     \vspace{4pt}
     \footnotesize
     \setlength{\tabcolsep}{4pt}
@@ -939,38 +939,38 @@
       \end{column}
     \end{columns}
   \end{table}
-  {\footnotesize **Tentative results, to be updated}
+  {\footnotesize **Tentative results, to be updated.}
   \vfill
   \begin{itemize}
     \setlength{\itemsep}{6pt}
-    \item[$\rightarrow$] Fine-tuning from a full-precision checkpoint is more effective than training from scratch, for memristor simulation.
+    \item[$\rightarrow$] Fine-tuning from a full-precision checkpoint is more effective than training from scratch for memristor simulation.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Full Context Transducer Experiments: 8-bit Quantization}
+\begin{frame}{Full-Context Transducer Experiments: 8-bit Quantization}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ Baseline)}
+    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ baseline)}
     \vspace{6pt}
     \resultsTableFontSize
     \setlength{\tabcolsep}{8pt}
     \begin{tabular}{c c c c c c}
       \toprule
-      \multicolumn{3}{c}{\textbf{Modules Quantized}}          & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                     \\
+      \multicolumn{3}{c}{\textbf{Modules Quantized}} & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                     \\
       \cmidrule(lr){1-3} \cmidrule(lr){4-4} \cmidrule(lr){5-6}
-      \textbf{Encoder}                                        & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM} & \textbf{No LM} & \textbf{4-gram} \\
+      \textbf{Encoder}                               & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM} & \textbf{No LM} & \textbf{4-gram} \\
       \midrule
-      \multicolumn{6}{l}{\textbf{Baseline}}                                                                                               \\
-      --                                                      & --                 & --                                & 5.8            & 5.6            & 4.9             \\
+      \multicolumn{6}{l}{\textbf{Baseline}}                                                                                                                       \\
+      --                                             & --                 & --                                & 5.8            & 5.6            & 4.9             \\
       \midrule
-      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                     \\
-      \checkmark                                              & --                 & --                                & 5.9            & 5.7            & 5.2             \\
-      \checkmark                                              & \checkmark         & --                                & 6.1            & 5.9            & 5.2             \\
-      \checkmark                                              & \checkmark         & \checkmark                        & 6.1            & 5.9            & 5.2             \\
+      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                            \\
+      \checkmark                                     & --                 & --                                & 5.9            & 5.7            & 5.2             \\
+      \checkmark                                     & \checkmark         & --                                & 6.1            & 5.9            & 5.2             \\
+      \checkmark                                     & \checkmark         & \checkmark                        & 6.1            & 5.9            & 5.2             \\
       \midrule
-      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                    \\
-      \checkmark                                              & --                 & --                                & 9.0 $\pm$ 0.29 & 8.1 $\pm$ 0.16 & 7.1 $\pm$ 0.07  \\
-      \checkmark                                              & \checkmark         & --                                & WIP            & WIP            & WIP             \\
-      \checkmark                                              & \checkmark         & \checkmark                        & WIP            & WIP            & WIP             \\
+      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                           \\
+      \checkmark                                     & --                 & --                                & 9.0 $\pm$ 0.29 & 8.1 $\pm$ 0.16 & 7.1 $\pm$ 0.07  \\
+      \checkmark                                     & \checkmark         & --                                & WIP            & WIP            & WIP             \\
+      \checkmark                                     & \checkmark         & \checkmark                        & WIP            & WIP            & WIP             \\
       \bottomrule
     \end{tabular}
   \end{table}
@@ -1006,7 +1006,7 @@
 
 \begin{frame}{Noisier Models Demand Stronger Internal LM Compensation}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech (dev-other, ELM scale = 0.6, Tree + 4-Gram LM search).}
+    \caption{WER (\%) on LibriSpeech (dev-other, ELM scale = 0.6, Tree + 4-gram LM search).}
     \vspace{2pt}
     \footnotesize
     \setlength{\tabcolsep}{4pt}
@@ -1032,7 +1032,7 @@
   \vspace{6pt}
 
   \begin{table}
-    \caption{Optimal LM scales and WER (\%) on LibriSpeech (dev-other, Tree + 4-Gram LM search).}
+    \caption{Optimal LM scales and WER (\%) on LibriSpeech (dev-other, Tree + 4-gram LM search).}
     \vspace{2pt}
     \footnotesize
     \setlength{\tabcolsep}{6pt}
@@ -1054,7 +1054,7 @@
       \bottomrule
     \end{tabular}
   \end{table}
-  {\scriptsize\textbf{ILM}: Internal Language Model, \textbf{ELM}: External Language Model}
+  {\scriptsize\textbf{ILM}: Internal Language Model; \textbf{ELM}: External Language Model.}
 
 
 \end{frame}
@@ -1067,15 +1067,15 @@
 \begin{frame}{Future Work: Error Analysis}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
-    \item \emph{Finetuning}:
+    \item \emph{Fine-tuning}:
           \begin{itemize}
-            \item Finetuning from a full precision checkpoint for other configurations to study the impact on WER.
+            \item Fine-tuning from a full-precision checkpoint for other configurations to study the impact on WER.
           \end{itemize}
     \item \emph{Error Analysis}:
           \begin{itemize}
             \item Substitutions vs.\ insertions vs.\ deletions.
                   \begin{itemize}
-                    \item[$\rightarrow$] Why does lexicon-free decoding degrade perform worse than tree search?
+                    \item[$\rightarrow$] Why does lexicon-free search degrade more than tree search?
                   \end{itemize}
             \item Acoustic posterior distortion and score calibration with external LMs.
           \end{itemize}
@@ -1097,15 +1097,15 @@
     \item \emph{Search Space vs.\ Model \& QAT Level}:
           \begin{itemize}
             \item Large search space $\Rightarrow$ more hypotheses $\Rightarrow$ more energy consumption and higher RTF.
-            \item Study the impact of restricing the search space on WER and RTF.
+            \item Study the impact of restricting the search space on WER and RTF.
                   \begin{itemize}
-                    \item[$\rightarrow$] How many more hypotheses are needed for on-device vs 4-bit vs.\ 8-bit vs.\ Full precision runs?
-                    \item[$\rightarrow$] Compare hypothesis expansion across CTC and Transducer variants.
+                    \item[$\rightarrow$] How many more hypotheses are needed for on-device vs.\ 4-bit vs.\ 8-bit vs.\ full-precision runs?
+                    \item[$\rightarrow$] Compare hypothesis expansion across CTC and transducer variants.
                   \end{itemize}
           \end{itemize}
     \item \emph{Search Paradigms}:
           \begin{itemize}
-            \item Explore alternative search algorithms and language model combinations (e.g. Lexicon-free with LSTM/Transformer based LM).
+            \item Explore alternative search algorithms and language model combinations (e.g., lexicon-free with LSTM/transformer-based LM).
           \end{itemize}
   \end{itemize}
 \end{frame}
@@ -1120,7 +1120,7 @@
     \item \emph{Selective Layer Mapping}:
           \begin{itemize}
             \item Deal with noise in noise-sensitive components (e.g., joint network).
-            \item[$\rightarrow$] Mixed precision quantization
+            \item[$\rightarrow$] Mixed-precision quantization
           \end{itemize}
     \item \emph{Denoising \& Output Compensation}:
           \begin{itemize}
@@ -1146,7 +1146,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}[allowframebreaks,label=finalSlide]
-  \centerline{Reference}
+  \centerline{References}
   \bibliographystyle{i6bibstyle}
   \bibliography{references}
 \end{frame}
