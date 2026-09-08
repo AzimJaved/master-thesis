@@ -32,6 +32,11 @@
 
 % misc
 \usepackage{subfigure}
+\subfiglabelskip=3pt
+\renewcommand{\subfigcapskip}{3pt}
+\newcommand{\beamerCapColor}{\usebeamercolor[fg]{caption name}}
+\renewcommand{\subcaplabelfont}{\beamerCapColor}
+\renewcommand{\subcapfont}{\beamerCapColor}
 \usepackage{wasysym}
 \usepackage{nameref}
 \usepackage{xcolor}
@@ -258,45 +263,44 @@
   \titlepage
 \end{frame}
 
-\begin{frame}
-  \frametitle{Outline}
-  \tableofcontents
-\end{frame}
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Related Work}
+\section{Related Works}
+
+\begin{frame}{Related Works}
+  \begin{itemize}
+    \item \structure{\textbf{Sequence Transduction with Recurrent Neural Networks}} \cite{graves2012sequence}
+      \begin{itemize}
+        \item Introduces the RNN-T architecture, a widely used architecture for ASR
+      \end{itemize}
+    \item \structure{\textbf{Conformer: Convolution-Augmented Transformer for Speech Recognition}} \cite{Gulati+Qin+:2020conformer}
+      \begin{itemize}
+        \item Introduces the Conformer encoder, a common choice for ASR encoders
+      \end{itemize}
+    \item \structure{\textbf{Synaptogen: A Cross-Domain Generative Device Model for Large-Scale Neuromorphic Circuit Design}} \cite{hennen2024synaptogen}
+      \begin{itemize}
+        \item Models measured device behavior for scalable simulation of memristive neural hardware
+      \end{itemize}
+    \item \structure{\textbf{Running Conventional Automatic Speech Recognition on Memristor Hardware: A Simulated Approach}} \cite{rossenbach2025memristor}
+      \begin{itemize}
+        \item Evaluates quantized CTC-based ASR under simulated memristor hardware
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\section{Motivation}
+
+\begin{frame}{Motivation}
+  \begin{itemize}
+    \setlength{\itemsep}{10pt}
+    \item Memristor hardware enables fast, energy-efficient neural network inference, but analog inaccuracies introduce noise.
+    \item CTC-based Conformers have been evaluated on simulated memristor hardware \cite{rossenbach2025memristor}.
+    \item Transducers add an autoregressive prediction network and a joint network, which are repeatedly evaluated during inference.
+    \item \emph{Objective}: characterize how quantization and simulated device noise affect transducer ASR and assess training and decoding countermeasures.
+  \end{itemize}
+\end{frame}
 
 \section{Prerequisites}
-
-\begin{frame}{In-Memory Computing \cite{rossenbach2025memristor}}
-  \begin{columns}[c]
-    \begin{column}{0.48\textwidth}
-      \begin{itemize}
-        \setlength{\itemsep}{3pt}
-        \item Various technologies exist, with varying tradeoffs:
-              \begin{itemize}
-                \item Chip complexity and density
-                \item Energy consumption
-                \item Speed and reliability
-              \end{itemize}
-        \item This talk focuses on \emph{memristive} hardware, in particular \emph{resistive RAM (ReRAM)}:
-              \begin{itemize}
-                \item Key benefits: low energy consumption, non-volatility
-              \end{itemize}
-      \end{itemize}
-    \end{column}
-
-    \begin{column}{0.52\textwidth}
-      \begin{figure}
-        \centering
-        \includegraphics[width=\linewidth]{figures/imc_hierarchy_clean.png}
-        \caption{Taxonomy of In-Memory Computing technologies}
-      \end{figure}
-    \end{column}
-  \end{columns}
-\end{frame}
 
 \begin{frame}{Overview \cite{rossenbach2025memristor}}
   \begin{columns}[c]
@@ -537,30 +541,6 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Memristor Neural Layers \cite{rossenbach2025memristor}}
-  \begin{itemize}
-    \setlength{\itemsep}{6pt}
-    \item \emph{Tile} the weight matrix:
-          \begin{itemize}
-            \item Tile weight matrix with arbitrary dimensions into smaller fixed-size arrays.
-            \item E.g., $512 \times 512$ weight matrix $\rightarrow$ $16$ crossbar arrays of size $128 \times 128$.
-          \end{itemize}
-    \item \emph{Slice} weights into memristor states:
-          \begin{itemize}
-            \item Binary setting (high vs.\ low resistance).
-            \item Stacking of memristors for each magnitude bit (\emph{$k$-bit} weight requires $k-1$ arrays).
-          \end{itemize}
-    \item \emph{Pair} positive ($+$) and negative ($-$) bitlines.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Memristor Neural Layers}
-  \begin{figure}
-    \centering
-    \includegraphics[width=0.72\linewidth]{figures/weight_slicing_tiling.png}
-    \caption{Mapping a weight matrix on memristor arrays \cite{rossenbach2025memristor}}
-  \end{figure}
-\end{frame}
 
 % \begin{frame}{From Single Memristor to Layer Module: Mapping (TikZ)}
 %   \centering
@@ -626,57 +606,11 @@
 % \end{frame}
 
 
-\begin{frame}{Quantization}
-  \begin{itemize}
-    \setlength{\itemsep}{6pt}
-    \item The number of memristors required is proportional to the precision of the weights.
-          \begin{itemize}
-            \item Need to reduce the precision of the weights $\rightarrow$ quantization.
-          \end{itemize}
-    \item Quantization-Aware Training (QAT) performs better than Post-Training Quantization (PTQ), but requires more training time \cite{gholami2021survey}.
-          \begin{itemize}
-            \item[$\rightarrow$] High performance gap at low precision
-          \end{itemize}
-  \end{itemize}
-  \begin{table}[h]
-    \centering
-    \caption{WER (\%) on TED-LIUMv2 dev, Conformer CTC, 4-gram LM
-      \cite{rossenbach2025memristor}}
-    \label{tab:anchor-results}
-    \small
-    \begin{tabular}{l c c c c c c c}
-      \toprule
-      Weight bits & FP32 & 8   & 6   & 5   & 4    & 3    & 2    \\
-      \midrule
-      PTQ         & 7.2  & 7.2 & 7.9 & 8.9 & 11.4 & 30.7 & --   \\
-      QAT         &      & 7.3 & 7.7 & 7.4 & 7.8  & 8.3  & 22.1 \\
-      \bottomrule
-    \end{tabular}
-  \end{table}
-\end{frame}
-
-\section{Motivation}
-\begin{frame}{Motivation}
-  \begin{itemize}
-    \setlength{\itemsep}{10pt}
-    \item CTC-based Conformer shown to run on (simulated) memristor hardware \cite{rossenbach2025memristor}.
-    \item How do \emph{transducer} models, with their added complexity compared to CTC, behave on device?
-          \begin{itemize}
-            \item Autoregressive prediction network; internal language model (ILM).
-            \item Joint network evaluated repeatedly per emitted label.
-          \end{itemize}
-    \item Performance degradation across search paradigms:
-          \begin{itemize}
-            \item Lexicon-free vs.\ tree search.
-            \item ILM and prior scaling {---} How does device noise change the optimal LM weighting?
-          \end{itemize}
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Motivation}
+\section{Experiments and Results}
+\begin{frame}{Transducer Deployment Scenarios}
   \begin{itemize}
     \setlength{\itemsep}{2pt}
-    \item Performance impact of deploying components of the model on the device?
+    \item Which components of the model should be deployed on the device?
           \begin{itemize}
             \item Encoder only vs.\ encoder + prediction network vs.\ full model (encoder + prediction network + joint network)
           \end{itemize}
@@ -751,9 +685,7 @@
     \caption{CTC vs.\ Transducer architecture components}
   \end{figure}
 \end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Experiments}
 \begin{frame}{Experimental Setup}
   \begin{itemize}
     \setlength{\itemsep}{6pt}
@@ -763,8 +695,8 @@
     \item Encoder: 12-layer Conformer \cite{Gulati+Qin+:2020conformer}, 512-dim.
     \item Model types:
           \begin{enumerate}
-            \item \emph{CTC} \cite{graves2006connectionist}: encoder only.
-            \item \emph{FFNN-transducer} \cite{graves2012sequence}: prediction network is a 2-layer feed-forward
+            \item \emph{Connectionist Temporal Classification (CTC) Model} \cite{graves2006connectionist}: encoder only.
+            \item \emph{Feed Forward Neural Network (FFNN)-transducer} \cite{graves2012sequence}: prediction network is a 2-layer feed-forward
                   net (640-dim) over the previous-label embedding; monotonic alignments \cite{tripathi2019monotonic}.
             \item \emph{Full-context transducer} \cite{graves2012sequence}: LSTM
                   prediction network; monotonic alignments \cite{tripathi2019monotonic}.
@@ -775,7 +707,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{CTC Experiments}
+\begin{frame}{CTC Results}
   \begin{table}
     \caption{WER (\%) on LibriSpeech dev-other {--} CTC}
     \vspace{2pt}
@@ -833,7 +765,7 @@
 
 \newcommand{\resultsTableFontSize}{\footnotesize}
 
-\begin{frame}{FFNN Transducer Experiments: 8-bit Quantization}
+\begin{frame}{FFNN Transducer Results: 8-bit Quantization}
   \begin{table}
     \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ baseline)}
     \vspace{6pt}
@@ -862,7 +794,7 @@
   \end{table}
 \end{frame}
 
-\begin{frame}{FFNN Transducer Experiments: 4-bit Quantization}
+\begin{frame}{FFNN Transducer Results: 4-bit Quantization}
   \begin{table}
     \caption{WER (\%) on LibriSpeech dev-other (4-bit Quantization vs.\ baseline)}
     \vspace{6pt}
@@ -947,7 +879,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Full-Context Transducer Experiments: 8-bit Quantization}
+\begin{frame}{Full-Context Transducer Results: 8-bit Quantization}
   \begin{table}
     \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ baseline)}
     \vspace{6pt}
@@ -1006,53 +938,52 @@
 
 \begin{frame}{Noisier Models Demand Stronger Internal LM Compensation}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech (dev-other, ELM scale = 0.6, Tree + 4-gram LM search).}
-    \vspace{2pt}
+    \caption{WER (\%) on LibriSpeech dev-other (Tree + 4-gram LM search)}
+    \vspace{6pt}
     \footnotesize
-    \setlength{\tabcolsep}{4pt}
-    \begin{tabular}{l c c c c c c}
-      \toprule
-                        & \multicolumn{2}{c}{\textbf{Modules Quantized}} & \multicolumn{4}{c}{\textbf{ILM Scale}}                                                                               \\
-      \cmidrule(lr){2-3} \cmidrule(lr){4-7}
-                        & \textbf{Encoder}                               & \textbf{Predictor}                     & 0.1             & 0.2            & 0.3            & 0.4                     \\
-      \midrule
-      \textbf{Baseline} & --                                             & --                                     & \textbf{4.8}    & \textbf{4.8}   & \textbf{4.8}   & 5.0                     \\
-      \midrule
-      \multirow{2}{*}{\textbf{QAT}}
-                        & \checkmark                                     & --                                     & \textbf{5.1}    & \textbf{5.1}   & \textbf{5.1}   & 5.3                     \\
-                        & \checkmark                                     & \checkmark                             & \textbf{5.0}    & \textbf{5.0}   & 5.1            & 5.2                     \\
-      \midrule
-      \multirow{2}{*}{\textbf{Memristor}}
-                        & \checkmark                                     & --                                     & 17.4 $\pm$ 1.60 & 8.5 $\pm$ 0.34 & 7.0 $\pm$ 0.06 & \textbf{6.8 $\pm$ 0.08} \\
-                        & \checkmark                                     & \checkmark                             & 18.7 $\pm$ 1.58 & 8.8 $\pm$ 0.23 & 7.2 $\pm$ 0.09 & \textbf{6.8 $\pm$ 0.03} \\
-      \bottomrule
-    \end{tabular}
-  \end{table}
+    \subtable[Fixed ELM scale = 0.6]{
+      \setlength{\tabcolsep}{4pt}
+      \begin{tabular}{l c c c c c c c}
+        \toprule
+                          & \multicolumn{2}{c}{\textbf{Modules Quantized}} & \multicolumn{5}{c}{\textbf{ILM Scale}}                                                                                                \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-8}
+                          & \textbf{Encoder}                               & \textbf{Predictor}                     & 0.1             & 0.2            & 0.3            & 0.4                     & 0.5            \\
+        \midrule
+        \textbf{Baseline} & --                                             & --                                     & \textbf{4.8}    & \textbf{4.8}   & \textbf{4.8}   & 5.0                     & 5.1            \\
+        \midrule
+        \multirow{2}{*}{\textbf{QAT}}
+                          & \checkmark                                     & --                                     & \textbf{5.1}    & \textbf{5.1}   & \textbf{5.1}   & 5.3                     & 5.4            \\
+                          & \checkmark                                     & \checkmark                             & \textbf{5.0}    & \textbf{5.0}   & 5.1            & 5.2                     & 5.4            \\
+        \midrule
+        \multirow{2}{*}{\textbf{Memristor}}
+                          & \checkmark                                     & --                                     & 17.4 $\pm$ 1.60 & 8.5 $\pm$ 0.34 & 7.0 $\pm$ 0.06 & \textbf{6.8 $\pm$ 0.08} & 6.7 $\pm$ 0.10 \\
+                          & \checkmark                                     & \checkmark                             & 18.7 $\pm$ 1.58 & 8.8 $\pm$ 0.23 & 7.2 $\pm$ 0.09 & \textbf{6.8 $\pm$ 0.03} & 6.9 $\pm$ 0.10 \\
+        \bottomrule
+      \end{tabular}
+    }
 
-  \vspace{6pt}
+    \vspace{8pt}
 
-  \begin{table}
-    \caption{Optimal LM scales and WER (\%) on LibriSpeech (dev-other, Tree + 4-gram LM search).}
-    \vspace{2pt}
-    \footnotesize
-    \setlength{\tabcolsep}{6pt}
-    \begin{tabular}{l c c c c c}
-      \toprule
-                        & \multicolumn{2}{c}{\textbf{Modules Quantized}} & \multicolumn{2}{c}{\textbf{Scales}} &                                                 \\
-      \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-                        & \textbf{Encoder}                               & \textbf{Predictor}                  & \textbf{ILM} & \textbf{ELM} & \textbf{WER (\%)} \\
-      \midrule
-      \textbf{Baseline} & --                                             & --                                  & 0.1          & 0.6          & 4.8               \\
-      \midrule
-      \multirow{2}{*}{\textbf{QAT}}
-                        & \checkmark                                     & --                                  & 0.2          & 0.7          & 5.0               \\
-                        & \checkmark                                     & \checkmark                          & 0.2          & 0.7          & 5.0               \\
-      \midrule
-      \multirow{2}{*}{\textbf{Memristor}}
-                        & \checkmark                                     & --                                  & 0.3          & 0.5          & 6.7 $\pm$ 0.07    \\
-                        & \checkmark                                     & \checkmark                          & 0.4          & 0.5          & 6.7 $\pm$ 0.04    \\
-      \bottomrule
-    \end{tabular}
+    \subtable[Optimal LM Scales]{
+      \setlength{\tabcolsep}{6pt}
+      \begin{tabular}{l c c c c c}
+        \toprule
+                          & \multicolumn{2}{c}{\textbf{Modules Quantized}} & \multicolumn{2}{c}{\textbf{Scales}} &                                                 \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+                          & \textbf{Encoder}                               & \textbf{Predictor}                  & \textbf{ILM} & \textbf{ELM} & \textbf{WER (\%)} \\
+        \midrule
+        \textbf{Baseline} & --                                             & --                                  & 0.1          & 0.6          & 4.8               \\
+        \midrule
+        \multirow{2}{*}{\textbf{QAT}}
+                          & \checkmark                                     & --                                  & 0.2          & 0.7          & 5.0               \\
+                          & \checkmark                                     & \checkmark                          & 0.2          & 0.7          & 5.0               \\
+        \midrule
+        \multirow{2}{*}{\textbf{Memristor}}
+                          & \checkmark                                     & --                                  & 0.3          & 0.5          & 6.7 $\pm$ 0.07    \\
+                          & \checkmark                                     & \checkmark                          & 0.4          & 0.5          & 6.7 $\pm$ 0.04    \\
+        \bottomrule
+      \end{tabular}
+    }
   \end{table}
   {\scriptsize\textbf{ILM}: Internal Language Model; \textbf{ELM}: External Language Model.}
 
@@ -1096,10 +1027,10 @@
           \end{itemize}
     \item \emph{Search Space vs.\ Model \& QAT Level}:
           \begin{itemize}
-            \item Large search space $\Rightarrow$ more hypotheses $\Rightarrow$ more energy consumption and higher RTF.
+            \item Large search space $\Rightarrow$ more hypotheses $\Rightarrow$ more energy consumption and higher Real-Time Factor (RTF).
             \item Study the impact of restricting the search space on WER and RTF.
                   \begin{itemize}
-                    \item[$\rightarrow$] How many more hypotheses are needed for on-device vs.\ 4-bit vs.\ 8-bit vs.\ full-precision runs?
+                    \item[$\rightarrow$] How many more hypotheses are needed for on-device (simulated) vs.\ 4-bit vs.\ 8-bit vs.\ full-precision runs?
                     \item[$\rightarrow$] Compare hypothesis expansion across CTC and transducer variants.
                   \end{itemize}
           \end{itemize}
@@ -1154,6 +1085,88 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 \backupbegin
+
+\begin{frame}{In-Memory Computing \cite{rossenbach2025memristor}}
+  \begin{columns}[c]
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \setlength{\itemsep}{3pt}
+        \item Various technologies exist, with varying tradeoffs:
+              \begin{itemize}
+                \item Chip complexity and density
+                \item Energy consumption
+                \item Speed and reliability
+              \end{itemize}
+        \item This talk focuses on \emph{memristive} hardware, in particular \emph{resistive RAM (ReRAM)}:
+              \begin{itemize}
+                \item Key benefits: low energy consumption, non-volatility
+              \end{itemize}
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.52\textwidth}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{figures/imc_hierarchy_clean.png}
+        \caption{Taxonomy of In-Memory Computing technologies}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Quantization}
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item The number of memristors required is proportional to the precision of the weights.
+          \begin{itemize}
+            \item Need to reduce the precision of the weights $\rightarrow$ quantization.
+          \end{itemize}
+    \item Quantization-Aware Training (QAT) performs better than Post-Training Quantization (PTQ), but requires more training time \cite{gholami2021survey}.
+          \begin{itemize}
+            \item[$\rightarrow$] High performance gap at low precision
+          \end{itemize}
+  \end{itemize}
+  \begin{table}[h]
+    \centering
+    \caption{WER (\%) on TED-LIUMv2 dev, Conformer CTC, 4-gram Language Model (LM)
+      \cite{rossenbach2025memristor}}
+    \label{tab:anchor-results}
+    \small
+    \begin{tabular}{l c c c c c c c}
+      \toprule
+      Weight bits & FP32 & 8   & 6   & 5   & 4    & 3    & 2    \\
+      \midrule
+      PTQ         & 7.2  & 7.2 & 7.9 & 8.9 & 11.4 & 30.7 & --   \\
+      QAT         &      & 7.3 & 7.7 & 7.4 & 7.8  & 8.3  & 22.1 \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+\begin{frame}{Memristor Neural Layers \cite{rossenbach2025memristor}}
+  \begin{itemize}
+    \setlength{\itemsep}{6pt}
+    \item \emph{Tile} the weight matrix:
+          \begin{itemize}
+            \item Tile weight matrix with arbitrary dimensions into smaller fixed-size arrays.
+            \item E.g., $512 \times 512$ weight matrix $\rightarrow$ $16$ crossbar arrays of size $128 \times 128$.
+          \end{itemize}
+    \item \emph{Slice} weights into memristor states:
+          \begin{itemize}
+            \item Binary setting (high vs.\ low resistance).
+            \item Stacking of memristors for each magnitude bit (\emph{$k$-bit} weight requires $k-1$ arrays).
+          \end{itemize}
+    \item \emph{Pair} positive ($+$) and negative ($-$) bitlines.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Memristor Neural Layers}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.72\linewidth]{figures/weight_slicing_tiling.png}
+    \caption{Mapping a weight matrix on memristor arrays \cite{rossenbach2025memristor}}
+  \end{figure}
+\end{frame}
 
 \begin{frame}{Appendix: Device VMM Operation Statistics}
   \centering
@@ -1389,4 +1402,3 @@
 % \end{frame}
 
 \end{document}
-
