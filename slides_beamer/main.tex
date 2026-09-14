@@ -271,19 +271,19 @@
   \begin{itemize}
     \item \structure{\textbf{Sequence Transduction with Recurrent Neural Networks}} \cite{graves2012sequence}
           \begin{itemize}
-            \item Introduces the RNN-T architecture, a widely used architecture for ASR
+            \item Introduces the Recurrent Neural Network - Transducer (RNN-T, or simply Transducer) architecture, widely used for Automatic Speech Recognition (ASR).
           \end{itemize}
     \item \structure{\textbf{Conformer: Convolution-Augmented Transformer for Speech Recognition}} \cite{Gulati+Qin+:2020conformer}
           \begin{itemize}
-            \item Introduces the Conformer encoder, a common choice for ASR encoders
+            \item Introduces the Conformer encoder, a common choice for ASR encoders.
           \end{itemize}
     \item \structure{\textbf{Synaptogen: A Cross-Domain Generative Device Model for Large-Scale Neuromorphic Circuit Design}} \cite{hennen2024synaptogen}
           \begin{itemize}
-            \item Models measured device behavior for scalable simulation of memristive neural hardware
+            \item Models measured device behavior for scalable simulation of memristive neural hardware.
           \end{itemize}
     \item \structure{\textbf{Running Conventional Automatic Speech Recognition on Memristor Hardware: A Simulated Approach}} \cite{rossenbach2025memristor}
           \begin{itemize}
-            \item Evaluates quantized CTC-based ASR under simulated memristor hardware
+            \item Evaluates quantized Connectionist Temporal Classification (CTC)-based ASR under simulated memristor hardware
           \end{itemize}
   \end{itemize}
 \end{frame}
@@ -293,7 +293,7 @@
 \begin{frame}{Motivation}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
-    \item Memristor hardware enables fast, energy-efficient neural network inference, but analog inaccuracies introduce noise.
+    \item Memristor hardware enables fast, energy-efficient neural network inference, but introduce analog inaccuracies.
     \item CTC-based Conformers have been evaluated on simulated memristor hardware \cite{rossenbach2025memristor}.
     \item Transducers add an autoregressive prediction network and a joint network, which are repeatedly evaluated during inference.
     \item \emph{Objective}: characterize how quantization and simulated device noise affect transducer ASR and assess training and decoding countermeasures.
@@ -314,7 +314,7 @@
               \end{itemize}
         \item Limitations:
               \begin{itemize}
-                \item High analog inaccuracies and thus need specific restrictions on mathematical operations \cite{wouters2016reliability}.
+                \item Introduces analog inaccuracies \cite{wouters2016reliability}.
                 \item Production is still in early stages \cite{infineon2022rram}.
                 \item Current experiments are simulated using SynaptogenML \cite{hennen2024synaptogen} \cite{rossenbach2025memristor}.
               \end{itemize}
@@ -343,7 +343,7 @@
           \begin{equation}
             I = G V \quad \text{with} \quad G = \frac{1}{R}
           \end{equation}
-    \item Addition done via Kirchhoff's law for any connected node in a circuit:
+    \item Addition done via Kirchhoff's law for any connected node in a circuit, with $N$ connected lines:
           \begin{equation}
             \sum_{n=0}^{N} I_n = 0 \;\rightarrow\; I_0 = - \sum_{n=1}^{N} I_n
           \end{equation}
@@ -473,13 +473,14 @@
 \begin{frame}{The Memristor \cite{hennen2024synaptogen}}
   \begin{columns}[c]
     \begin{column}{0.52\textwidth}
-      \emph{Key Idea}: Program weights by setting the resistance.
+      \emph{Key Idea}: Encode each weight bit as a high- or low-resistance state.
       \begin{itemize}
         \setlength{\itemsep}{3pt}
-        \item Apply $-V > -V_S \;\rightarrow$ set to low resistance
-        \item Apply $\phantom{-}V > \phantom{-}V_R \;\rightarrow$ set to high resistance
-        \item Intermediate states possible, but difficult to program reliably
-        \item State is physically stored (non-volatile memory)
+        \item Let $V_S$ be the set voltage and $V_R$ the reset voltage thresholds.
+        \item Apply $-V > -V_S \;\rightarrow$ set to low resistance.
+        \item Apply $\phantom{-}V > \phantom{-}V_R \;\rightarrow$ set to high resistance.
+        \item Intermediate states possible, but difficult to program reliably.
+        \item State is physically stored (non-volatile memory).
       \end{itemize}
     \end{column}
 
@@ -488,6 +489,7 @@
         \centering
         \includegraphics[width=\linewidth]{figures/memristor_iv_curve.png}
         \caption{I{--}V characteristic curve of a memristor \cite{hennen2024synaptogen}}
+        {\scriptsize $R_L/R_H$: low-/high-resistance state; $I_L(V)/I_H(V)$: corresponding current; $V_{\max}$: maximum applied voltage; $\mathrm{RESET}(V)$: current during the reset transition.}
       \end{figure}
     \end{column}
   \end{columns}
@@ -498,15 +500,15 @@
   \begin{itemize}
     \setlength{\itemsep}{3pt}
     \item[] \emph{Programming Limitations}
-    \item Resulting resistance state varies with each programming cycle
-    \item Non-linear relation of current and voltage
+    \item Resulting resistance state varies with each programming cycle.
+    \item Non-linear relation of current and voltage.
   \end{itemize}
   \hfill
   \begin{itemize}
     \setlength{\itemsep}{3pt}
     \item[] \emph{Cannot exactly model weights}
-    \item Only positive, non-zero weights possible
-    \item Current leakage prohibits a true zero
+    \item Only positive, non-zero weights possible.
+    \item Current leakage prohibits a true zero.
   \end{itemize}
 \end{frame}
 
@@ -517,7 +519,7 @@
         \setlength{\itemsep}{2pt}
         \item Use positive and negative bitlines to create memristor pairs
         \item Each row-wise pair of memristors represents a weight
-        \item[$\rightarrow$] Differential pair allows for negative and zero weight values:
+        \item[$\rightarrow$] For $N$ input rows, with row index $i$ and output-column index $j$:
               \begin{equation*}
                 I_j = \sum_{i=1}^{N} V_i G_{i,j}^{+} - \sum_{i=1}^{N} V_i G_{i,j}^{-}
               \end{equation*}
@@ -542,83 +544,19 @@
 \end{frame}
 
 
-% \begin{frame}{From Single Memristor to Layer Module: Mapping (TikZ)}
-%   \centering
-%   \begin{tikzpicture}[
-%       x={(0.86cm, 0.35cm)}, y={(0.5cm, -0.45cm)}, z={(0cm,1cm)},
-%       line cap=round, line join=round,
-%       bitlbl/.style={inner sep=1pt, font=\fontsize{9}{10}\selectfont},
-%       xlbl/.style={font=\fontsize{11}{12}\selectfont},
-%     ]
-%     \crossbar{-6,-5,0,7}{1,-1,5,-2}{-3,4,-2,3}{-7,6,0,-1}
-%     \begin{scope}[shift={(0.8,-0.8,2.7)}, scale=1.35]
-%       \coordinate (T_TL) at (0,0);
-%       \coordinate (T_TR) at (2,0);
-%       \coordinate (T_BL) at (0,2);
-%       \coordinate (T_BR) at (2,2);
-%       \coordinate (T_MR) at (2,1);
-%     \end{scope}
-%     \draw[dashed, black!55] (2,0,0) -- (T_TL);
-%     \draw[dashed, black!55] (2,2,0) -- (T_BL);
-%     \draw[dashed, black!55] (4,2,0) -- (T_BR);
-%     \begin{scope}[shift={(0.8,-0.8,2.7)}, scale=1.35]
-%       \draw[fill=white, line width=0.8pt] (0,0) -- (2,0) -- (2,2) -- (0,2) -- cycle;
-%       \draw[line width=0.3pt] (1,0) -- (1,2) (0,1) -- (2,1);
-%       \node[inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (0.5,0.5) {$0$};
-%       \node[inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (1.5,0.5) {$7$};
-%       \node[red, inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (0.5,1.5) {$5$};
-%       \node[inner sep=1pt, font=\fontsize{12}{13}\selectfont] at (1.5,1.5) {$-2$};
-%     \end{scope}
-%     \node[font=\fontsize{10}{11}\selectfont\itshape] at (-2.5cm,1.8cm) {tiling};
-%     \begin{scope}[shift={(7.3cm,4.6cm)}, scale=1.15]
-%       \crossbartwofour{0,0,1,0}{1,0,0,0}{1}{2}
-%       \foreach \col/\s in {0/+,1/-,2/+,3/-} {
-%         \node[bitlbl] at (\col+0.5,-0.5) {$\s$};
-%       }
-%       \node[xlbl] at (4.8,1.0) {$\times 4$};
-%       \coordinate (slice4_left) at (0, 1, 0);
-%     \end{scope}
-%     \begin{scope}[shift={(7.3cm,2.2cm)}, scale=1.15]
-%       \crossbartwofour{0,0,1,0}{0,0,0,1}{1}{2}
-%       \foreach \col/\s in {0/+,1/-,2/+,3/-} {
-%         \node[bitlbl] at (\col+0.5,-0.5) {$\s$};
-%       }
-%       \node[xlbl] at (4.8,1.0) {$\times 2$};
-%       \coordinate (slice2_left) at (0, 1, 0);
-%     \end{scope}
-%     \begin{scope}[shift={(7.3cm,-0.2cm)}, scale=1.15]
-%       \crossbartwofour{0,0,1,0}{1,0,0,0}{1}{2}
-%       \foreach \col/\s in {0/+,1/-,2/+,3/-} {
-%         \node[bitlbl] at (\col+0.5,-0.5) {$\s$};
-%       }
-%       \node[xlbl] at (4.8,1.0) {$\times 1$};
-%       \node[xlbl] at (-0.8,1.0) {$V_{\mathrm{in}}$};
-%       \draw[->, line width=0.4pt] (-0.3, 1.0) -- (-0.05, 1.0);
-%       \node[xlbl] at (4.5,2.4) {$I_{\mathrm{out}}$};
-%       \draw[->, line width=0.4pt] (4.0, 2.05) -- (4.0, 2.3);
-%       \coordinate (slice1_left) at (0, 1, 0);
-%     \end{scope}
-%     \draw[->, shorten >=2pt, shorten <=2pt] (T_MR) -- (slice4_left);
-%     \draw[->, shorten >=2pt, shorten <=2pt] (T_MR) -- (slice2_left) node[midway, below=3pt, font=\fontsize{10}{11}\selectfont\itshape] {slicing};
-%     \draw[->, shorten >=2pt, shorten <=2pt] (T_MR) -- (slice1_left);
-%   \end{tikzpicture}
-%   {\small\textbf{Figure}: Exemplary mapping of a 4-bit quantized weight onto 3 memristor arrays.}
-% \end{frame}
-
-
 \section{Experiments and Results}
 \begin{frame}{Transducer Deployment Scenarios}
   \begin{itemize}
     \setlength{\itemsep}{2pt}
     \item Which components of the model should be deployed on the device?
           \begin{itemize}
-            \item Encoder only vs.\ encoder + prediction network vs.\ full model (encoder + prediction network + joint network)
+            \item \emph{Encoder only} vs.\ \emph{encoder + predictor} vs.\ \emph{encoder + predictor + joiner} (full model).
           \end{itemize}
     \item \emph{Tradeoff}: more offloading $\Rightarrow$ more energy efficiency, but also more noise.
   \end{itemize}
   \begin{figure}
     \centering
-    \resizebox{!}{0.6\textheight}{%
+    \resizebox{!}{0.45\textheight}{%
       \begin{tikzpicture}[
           node distance=1.1cm and 1.6cm,
           block/.style={
@@ -635,25 +573,25 @@
         ]
 
         % --- Row 1 (Inputs) ---
-        \node[io] (prev_tokens) {Previous Labels\\($y^{<u}_0$)};
-        \node[io, right=3.8cm of prev_tokens] (audio) {Audio Features\\$x_1^T$};
+        \node[io] (prev_tokens) {Previous Labels\\$\mathbf{y}_0^{u-1}$};
+        \node[io, right=3.8cm of prev_tokens] (audio) {Audio Features\\$\mathbf{x}_1^T$};
 
         % --- Row 2 (Prediction Network on left, Encoder on right) ---
-        \node[block, above=1.0cm of prev_tokens, fill=orange!15] (pred) {Prediction Network\\{\footnotesize{(FFNN / LSTM)}}};
+        \node[block, above=1.0cm of prev_tokens, fill=orange!15] (pred) {Predictor\\{\footnotesize{(FFNN / LSTM)}}};
         \node[block, above=1.0cm of audio] (encoder) {Encoder};
 
         % --- External LM alongside the Encoder (on the right) ---
         \node[optblock, right=1.2cm of encoder] (extlm) {External LM\\{\footnotesize{(Optional)}}};
 
         % --- CTC Output directly above Encoder ---
-        \node[io, above=1.6cm of encoder] (ctc) {\textbf{CTC Output}\\$P(a_t \mid x_1^T)$};
+        \node[io, above=1.6cm of encoder] (ctc) {\textbf{CTC Output}\\$p_t(k \mid \mathbf{x}_1^T)$};
 
         % --- Row 3 (Joint Network placed to the left so it doesn't overlap CTC) ---
         \path (pred) -- (encoder) coordinate[midway] (mid_pred_enc);
-        \node[block, above=1.6cm of pred, fill=purple!15] (joint) {Joint Network};
+        \node[block, above=1.6cm of pred, fill=purple!15] (joint) {Joiner};
 
         % --- Row 4 (RNN-T Output above Joint) ---
-        \node[io, above=1.0cm of joint] (rnnt) {\textbf{RNN-T Output}\\$P(y_{t,u} \mid x_1^T, y^{<u}_0)$};
+        \node[io, above=1.0cm of joint] (rnnt) {\textbf{RNN-T Output}\\$p_{t,u}(k \mid \mathbf{x}_1^T, \mathbf{y}_0^{u-1})$};
 
         % --- Connections / Arrows ---
         % Inputs to networks
@@ -684,15 +622,19 @@
     \vspace{-2pt}
     \caption{CTC vs.\ Transducer architecture components}
   \end{figure}
+  {\scriptsize \textbf{FFNN}: feed-forward neural network; \textbf{LSTM}: long short-term memory; \textbf{LM}: language model.} \\
+  {\scriptsize $k$: candidate label or blank; $t$: acoustic-frame index; $u$: output-label index.}\\
+  {\scriptsize $\mathbf{x}_1^T=(\mathbf{x}_1,\ldots,\mathbf{x}_T)$: audio-feature sequence;
+  $\mathbf{y}_0^{u-1}=(y_0,\ldots,y_{u-1})$: previously emitted labels;}
 \end{frame}
 
 \begin{frame}{Experimental Setup}
   \begin{itemize}
     \setlength{\itemsep}{6pt}
-    \item Data: LibriSpeech \cite{Librispeech} (960\,h), BPE subword targets
+    \item \emph{Data}: LibriSpeech \cite{Librispeech} (960\,h), Byte-Pair Encoding (BPE) subword targets
           (128 merges $\to$ 184 labels).
-    \item Features: 80 log-mel filters, 10\,ms frame shift; SpecAugment during training.
-    \item Encoder: 12-layer Conformer \cite{Gulati+Qin+:2020conformer}, 512-dim.
+    \item \emph{Features}: 80 log-mel filters, 10\,ms frame shift; SpecAugment during training.
+    \item \emph{Encoder}: 12-layer Conformer \cite{Gulati+Qin+:2020conformer}, 512-dim.
     \item Model types:
           \begin{enumerate}
             \item \emph{Connectionist Temporal Classification (CTC) Model} \cite{graves2006connectionist}: encoder only.
@@ -701,15 +643,15 @@
             \item \emph{Full-context transducer} \cite{graves2012sequence}: LSTM
                   prediction network; monotonic alignments \cite{tripathi2019monotonic}.
           \end{enumerate}
-    \item Quantization: QAT, per-tensor symmetric, 8- and 4-bit weights, 8-bit activations; zero-point 0.
-    \item Stages: (1) Full-precision baseline $\to$ (2) Full pre-training with QAT (fake quantization) $\to$
+    \item \emph{Quantization}: Quantization-Aware Training (QAT), per-tensor symmetric, 8- and 4-bit weights, 8-bit activations; zero-point 0.
+    \item \emph{Stages}: (1) Full-precision baseline $\to$ (2) Full pre-training with QAT (fake quantization) $\to$
           (3) memristor simulation (3{--}5 runs).
   \end{itemize}
 \end{frame}
 
 \begin{frame}{CTC Results}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other {--} CTC}
+    \caption{Word Error Rate (WER, \%; mean $\pm$ standard deviation) on LibriSpeech dev-other {--} CTC}
     \vspace{2pt}
     \footnotesize
     \subtable[Baseline]{
@@ -812,8 +754,8 @@
       \midrule
       \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                                             \\
       \checkmark                                     & --                 & --                                & 7.2             & 6.8                                  & 5.2                       \\
-      \checkmark                                     & \checkmark         & --                                & TBD             & TBD                                  & TBD                       \\
-      \checkmark                                     & \checkmark         & \checkmark                        & TBD             & TBD                                  & TBD                       \\
+      \checkmark                                     & \checkmark         & --**                              & 6.4             & 6.2                                  & 5.0                       \\
+      \checkmark                                     & \checkmark         & \checkmark**                      & 6.4             & 6.2                                  & 4.9                       \\
       \midrule
       \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                                            \\
       \checkmark                                     & --                 & --                                & 10.1 $\pm$ 0.05 & 9.1 $\pm$ 0.11                       & 6.7 $\pm$ 0.07            \\
@@ -997,15 +939,15 @@
     \setlength{\itemsep}{10pt}
     \item \emph{Fine-tuning}:
           \begin{itemize}
-            \item Fine-tuning from a full-precision checkpoint for other configurations to study the impact on WER.
+            \item Fine-tuning from a full-precision checkpoint for other configurations
           \end{itemize}
     \item \emph{Error Analysis}:
           \begin{itemize}
             \item Substitutions vs.\ insertions vs.\ deletions.
                   \begin{itemize}
-                    \item[$\rightarrow$] Why does lexicon-free search degrade more than tree search?
+                    \item[$\rightarrow$] How can we improve the degradations in the lexicon-free search?
                   \end{itemize}
-            \item Acoustic posterior distortion and score calibration with external LMs.
+            \item Study Acoustic posterior distortion under noise.
           \end{itemize}
     \item \emph{Generalization}:
           \begin{itemize}
@@ -1020,7 +962,7 @@
     \item \emph{Decoder Parameters}:
           \begin{itemize}
             \item Explore penalties for blank emissions.
-            \item Tune softmax temperature to sharpen or soften posterior peaks under noise.
+            \item Tune softmax temperature to sharpen or soften the distribution under noise.
           \end{itemize}
     \item \emph{Search Space vs.\ Model \& QAT Level}:
           \begin{itemize}
