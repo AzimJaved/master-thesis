@@ -651,7 +651,7 @@
 
 \begin{frame}{CTC Results}
   \begin{table}
-    \caption{Word Error Rate (WER, \%; mean $\pm$ standard deviation) on LibriSpeech dev-other {--} CTC}
+    \caption{WER (\%; mean $\pm$ standard deviation) on LibriSpeech dev-other {--} CTC. Memristor results use 5 simulation runs.}
     \vspace{2pt}
     \footnotesize
     \subtable[Baseline]{
@@ -661,7 +661,7 @@
         \cmidrule(lr){2-2} \cmidrule(lr){3-4}
         \textbf{Model} & \textbf{No LM}                        & \textbf{No LM}                    & \textbf{4-gram} \\
         \midrule
-        CTC            & 7.1                                   & 5.0                               & 5.2             \\
+        CTC            & 7.1                                   & 6.5                               & 5.2             \\
         \bottomrule
       \end{tabular}
     }
@@ -679,8 +679,8 @@
             \cmidrule(lr){2-2} \cmidrule(lr){3-4}
             \textbf{Bits} & \textbf{No LM}                        & \textbf{No LM}                    & \textbf{4-gram} \\
             \midrule
-            8             & 7.3                                   & 5.2                               & 5.3             \\
-            4             & 8.3                                   & 5.4                               & 5.7             \\
+            8             & 7.3                                   & 6.8                               & 5.3             \\
+            4             & 8.3                                   & 7.6                               & 5.7             \\
             \bottomrule
           \end{tabular}
         }
@@ -696,7 +696,7 @@
             \textbf{Bits} & \textbf{No LM}                        & \textbf{No LM}                    & \textbf{4-gram} \\
             \midrule
             8             & 13.5 $\pm$ 0.37                       & 10.4 $\pm$ 0.20                   & 6.7 $\pm$ 0.09  \\
-            4             & 11.9 $\pm$ 0.18                       & TBD                               & 6.8 $\pm$ 0.12  \\
+            4             & 11.9 $\pm$ 0.18                       & 10.1 $\pm$ 0.12                   & 6.8 $\pm$ 0.12  \\
             \bottomrule
           \end{tabular}
         }
@@ -709,67 +709,67 @@
 
 \begin{frame}{FFNN Transducer Results: 8-bit Quantization}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ baseline)}
+    \caption{WER (\%; mean $\pm$ standard deviation) on LibriSpeech dev-other (8-bit Quantization vs.\ baseline). Memristor results use 3 simulation runs.}
     \vspace{6pt}
     \resultsTableFontSize
     \setlength{\tabcolsep}{8pt}
     \begin{tabular}{c c c c c c}
       \toprule
-      \multicolumn{3}{c}{\textbf{Modules Quantized}} & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                                                                \\
+      \multicolumn{3}{c}{\textbf{Modules Quantized}} & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                                                                       \\
       \cmidrule(lr){1-3} \cmidrule(lr){4-4} \cmidrule(lr){5-6}
-      \textbf{Encoder}                               & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}            & \textbf{No LM}                       & \textbf{4-gram}           \\
+      \textbf{Encoder}                               & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}            & \textbf{No LM}                       & \textbf{4-gram}                  \\
       \midrule
-      \multicolumn{6}{l}{\textbf{Baseline}}                                                                                                                                                                  \\
-      --                                             & --                 & --                                & 5.9                       & 5.8                                  & 4.8                       \\
+      \multicolumn{6}{l}{\textbf{Baseline}}                                                                                                                                                                         \\
+      --                                             & --                 & --                                & 5.9                       & 5.8                                  & 4.8                              \\
       \midrule
-      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                                                       \\
-      \checkmark                                     & --                 & --                                & 6.3                       & 6.1                                  & 4.9                       \\
-      \checkmark                                     & \checkmark         & --                                & 6.4                       & 6.2                                  & 5.0                       \\
-      \checkmark                                     & \checkmark         & \checkmark                        & 6.4                       & 6.2                                  & 4.9                       \\
+      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                                                              \\
+      \checkmark                                     & --                 & --                                & 6.3                       & 6.1                                  & 4.9                              \\
+      \checkmark                                     & \checkmark         & --                                & 6.4                       & 6.2                                  & 5.0                              \\
+      \checkmark                                     & \checkmark         & \checkmark                        & 6.4                       & 6.2                                  & 4.9                              \\
       \midrule
-      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                                                      \\
-      \checkmark                                     & --                 & --                                & \phantom{0}9.8 $\pm$ 0.06 & \phantom{5}8.7 $\pm$ \phantom{1}0.03 & \phantom{1}6.7 $\pm$ 0.07 \\
-      \checkmark                                     & \checkmark         & --                                & 10.7 $\pm$ 0.10           & \phantom{5}8.9 $\pm$ \phantom{1}0.11 & \phantom{1}6.7 $\pm$ 0.04 \\
-      \checkmark                                     & \checkmark         & \checkmark                        & 44.7 $\pm$ 1.95           & 56.1 $\pm$ 10.90                     & 17.2 $\pm$ 1.99**         \\
+      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                                                             \\
+      \checkmark                                     & --                 & --                                & \phantom{0}9.8 $\pm$ 0.06 & \phantom{5}8.7 $\pm$ \phantom{1}0.03 & \phantom{$^{\#}$1}6.7 $\pm$ 0.07 \\
+      \checkmark                                     & \checkmark         & --                                & 10.7 $\pm$ 0.10           & \phantom{5}8.9 $\pm$ \phantom{1}0.11 & \phantom{$^{\#}$1}6.7 $\pm$ 0.04 \\
+      \checkmark                                     & \checkmark         & \checkmark                        & 44.7 $\pm$ 1.95           & 56.1 $\pm$ 10.90                     & $^{\#}$18.0 $\pm$ 1.27           \\
       \bottomrule
     \end{tabular}
   \end{table}
-  {\footnotesize **fake result}
+  {\scriptsize $^{\#}$ Result only for 2 runs, other runs WIP.}
 \end{frame}
 
 \begin{frame}{FFNN Transducer Results: 4-bit Quantization}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other (4-bit Quantization vs.\ baseline)}
+    \caption{WER (\%; mean $\pm$ standard deviation) on LibriSpeech dev-other (4-bit Quantization vs.\ baseline). Memristor results use 3 simulation runs.}
     \vspace{6pt}
     \resultsTableFontSize
     \setlength{\tabcolsep}{8pt}
     \begin{tabular}{c c c c c c}
       \toprule
-      \multicolumn{3}{c}{\textbf{Modules Quantized}} & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                                                      \\
+      \multicolumn{3}{c}{\textbf{Modules Quantized}} & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                                                                                                                                                \\
       \cmidrule(lr){1-3} \cmidrule(lr){4-4} \cmidrule(lr){5-6}
-      \textbf{Encoder}                               & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}  & \textbf{No LM}                       & \textbf{4-gram}           \\
+      \textbf{Encoder}                               & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}                                & \textbf{No LM}                                                     & \textbf{4-gram}                                         \\
       \midrule
-      \multicolumn{6}{l}{\textbf{Baseline}}                                                                                                                                                        \\
-      --                                             & --                 & --                                & 5.9             & 5.8                                  & 4.8                       \\
+      \multicolumn{6}{l}{\textbf{Baseline}}                                                                                                                                                                                                                                                  \\
+      --                                             & --                 & --                                & 5.9                                           & 5.8                                                                & 4.8                                                     \\
       \midrule
-      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                                             \\
-      \checkmark                                     & --                 & --                                & 7.2             & 6.8                                  & 5.2                       \\
-      \checkmark                                     & \checkmark         & --**                              & 6.4             & 6.2                                  & 5.0                       \\
-      \checkmark                                     & \checkmark         & \checkmark**                      & 6.4             & 6.2                                  & 4.9                       \\
+      \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                                                                                                                                       \\
+      \checkmark                                     & --                 & --                                & 7.2\phantom{\textsuperscript{**}}             & 6.8\phantom{\textsuperscript{**}}                                  & 5.2\phantom{\textsuperscript{**}}                       \\
+      \checkmark                                     & \checkmark         & --                                & 7.3\phantom{\textsuperscript{**}}             & 6.9\phantom{\textsuperscript{**}}                                  & 5.3\textsuperscript{**}                                 \\
+      \checkmark                                     & \checkmark         & \checkmark                        & 7.3\textsuperscript{**}                       & 6.9\textsuperscript{**}                                            & 5.5\textsuperscript{**}                                 \\
       \midrule
-      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                                            \\
-      \checkmark                                     & --                 & --                                & 10.1 $\pm$ 0.05 & 9.1 $\pm$ 0.11                       & 6.7 $\pm$ 0.07            \\
-      \checkmark                                     & \checkmark         & --**                              & 10.7 $\pm$ 0.10 & \phantom{5}8.9 $\pm$ \phantom{1}0.11 & \phantom{1}6.7 $\pm$ 0.04 \\
-      \checkmark                                     & \checkmark         & \checkmark**                      & 44.7 $\pm$ 1.95 & 56.1 $\pm$ 10.90                     & 17.2 $\pm$ 1.99           \\
+      \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                                                                                                                                      \\
+      \checkmark                                     & --                 & --                                & 10.1 $\pm$ 0.05\phantom{\textsuperscript{**}} & \phantom{5}9.1 $\pm$ \phantom{1}0.11\phantom{\textsuperscript{**}} & \phantom{1}6.7 $\pm$ 0.07\phantom{\textsuperscript{**}} \\
+      \checkmark                                     & \checkmark         & --                                & 10.4 $\pm$ 0.11\phantom{\textsuperscript{**}} & \phantom{5}9.3 $\pm$ \phantom{1}0.12\phantom{\textsuperscript{**}} & \phantom{1}6.7 $\pm$ 0.06\phantom{\textsuperscript{**}} \\
+      \checkmark                                     & \checkmark         & \checkmark                        & 44.7 $\pm$ 1.95\textsuperscript{**}           & 56.1 $\pm$ 10.90\textsuperscript{**}                               & 17.2 $\pm$ 1.99\textsuperscript{**}                     \\
       \bottomrule
     \end{tabular}
   \end{table}
-  {\footnotesize **fake result}
+  {\scriptsize \textsuperscript{**} Filler result.}
 \end{frame}
 
 \begin{frame}{FFNN Transducer: Fine-Tuning vs.\ QAT from Scratch}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other: Checkpoint fine-tuning vs.\ full pre-training (PTN). Configuration {--} FFNN Transducer with Encoder under QAT}
+    \caption{WER (\%; mean $\pm$ standard deviation) on LibriSpeech dev-other: Checkpoint fine-tuning vs.\ full pre-training (PTN). Configuration {--} FFNN Transducer with Encoder under QAT. Memristor results use 3 simulation runs.}
     \vspace{4pt}
     \footnotesize
     \setlength{\tabcolsep}{4pt}
@@ -820,7 +820,7 @@
 
 \begin{frame}{Full-Context Transducer Results: 8-bit Quantization}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other (8-bit Quantization vs.\ baseline)}
+    \caption{WER (\%; mean $\pm$ standard deviation) on LibriSpeech dev-other (8-bit Quantization vs.\ baseline). Memristor results use 3 simulation runs.}
     \vspace{6pt}
     \resultsTableFontSize
     \setlength{\tabcolsep}{8pt}
@@ -849,7 +849,7 @@
 
 % \begin{frame}{Full Context Transducer Experiments: 4-bit Quantization}
 %   \begin{table}
-%     \caption{WER (\%) on LibriSpeech dev-other (4-bit Quantization vs.\ Baseline)}
+%     \caption{WER (\%; mean $\pm$ standard deviation) on LibriSpeech dev-other (4-bit Quantization vs.\ Baseline). Memristor results use 3 simulation runs.}
 %     \vspace{6pt}
 %     \resultsTableFontSize
 %     \setlength{\tabcolsep}{8pt}
@@ -877,7 +877,7 @@
 
 \begin{frame}{Noisier Models Demand Stronger Internal LM Compensation}
   \begin{table}
-    \caption{WER (\%) on LibriSpeech dev-other (Tree + 4-gram LM search)}
+    \caption{WER (\%; mean $\pm$ standard deviation) on LibriSpeech dev-other (Tree + 4-gram LM search). Memristor results use 3 simulation runs.}
     \vspace{6pt}
     \footnotesize
     \subtable[Fixed ELM scale = 0.6]{
@@ -934,7 +934,7 @@
 
 \section{Future Work}
 
-\begin{frame}{Future Work: Error Analysis}
+\begin{frame}{Future Work}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
     \item \emph{Fine-tuning}:
@@ -983,7 +983,7 @@
 \begin{frame}{Future Work: Robust Training \& Countermeasures}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
-    \item \emph{Noise-Aware QAT}:
+    \item \emph{Noise-and-Quantization Aware Training}:
           \begin{itemize}
             \item Inject simulated crossbar conductance noise directly into training forward pass.
           \end{itemize}
@@ -1067,7 +1067,7 @@
   \end{itemize}
   \begin{table}[h]
     \centering
-    \caption{WER (\%) on TED-LIUMv2 dev, Conformer CTC, 4-gram Language Model (LM)
+    \caption{WER (\%; mean $\pm$ standard deviation) on TED-LIUMv2 dev, Conformer CTC, 4-gram Language Model (LM)
       \cite{rossenbach2025memristor}}
     \label{tab:anchor-results}
     \small
@@ -1107,7 +1107,111 @@
   \end{figure}
 \end{frame}
 
-\begin{frame}{Appendix: Device VMM Operation Statistics}
+\begin{frame}{FFNN Transducer: 8-bit vs.\ 4-bit Quantization}
+  \begin{table}
+    \caption{WER (\%; mean $\pm$ standard deviation) on LibriSpeech dev-other. Memristor results use 3 simulation runs unless marked otherwise.}
+    \vspace{2pt}
+    \scriptsize
+    \setlength{\tabcolsep}{6pt}
+    \renewcommand{\arraystretch}{0.92}
+    \resizebox{0.75\textwidth}{!}{%
+      \begin{tabular}{c c c c c c c}
+        \toprule
+                      & \multicolumn{3}{c}{\textbf{Modules Quantized}}                  & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                     \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-5} \cmidrule(lr){6-7}
+        \textbf{Bits} & \textbf{Encoder}                                                & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM} & \textbf{No LM} & \textbf{4-gram} \\
+        \midrule
+        \multicolumn{7}{l}{\textbf{Baseline}}                                                                                                                                                        \\
+        --            & --                                                              & --                 & --
+                      & \phantom{0}5.9\phantom{ $\pm$ 0.00}
+                      & \phantom{0}5.8\phantom{ $\pm$ 10.90}
+                      & \phantom{0}4.8\phantom{ $\pm$ 0.00}                                                                                                                                          \\
+        \midrule
+        \multicolumn{7}{l}{\textbf{QAT}}                                                                                                                                                             \\
+        8             & \checkmark                                                      & --                 & --
+                      & \phantom{0}6.3\phantom{ $\pm$ 0.00}
+                      & \phantom{0}6.1\phantom{ $\pm$ 10.90}
+                      & \phantom{0}4.9\phantom{ $\pm$ 0.00}                                                                                                                                          \\
+        8             & \checkmark                                                      & \checkmark         & --
+                      & \phantom{0}6.4\phantom{ $\pm$ 0.00}
+                      & \phantom{0}6.2\phantom{ $\pm$ 10.90}
+                      & \phantom{0}5.0\phantom{ $\pm$ 0.00}                                                                                                                                          \\
+        8             & \checkmark                                                      & \checkmark         & \checkmark
+                      & \phantom{0}6.4\phantom{ $\pm$ 0.00}
+                      & \phantom{0}6.2\phantom{ $\pm$ 10.90}
+                      & \phantom{0}4.9\phantom{ $\pm$ 0.00}                                                                                                                                          \\
+        \specialrule{0.25pt}{2pt}{2pt}
+        4             & \checkmark                                                      & --                 & --
+                      & \phantom{0}7.2\phantom{ $\pm$ 0.00}
+                      & \phantom{0}6.8\phantom{ $\pm$ 10.90}
+                      & \phantom{0}5.2\phantom{ $\pm$ 0.00}                                                                                                                                          \\
+        4             & \checkmark                                                      & \checkmark         & --
+                      & \phantom{0}7.3\phantom{ $\pm$ 0.00}
+                      & \phantom{0}6.9\phantom{ $\pm$ 10.90}
+                      & \phantom{0}5.3\rlap{\textsuperscript{**}}\phantom{ $\pm$ 0.00}                                                                                                               \\
+        4             & \checkmark                                                      & \checkmark         & \checkmark
+                      & \phantom{0}7.3\rlap{\textsuperscript{**}}\phantom{ $\pm$ 0.00}
+                      & \phantom{0}6.9\rlap{\textsuperscript{**}}\phantom{ $\pm$ 10.90}
+                      & \phantom{0}5.5\rlap{\textsuperscript{**}}\phantom{ $\pm$ 0.00}                                                                                                               \\
+        \midrule
+        \multicolumn{7}{l}{\textbf{Memristor Simulation}}                                                                                                                                            \\
+        8             & \checkmark                                                      & --                 & --
+                      & \phantom{0}9.8 $\pm$ 0.06
+                      & \phantom{0}8.7 $\pm$ \phantom{1}0.03
+                      & \phantom{0}6.7 $\pm$ 0.07                                                                                                                                                    \\
+        8             & \checkmark                                                      & \checkmark         & --
+                      & 10.7 $\pm$ 0.10
+                      & \phantom{0}8.9 $\pm$ \phantom{1}0.11
+                      & \phantom{0}6.7 $\pm$ 0.04                                                                                                                                                    \\
+        8             & \checkmark                                                      & \checkmark         & \checkmark
+                      & 44.7 $\pm$ 1.95
+                      & 56.1 $\pm$ 10.90
+                      & 18.0 $\pm$ 1.27\rlap{\textsuperscript{1}}                                                                                                                                    \\
+        \specialrule{0.25pt}{2pt}{2pt}
+        4             & \checkmark                                                      & --                 & --
+                      & 10.1 $\pm$ 0.05
+                      & \phantom{0}9.1 $\pm$ \phantom{1}0.11
+                      & \phantom{0}6.7 $\pm$ 0.07                                                                                                                                                    \\
+        4             & \checkmark                                                      & \checkmark         & --
+                      & 10.4 $\pm$ 0.11
+                      & \phantom{0}9.3 $\pm$ \phantom{1}0.12
+                      & \phantom{0}6.7 $\pm$ 0.06                                                                                                                                                    \\
+        4             & \checkmark                                                      & \checkmark         & \checkmark
+                      & 44.7 $\pm$ 1.95\rlap{\textsuperscript{**}}
+                      & 56.1 $\pm$ 10.90\rlap{\textsuperscript{**}}
+                      & 17.2 $\pm$ 1.99\rlap{\textsuperscript{**}}                                                                                                                                   \\
+        \bottomrule
+      \end{tabular}
+    }
+  \end{table}
+  \vspace{2pt}
+  {\tiny \textsuperscript{1}Based on 2 completed runs. \textsuperscript{**}Filler result.}
+\end{frame}
+
+\begin{frame}{Full QAT FFNN Transducer Deep Dive}
+  \begin{table}
+    \caption{WER (\%; mean $\pm$ standard deviation) on LibriSpeech dev-other. The entire model is trained under QAT. Memristor results use 3 simulation runs.}
+    \vspace{4pt}
+    \footnotesize
+    \setlength{\tabcolsep}{5pt}
+    \begin{tabular}{c c c c c c}
+      \toprule
+      \multicolumn{3}{c}{\textbf{Memristor Simulated Modules}} & \textbf{Lex-Free}  & \multicolumn{2}{c}{\textbf{Tree}}                                                                                                                          \\
+      \cmidrule(lr){1-3} \cmidrule(lr){4-4} \cmidrule(lr){5-6}
+      \textbf{Encoder}                                         & \textbf{Predictor} & \textbf{Joiner}                   & \textbf{No LM}            & \textbf{No LM}                       & \textbf{4-gram}                                     \\
+      \midrule
+      \checkmark                                               & \checkmark         & \checkmark                        & 44.7 $\pm$ 1.95           & 56.1 $\pm$ 10.90                     & 18.1 $\pm$ 1.27\rlap{\textsuperscript{2}}           \\
+      \checkmark                                               & --                 & \checkmark                        & 45.4 $\pm$ 4.99           & 55.1 $\pm$ \phantom{1}6.60           & 15.0\rlap{\textsuperscript{1}}\phantom{ $\pm$ 1.27} \\
+      \checkmark                                               & \checkmark         & --                                & \phantom{0}9.8 $\pm$ 0.03 & \phantom{0}8.7 $\pm$ \phantom{1}0.10 & \phantom{1}6.7 $\pm$ 0.03                           \\
+      \checkmark                                               & \checkmark         & 1st Layer Only                    & 11.2 $\pm$ 0.18           & \phantom{0}9.4 $\pm$ \phantom{1}0.09 & \phantom{1}6.9 $\pm$ 0.07\rlap{\textsuperscript{2}} \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+  \vspace{4pt}
+  {\scriptsize $^{1}$Based on 1 completed run; standard deviation unavailable. $^{2}$Based on 2 completed runs.}
+\end{frame}
+
+\begin{frame}{Device VMM Operation Statistics}
   \centering
   \begin{table}[h]
     \centering
