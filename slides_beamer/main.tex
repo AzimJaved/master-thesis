@@ -226,7 +226,7 @@
 \author[A. Javed]{Azim Javed}
 
 \advisor{Benedikt Hilmes and Simon Berger}
-\supervisor{Prof. Ralf Schlüter}
+\supervisor{Priv.-Doz. Ralf Schlüter}
 
 \institute[RWTH Aachen University] % (optional)
 {
@@ -269,21 +269,21 @@
 
 \begin{frame}{Related Works}
   \begin{itemize}
-    \item \structure{\textbf{Sequence Transduction with Recurrent Neural Networks}} \cite{graves2012sequence}
+    \item \structure{\textbf{Monotonic Recurrent Neural Network Transducer (RNN-T) and Decoding Strategies}} \cite{tripathi2019monotonic}
           \begin{itemize}
-            \item Introduces the Recurrent Neural Network - Transducer (RNN-T, or simply Transducer) architecture, widely used for Automatic Speech Recognition (ASR).
+            \item Introduces monotonic alignments for RNN-T
           \end{itemize}
     \item \structure{\textbf{Conformer: Convolution-Augmented Transformer for Speech Recognition}} \cite{Gulati+Qin+:2020conformer}
           \begin{itemize}
-            \item Introduces the Conformer encoder, a common choice for ASR encoders.
+            \item Introduces the Conformer encoder
           \end{itemize}
     \item \structure{\textbf{Synaptogen: A Cross-Domain Generative Device Model for Large-Scale Neuromorphic Circuit Design}} \cite{hennen2024synaptogen}
           \begin{itemize}
-            \item Models measured device behavior for scalable simulation of memristive neural hardware.
+            \item Synaptogen: Memristor device model for a family of devices
           \end{itemize}
     \item \structure{\textbf{Running Conventional Automatic Speech Recognition on Memristor Hardware: A Simulated Approach}} \cite{rossenbach2025memristor}
           \begin{itemize}
-            \item Evaluates quantized Connectionist Temporal Classification (CTC)-based ASR under simulated memristor hardware
+            \item Extends Synaptogen and introduces SynaptogenML
           \end{itemize}
   \end{itemize}
 \end{frame}
@@ -293,30 +293,41 @@
 \begin{frame}{Motivation}
   \begin{itemize}
     \setlength{\itemsep}{10pt}
-    \item Memristor hardware enables fast, energy-efficient neural network inference, but introduce analog inaccuracies.
-    \item CTC-based Conformers have been evaluated on simulated memristor hardware \cite{rossenbach2025memristor}.
-    \item Transducers add an autoregressive prediction network and a joint network, which are repeatedly evaluated during inference.
-    \item \emph{Objective}: characterize how quantization and simulated device noise affect transducer ASR and assess training and decoding countermeasures.
+    \item Memristor hardware enables fast, energy-efficient neural network inference.
+          \begin{itemize}
+            \item[$\rightarrow$] but introduces analog inaccuracies.
+          \end{itemize}
+    \item CTC-based Conformers have been evaluated on memristor hardware \cite{rossenbach2025memristor}.
+    \item Transducers add two components, which are repeatedly invoked at inference:
+          \begin{itemize}
+            \item Predictor network
+            \item Joiner network
+          \end{itemize}
+    \item \emph{Objective}:
+          \begin{itemize}
+            \item Characterize the effect of quantization and device noise on transducer ASR.
+            \item Assess training and decoding countermeasures.
+          \end{itemize}
   \end{itemize}
 \end{frame}
 
 \section{Prerequisites}
 
-\begin{frame}{Overview \cite{rossenbach2025memristor}}
+\begin{frame}{Overview}
   \begin{columns}[c]
     \begin{column}{0.70\textwidth}
       \begin{itemize}
         \setlength{\itemsep}{1.5pt}
         \item A \emph{memristor} is an analog computing device with a programmable resistance state \cite{strukov2008MM}.
-        \item Enables fast, energy-efficient implementation of Vector-Matrix Multiplication (VMM) \cite{wan2022compute} {---}
+        \item Enables fast, energy-efficient implementation of Vector-Matrix Multiplication (VMM)
               \begin{itemize}
                 \item[$\rightarrow$] and thus neural networks.
               \end{itemize}
         \item Limitations:
               \begin{itemize}
-                \item Introduces analog inaccuracies \cite{wouters2016reliability}.
-                \item Production is still in early stages \cite{infineon2022rram}.
-                \item Current experiments are simulated using SynaptogenML \cite{hennen2024synaptogen} \cite{rossenbach2025memristor}.
+                \item Introduces analog inaccuracies.
+                \item Production is still in early stages.
+                \item Experiments are simulated using SynaptogenML \cite{rossenbach2025memristor}.
               \end{itemize}
       \end{itemize}
     \end{column}
@@ -331,10 +342,10 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Analog In-Memory Computing \cite{aguirre2024hardware}}
+\begin{frame}{Analog In-Memory Computing}
   \begin{itemize}
     \setlength{\itemsep}{6pt}
-    \item Multiplication computation done via Ohm's law:
+    \item Multiplication computation via Ohm's law:
           \begin{equation}
             V = IR
           \end{equation}
@@ -343,7 +354,10 @@
           \begin{equation}
             I = G V \quad \text{with} \quad G = \frac{1}{R}
           \end{equation}
-    \item Addition done via Kirchhoff's law for any connected node in a circuit, with $N$ connected lines:
+    \item Addition done via Kirchhoff's law:
+          \begin{itemize}
+            \item For any connected node in a circuit, with $N$ connected lines:
+          \end{itemize}
           \begin{equation}
             \sum_{n=0}^{N} I_n = 0 \;\rightarrow\; I_0 = - \sum_{n=1}^{N} I_n
           \end{equation}
@@ -351,14 +365,14 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Analog In-Memory Computing \cite{rossenbach2025memristor}}
+\begin{frame}{Analog In-Memory Computing}
   \begin{columns}[c]
     \begin{column}{0.54\textwidth}
       \begin{itemize}
         \setlength{\itemsep}{4pt}
-        \item Resistors ($\square$) as connecting element between vertical and horizontal circuit lines
-        \item Each resistor's conductance is an element of a constant matrix
-        \item Column sum simply via line connection
+        \item Resistors as the connecting element between vertical and horizontal lines.
+        \item Each resistor's conductance is an element of a constant matrix.
+        \item Column sum via line connection.
       \end{itemize}
     \end{column}
 
@@ -470,17 +484,17 @@
   \hfill
 \end{frame}
 
-\begin{frame}{The Memristor \cite{hennen2024synaptogen}}
+\begin{frame}{The Memristor}
   \begin{columns}[c]
     \begin{column}{0.52\textwidth}
       \emph{Key Idea}: Encode each weight bit as a high- or low-resistance state.
       \begin{itemize}
         \setlength{\itemsep}{3pt}
         \item Let $V_S$ be the set voltage and $V_R$ the reset voltage thresholds.
-        \item Apply $-V > -V_S \;\rightarrow$ set to low resistance.
-        \item Apply $\phantom{-}V > \phantom{-}V_R \;\rightarrow$ set to high resistance.
+        \item Apply $V < V_S \;\rightarrow$ set to low resistance.
+        \item Apply $V > V_R \;\rightarrow$ set to high resistance.
         \item Intermediate states possible, but difficult to program reliably.
-        \item State is physically stored (non-volatile memory).
+        \item Memristor state is non-volatile.
       \end{itemize}
     \end{column}
 
@@ -496,23 +510,21 @@
 \end{frame}
 
 
-\begin{frame}{Limitations \cite{rossenbach2025memristor}}
+\begin{frame}{Limitations So Far}
   \begin{itemize}
     \setlength{\itemsep}{3pt}
-    \item[] \emph{Programming Limitations}
     \item Resulting resistance state varies with each programming cycle.
     \item Non-linear relation of current and voltage.
   \end{itemize}
   \hfill
   \begin{itemize}
     \setlength{\itemsep}{3pt}
-    \item[] \emph{Cannot exactly model weights}
     \item Only positive, non-zero weights possible.
     \item Current leakage prohibits a true zero.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{(Paired) Memristor Array \cite{aguirre2024hardware}}
+\begin{frame}{Memristor Crossbar Layout}
   \begin{columns}[c]
     \begin{column}{0.52\textwidth}
       \begin{itemize}
@@ -548,9 +560,9 @@
 \begin{frame}{Transducer Deployment Scenarios}
   \begin{itemize}
     \setlength{\itemsep}{2pt}
-    \item Which components of the model should be deployed on the device?
+    \item Which components of the model can be deployed on the device?
           \begin{itemize}
-            \item \emph{Encoder only} vs.\ \emph{encoder + predictor} vs.\ \emph{encoder + predictor + joiner} (full model).
+            \item \emph{Encoder only} vs.\ \emph{encoder + predictor} vs.\ \emph{encoder + predictor + joiner}.
           \end{itemize}
     \item \emph{Tradeoff}: more offloading $\Rightarrow$ more energy efficiency, but also more noise.
   \end{itemize}
@@ -754,7 +766,7 @@
       \midrule
       \multicolumn{6}{l}{\textbf{QAT}}                                                                                                                                                                                                                                                       \\
       \checkmark                                     & --                 & --                                & 7.2\phantom{\textsuperscript{**}}             & 6.8\phantom{\textsuperscript{**}}                                  & 5.2\phantom{\textsuperscript{**}}                       \\
-      \checkmark                                     & \checkmark         & --                                & 7.3\phantom{\textsuperscript{**}}             & 6.9\phantom{\textsuperscript{**}}                                  & 5.3\textsuperscript{**}                                 \\
+      \checkmark                                     & \checkmark         & --                                & 7.3\phantom{\textsuperscript{**}}             & 6.9\phantom{\textsuperscript{**}}                                  & 5.3\phantom{\textsuperscript{**}}                       \\
       \checkmark                                     & \checkmark         & \checkmark                        & 7.3\textsuperscript{**}                       & 6.9\textsuperscript{**}                                            & 5.5\textsuperscript{**}                                 \\
       \midrule
       \multicolumn{6}{l}{\textbf{Memristor Simulation}}                                                                                                                                                                                                                                      \\
@@ -1208,7 +1220,8 @@
     \end{tabular}
   \end{table}
   \vspace{4pt}
-  {\scriptsize $^{1}$Based on 1 completed run; standard deviation unavailable. $^{2}$Based on 2 completed runs.}
+  {\scriptsize $^{1}$Based on 1 completed run; standard deviation unavailable. $^{2}$Based on 2 completed runs.} \\
+  {\scriptsize All rows except the first row could possibly be tuned to improve WER.}
 \end{frame}
 
 \begin{frame}{Device VMM Operation Statistics}
