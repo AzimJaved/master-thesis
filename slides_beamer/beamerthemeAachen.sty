@@ -10,6 +10,9 @@
 
 \ProvidesPackage{beamerthemeAachen}
 
+\newif\ifreferenceslides
+\newif\ifbackupslides
+
 \usepackage[size=a4,scale=3.5]{beamerposter} % change scale from 3.5 to 1
 
 \definecolor{i6blue}{cmyk}{1,0.305,0,0.06}
@@ -49,7 +52,15 @@
     \rule{0pt}{2.0ex}
     \mdseries
     \insertshortauthor :\vphantom{X}\insertshorttitle \hfill
-    \Acrobatmenu{GoToPage}{\insertframenumber/\ref{finalSlide}\hspace{0em}} \hfill
+    \Acrobatmenu{GoToPage}{%
+      \ifbackupslides
+        Backup \insertframenumber
+      \else\ifreferenceslides
+        References
+      \else
+        \insertframenumber/\ref{thankYouSlide}%
+      \fi\fi
+    } \hfill
     %\insertframenumber / \inserttotalframenumber \hfill
     %\insertpagenumber / \insertpresentationendpage \hfill
     \insertshortdate\\
