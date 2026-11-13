@@ -4,6 +4,12 @@
 
 ## Local sources
 
+### Presentation review updates
+
+- Fine-tuning comparison now includes QAT references: experiment 3 / F row 28 (FP32 to 8-bit: 6.5, 6.2, 4.9) and experiment 9 / F row 35 (8-bit to 4-bit: 7.5, 7.0, 5.4). Experiment 9A / row 36 changes inference ADC settings on that fine-tuned model; its memristor-simulated scores remain provisional (two runs). No new ADC 4/4 result is inferred.
+- Single-run table values display plus/minus 0.00 with an asterisk, at the user's request. This is a single-run display convention, not a measured multi-run SD. Two-run scores retain their measured SD and an asterisk.
+- Review wording for correction tolerance: “10% acceptable relative degradation” (numeric setting remains 0.10).
+
 The slides are now incorporated directly into `main.tex`; the former `new_results_slides.tex` file has been removed. `figures/joiner_output_distributions.png` is a presentation copy of the original histogram with legends standardized to “QAT” and “Memristor simulated”; plotted data are unchanged. The caption retains the ADC 4/4 setting.
 
 All sheet row references below are the visible spreadsheet row numbers, not HTML line numbers.
