@@ -882,8 +882,8 @@
     \item Layer 1 largely unchanged; output-layer shows tail contraction.
     \item Weaker, but similar, contraction than previously observed for positional encodings in lead up to \cite{benedikt2026pe}.
     \item[] \begin{itemize}
-      \item Resolved by favoring ADC range bits over precision bits.
-    \end{itemize}
+            \item Resolved by favoring ADC range bits over precision bits.
+          \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -901,19 +901,19 @@
         \subtable[\raggedright Full-model ADC tuning.]{%
           \begin{tabularx}{\linewidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X||c|}
             \hline
-            \multicolumn{2}{|c||}{\adcconfighead{\textbf{Full model}\\\textbf{ADC Config}}} & \multirow{2}{*}{\textbf{WER [\%]}} \\
+            \multicolumn{2}{|c||}{\adcconfighead{\textbf{Full model} \\\textbf{ADC Config}}} & \multirow{2}{*}{\textbf{WER [\%]}} \\
             \cline{1-2}
-            \adcconfighead{\textbf{Precision}\\\textbf{bits}} & \adcconfighead{\textbf{Range}\\\textbf{bits}} & \\
+            \adcconfighead{\textbf{Precision}                        \\\textbf{bits}} & \adcconfighead{\textbf{Range}\\\textbf{bits}} & \\
             \hline\noalign{\vskip 2pt}\hline
-            4                                              & \phantom{0}4                       & \werresult{44.7}{1.95} \\
+            4 & \phantom{0}4 & \werresult{44.7}{1.95}                \\
             \hline
-            8                                              & \phantom{0}8                       & \werresult{34.9}{1.30} \\
+            8 & \phantom{0}8 & \werresult{34.9}{1.30}                \\
             \hline
-            4                                              & \phantom{0}8                       & \werresult{12.4}{0.38} \\
+            4 & \phantom{0}8 & \werresult{12.4}{0.38}                \\
             \hline
-            4                                              & 12                                 & \werresult{12.3}{0.37} \\
+            4 & 12           & \werresult{12.3}{0.37}                \\
             \hline
-            4                                              & 16                                 & \werresult{12.3}{0.28} \\
+            4 & 16           & \werresult{12.3}{0.28}                \\
             \hline
           \end{tabularx}
         }
@@ -924,23 +924,23 @@
         \subtable[\raggedright Targeted joiner ADC tuning.]{%
           \begin{tabularx}{\linewidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X||c|}
             \hline
-            \multicolumn{2}{|c|}{\adcconfighead{\textbf{Joiner layer 1}\\\textbf{ADC Config}}} & \multicolumn{2}{c||}{\adcconfighead{\textbf{Output layer}\\\textbf{ADC Config}}} & \multirow{2}{*}{\textbf{WER [\%]}} \\
+            \multicolumn{2}{|c|}{\adcconfighead{\textbf{Joiner layer 1}                       \\\textbf{ADC Config}}} & \multicolumn{2}{c||}{\adcconfighead{\textbf{Output layer}\\\textbf{ADC Config}}} & \multirow{2}{*}{\textbf{WER [\%]}} \\
             \cline{1-4}
-            \adcconfighead{\textbf{Precision}\\\textbf{bits}} & \adcconfighead{\textbf{Range}\\\textbf{bits}} & \adcconfighead{\textbf{Precision}\\\textbf{bits}} & \adcconfighead{\textbf{Range}\\\textbf{bits}} & \\
+            \adcconfighead{\textbf{Precision}                                                 \\\textbf{bits}} & \adcconfighead{\textbf{Range}\\\textbf{bits}} & \adcconfighead{\textbf{Precision}\\\textbf{bits}} & \adcconfighead{\textbf{Range}\\\textbf{bits}} & \\
             \hline\noalign{\vskip 2pt}\hline
-            \multirow{6}{*}{4} & \multirow{6}{*}{4} & 4 & 4 & \werresult{44.7}{1.95} \\
+            \multirow{6}{*}{4} & \multirow{6}{*}{4} & 4 & 4 & \werresult{44.7}{1.95}          \\
             \cline{3-5}
-            & & 1 & 7 & \weronerun{12.2} \\
+                               &                    & 4 & 8 & \werresult{11.9}{0.15}                \\
             \cline{3-5}
-            & & 2 & 6 & \werresult{13.2}{0.59} \\
+                               &                    & 1 & 7 & \werresult{12.2}{0.17}                \\
             \cline{3-5}
-            & & 3 & 5 & \werresult{14.0}{0.21} \\
+                               &                    & 2 & 6 & \werresult{13.2}{0.59}          \\
             \cline{3-5}
-            & & 4 & 8 & \weronerun{12.2} \\
+                               &                    & 3 & 5 & \werresult{14.0}{0.21}          \\
             \cline{3-5}
-            & & 5 & 3 & \weronerun{89.1} \\
+                               &                    & 5 & 3 & \weronerun{89.1}                \\
             \hline\hline
-            2 & 6 & 2 & 6 & \textbf{\werresult{11.7}{0.50}} \\
+            2                  & 6                  & 2 & 6 & \textbf{\werresult{11.7}{0.50}} \\
             \hline
           \end{tabularx}
         }
@@ -955,29 +955,29 @@
 \begin{frame}{FFNN Transducer: Output Layer's Bias}
   \begin{table}
     \begin{threeparttable}
-    \caption{8-bit full-model QAT FFNN Transducer and memristor-simulated results with/without output bias; WER [\%].}
-    \vspace{6pt}
-    \footnotesize
-    \setlength{\tabcolsep}{5pt}
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|c|c|c|c||c|U|c|}
-      \hline
-      \multirow{2}{*}{\textbf{Model}} & \multicolumn{2}{c|}{\textbf{Joiner ADC Config}} & \multirow{2}{*}{\shortstack{\textbf{Output}                                                               \\\textbf{bias}}} & \multirow{2}{*}{\textbf{Lex-Free}} & \multirow{2}{*}{\textbf{Tree}} & \multirow{2}{*}{\textbf{Tree + 4-gram}} \\
-      \cline{2-3}
-                                      & \textbf{Precision bits}                         & \textbf{Range bits}                         &     &                  &                  &                 \\
-      \hline\noalign{\vskip 2pt}\hline
-      \multirow{2}{*}{QAT}            & \multicolumn{2}{c|}{--}                         & Yes                                         & 6.4 & 6.2              & 4.9                                \\
-      \cline{4-7}
-                                      & \multicolumn{2}{c|}{--}                         & No                                          & 6.3 & 6.1              & 5.0                                \\
-      \hline\hline
-      \multirow{3}{*}{\shortstack{Memristor\\simulation}} & \multirow{2}{*}{4} & \multirow{2}{*}{4} & Yes & \werresult{44.7}{1.95} & \werresult{56.1}{10.90} & \werresult{18.8}{1.24} \\
-      \cline{4-7}
-                                      & & & No & \weronerun{18.4} & \weronerun{12.2} & \weronerun{8.1} \\
-      \cline{2-7}
-                                      & 2                                               & 6                                           & No  & \weronerun{9.9}  & \weronerun{8.6}  & \weronerun{6.4} \\
-      \hline
-    \end{tabular}
-    \adctablenotes
+      \caption{8-bit full-model QAT FFNN Transducer and memristor-simulated results with/without output bias; WER [\%].}
+      \vspace{6pt}
+      \footnotesize
+      \setlength{\tabcolsep}{5pt}
+      \renewcommand{\arraystretch}{1.2}
+      \begin{tabular}{|c|c|c|c||c|U|c|}
+        \hline
+        \multirow{2}{*}{\textbf{Model}} & \multicolumn{2}{c|}{\textbf{Joiner ADC Config}} & \multirow{2}{*}{\shortstack{\textbf{Output}                                                               \\\textbf{bias}}} & \multirow{2}{*}{\textbf{Lex-Free}} & \multirow{2}{*}{\textbf{Tree}} & \multirow{2}{*}{\textbf{Tree + 4-gram}} \\
+        \cline{2-3}
+                                        & \textbf{Precision bits}                         & \textbf{Range bits}                         &     &                  &                  &                 \\
+        \hline\noalign{\vskip 2pt}\hline
+        \multirow{2}{*}{QAT}            & \multicolumn{2}{c|}{--}                         & Yes                                         & 6.4 & 6.2              & 4.9                                \\
+        \cline{4-7}
+                                        & \multicolumn{2}{c|}{--}                         & No                                          & 6.3 & 6.1              & 5.0                                \\
+        \hline\hline
+        \multirow{3}{*}{\shortstack{Memristor                                                                                                                                                         \\simulation}} & \multirow{2}{*}{4} & \multirow{2}{*}{4} & Yes & \werresult{44.7}{1.95} & \werresult{56.1}{10.90} & \werresult{18.8}{1.24} \\
+        \cline{4-7}
+                                        &                                                 &                                             & No  & \weronerun{18.4} & \weronerun{12.2} & \weronerun{8.1} \\
+        \cline{2-7}
+                                        & 2                                               & 6                                           & No  & \werresult{10.0}{0.15}  & \weronerun{8.6}  & \weronerun{6.4} \\
+        \hline
+      \end{tabular}
+      \adctablenotes
     \end{threeparttable}
   \end{table}
   \resultTakeaway{Removing the bias on the output layer limits the performance degradation, but ADC clipping remains.}
@@ -986,27 +986,27 @@
 \begin{frame}{4-bit FFNN Transducer: ADC Tuning Is Not Enough}
   \begin{table}
     \begin{threeparttable}
-    \caption{4-bit FFNN transducer: output-layer ADC ablation, memristor-simulated results.}
-    \vspace{6pt}
-    \footnotesize
-    \setlength{\tabcolsep}{12pt}
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|c|c||c|}
-      \hline
-      \multicolumn{2}{|c||}{\textbf{Output-layer ADC Config}} & \multirow{2}{*}{\textbf{Lex-Free WER [\%]}}                          \\
-      \cline{1-2}
-      \textbf{Precision bits}                                 & \textbf{Range bits}                         &                        \\
-      \hline\noalign{\vskip 2pt}\hline
-      4                                                       & 4                                           & \werresult{37.4}{1.33} \\
-      \hline
-      1                                                       & 7                                           & \weronerun{38.5}       \\
-      \hline
-      2                                                       & 6                                           & \weronerun{37.7}       \\
-      \hline
-      4                                                       & 8                                           & \weronerun{37.2}       \\
-      \hline
-    \end{tabular}
-    \adctablenotes
+      \caption{4-bit FFNN transducer: output-layer ADC ablation, memristor-simulated results.}
+      \vspace{6pt}
+      \footnotesize
+      \setlength{\tabcolsep}{12pt}
+      \renewcommand{\arraystretch}{1.2}
+      \begin{tabular}{|c|c||c|}
+        \hline
+        \multicolumn{2}{|c||}{\textbf{Output-layer ADC Config}} & \multirow{2}{*}{\textbf{Lex-Free WER [\%]}}                          \\
+        \cline{1-2}
+        \textbf{Precision bits}                                 & \textbf{Range bits}                         &                        \\
+        \hline\noalign{\vskip 2pt}\hline
+        4                                                       & 4                                           & \werresult{37.4}{1.33} \\
+        \hline
+        1                                                       & 7                                           & \weronerun{38.5}       \\
+        \hline
+        2                                                       & 6                                           & \weronerun{37.7}       \\
+        \hline
+        4                                                       & 8                                           & \weronerun{37.2}       \\
+        \hline
+      \end{tabular}
+      \adctablenotes
     \end{threeparttable}
   \end{table}
   \resultTakeaway{Unlike the 8-bit FFNN Transducer model, the 4-bit model does not improve performance with expanded ADC range on the output layer.}
@@ -1092,38 +1092,38 @@
   \end{itemize}
   \begin{table}
     \begin{threeparttable}
-    \caption{4-bit FFNN transducer: memristor-simulated Lex-Free WER [\%] for joiner programming and ADC ablations.}
-    \vspace{3pt}
-    \footnotesize
-    \setlength{\tabcolsep}{10pt}
-    \renewcommand{\arraystretch}{1.1}
-    \setlength{\tabcolsep}{4pt}
-    \begin{tabular}{|c|c|c|c|c|c||c|}
-      \hline
-      \multicolumn{2}{|c|}{\textbf{Joiner programming}} & \multicolumn{2}{c|}{\textbf{Joiner 1 ADC Config}} & \multicolumn{2}{c||}{\textbf{Output ADC Config}} & \multirow{2}{*}{\textbf{Lex-Free WER [\%]}} \\
-      \cline{1-6}
-      \textbf{First layer} & \textbf{Output layer} & \shortstack{\textbf{Precision}\\\textbf{bits}} & \shortstack{\textbf{Range}\\\textbf{bits}} & \shortstack{\textbf{Precision}\\\textbf{bits}} & \shortstack{\textbf{Range}\\\textbf{bits}} & \\
-      \hline\noalign{\vskip 2pt}\hline
-      \multirow{2}{*}{No correction}                    & \multirow{2}{*}{No correction}             & 4                                         & 4                                           & 4 & 4 & \werresult{37.4}{1.33} \\
-      \cline{3-7}
-                                                        &                                            & 4                                         & 8                                           & 4 & 8 & \weronerun{36.1}       \\
-      \hline\hline
-      Ideal                                             & No correction                              & 4                                         & 8                                           & 4 & 8 & \werresult{18.4}{0.50} \\
-      \hline
-      No correction                                     & Ideal                                      & 4                                         & 8                                           & 4 & 8 & \werresult{24.8}{0.81} \\
-      \hline\hline
-      \multirow{2}{*}{Ideal}                            & \multirow{2}{*}{Ideal}                     & 4                                         & 4                                           & 4 & 4 & \werresult{15.1}{0.02} \\
-      \cline{3-7}
-                                                        &                                            & 4                                         & 8                                           & 4 & 8 & \werresult{14.9}{0.12} \\
-      \hline\hline
-      \multirow{3}{*}{Corrected}                        & \multirow{3}{*}{Corrected}                 & 4                                         & 4                                           & 4 & 4 & \weronerun{16.5}       \\
-      \cline{3-7}
-                                                        &                                            & 4                                         & 8                                           & 4 & 8 & \werresult{16.1}{0.37} \\
-      \cline{3-7}
-                                                        &                                            & 4                                         & 4                                           & 2 & 6 & \weronerun{16.2}       \\
-      \hline
-    \end{tabular}
-    \adctablenotes
+      \caption{4-bit FFNN transducer: memristor-simulated Lex-Free WER [\%] for joiner programming and ADC ablations.}
+      \vspace{3pt}
+      \footnotesize
+      \setlength{\tabcolsep}{10pt}
+      \renewcommand{\arraystretch}{1.1}
+      \setlength{\tabcolsep}{4pt}
+      \begin{tabular}{|c|c|c|c|c|c||c|}
+        \hline
+        \multicolumn{2}{|c|}{\textbf{Joiner programming}} & \multicolumn{2}{c|}{\textbf{Joiner 1 ADC Config}} & \multicolumn{2}{c||}{\textbf{Output ADC Config}} & \multirow{2}{*}{\textbf{Lex-Free WER [\%]}}                                  \\
+        \cline{1-6}
+        \textbf{First layer}                              & \textbf{Output layer}                             & \shortstack{\textbf{Precision}                                                                                                  \\\textbf{bits}} & \shortstack{\textbf{Range}\\\textbf{bits}} & \shortstack{\textbf{Precision}\\\textbf{bits}} & \shortstack{\textbf{Range}\\\textbf{bits}} & \\
+        \hline\noalign{\vskip 2pt}\hline
+        \multirow{2}{*}{No correction}                    & \multirow{2}{*}{No correction}                    & 4                                                & 4                                           & 4 & 4 & \werresult{37.4}{1.33} \\
+        \cline{3-7}
+                                                          &                                                   & 4                                                & 8                                           & 4 & 8 & \weronerun{36.1}       \\
+        \hline\hline
+        Ideal                                             & No correction                                     & 4                                                & 8                                           & 4 & 8 & \werresult{18.4}{0.50} \\
+        \hline
+        No correction                                     & Ideal                                             & 4                                                & 8                                           & 4 & 8 & \werresult{24.8}{0.81} \\
+        \hline\hline
+        \multirow{2}{*}{Ideal}                            & \multirow{2}{*}{Ideal}                            & 4                                                & 4                                           & 4 & 4 & \werresult{15.1}{0.02} \\
+        \cline{3-7}
+                                                          &                                                   & 4                                                & 8                                           & 4 & 8 & \werresult{14.9}{0.12} \\
+        \hline\hline
+        \multirow{3}{*}{Corrected}                        & \multirow{3}{*}{Corrected}                        & 4                                                & 4                                           & 4 & 4 & \weronerun{16.5}       \\
+        \cline{3-7}
+                                                          &                                                   & 4                                                & 8                                           & 4 & 8 & \werresult{16.1}{0.37} \\
+        \cline{3-7}
+                                                          &                                                   & 4                                                & 4                                           & 2 & 6 & \weronerun{16.2}       \\
+        \hline
+      \end{tabular}
+      \adctablenotes
     \end{threeparttable}
   \end{table}
 \end{frame}
@@ -1131,34 +1131,34 @@
 \begin{frame}{FFNN Transducer: Programming Correction (2)}
   \begin{table}
     \begin{threeparttable}
-    \caption{Full-model programming correction: QAT and memristor-simulated WER [\%] for the FFNN transducer.}
-    \vspace{6pt}
-    \footnotesize
-    \setlength{\tabcolsep}{8pt}
-    \renewcommand{\arraystretch}{1.25}
-    \setlength{\tabcolsep}{5pt}
-    \begin{tabular}{|c|c|c|c||c|c|c|}
-      \hline
-      \multirow{2}{*}{\textbf{Weights}} & \multirow{2}{*}{\textbf{Programming}} & \multicolumn{2}{c||}{\textbf{Joiner ADC Config}} & \multirow{2}{*}{\textbf{Lex-Free}} & \multirow{2}{*}{\textbf{Tree}} & \multirow{2}{*}{\textbf{Tree + 4-gram}} \\
-      \cline{3-4}
-                                        &                                       & \textbf{Precision bits}                   & \textbf{Range bits}                &                                &                                         &                                \\
-      \hline\noalign{\vskip 2pt}\hline
-      \multirow{3}{*}{8-bit}            & QAT                                   & \multicolumn{2}{c||}{--}                  & 6.4                                & 6.2                            & 4.9                                                                      \\
-      \cline{2-7}
-                                        & No correction & \multirow{2}{*}{2} & \multirow{2}{*}{6} & \werresult{11.7}{0.50} & \werresult{9.7}{0.29} & \werresult{7.0}{0.19} \\
-      \cline{2-2}\cline{5-7}
-                                        & Corrected & & & \textbf{\werresult{7.4}{0.07}} & \textbf{\werresult{7.2}{0.05}} & \textbf{\werresult{5.5}{0.04}} \\
-      \hline\hline
-      \multirow{3}{*}{4-bit}            & QAT                                   & \multicolumn{2}{c||}{--}                  & 8.2                                & 7.8                            & 5.7                                                                      \\
-      \cline{2-7}
-                                        & No correction & \multirow{2}{*}{4} & \multirow{2}{*}{4} & \werresult{37.4}{1.33} & \werresult{29.6}{2.39} & \ffnnFourBitFullDeviceLmWer \\
-      \cline{2-2}\cline{5-7}
-                                        & Corrected & & & \textbf{\werresult{9.9}{0.02}} & \textbf{\werresult{9.2}{0.08}} & \textbf{\werresult{6.7}{0.03}} \\
-      \hline
-    \end{tabular}
-    \begin{tablenotes}[flushleft]\footnotesize
-      \item[] Correction: 10 cycles, 10\% acceptable relative degradation, 0.6\,V; other ADCs: default.
-    \end{tablenotes}
+      \caption{Full-model programming correction: QAT and memristor-simulated WER [\%] for the FFNN transducer.}
+      \vspace{6pt}
+      \footnotesize
+      \setlength{\tabcolsep}{8pt}
+      \renewcommand{\arraystretch}{1.25}
+      \setlength{\tabcolsep}{5pt}
+      \begin{tabular}{|c|c|c|c||c|c|c|}
+        \hline
+        \multirow{2}{*}{\textbf{Weights}} & \multirow{2}{*}{\textbf{Programming}} & \multicolumn{2}{c||}{\textbf{Joiner ADC Config}} & \multirow{2}{*}{\textbf{Lex-Free}} & \multirow{2}{*}{\textbf{Tree}} & \multirow{2}{*}{\textbf{Tree + 4-gram}}                                  \\
+        \cline{3-4}
+                                          &                                       & \textbf{Precision bits}                          & \textbf{Range bits}                &                                &                                         &                                \\
+        \hline\noalign{\vskip 2pt}\hline
+        \multirow{3}{*}{8-bit}            & QAT                                   & \multicolumn{2}{c||}{--}                         & 6.4                                & 6.2                            & 4.9                                                                      \\
+        \cline{2-7}
+                                          & No correction                         & \multirow{2}{*}{2}                               & \multirow{2}{*}{6}                 & \werresult{11.7}{0.50}         & \werresult{9.7}{0.29}                   & \werresult{7.0}{0.19}          \\
+        \cline{2-2}\cline{5-7}
+                                          & Corrected                             &                                                  &                                    & \textbf{\werresult{7.4}{0.07}} & \textbf{\werresult{7.2}{0.05}}          & \textbf{\werresult{5.5}{0.04}} \\
+        \hline\hline
+        \multirow{3}{*}{4-bit}            & QAT                                   & \multicolumn{2}{c||}{--}                         & 8.2                                & 7.8                            & 5.7                                                                      \\
+        \cline{2-7}
+                                          & No correction                         & \multirow{2}{*}{4}                               & \multirow{2}{*}{4}                 & \werresult{37.4}{1.33}         & \werresult{29.6}{2.39}                  & \ffnnFourBitFullDeviceLmWer    \\
+        \cline{2-2}\cline{5-7}
+                                          & Corrected                             &                                                  &                                    & \textbf{\werresult{9.9}{0.02}} & \textbf{\werresult{9.2}{0.08}}          & \textbf{\werresult{6.7}{0.03}} \\
+        \hline
+      \end{tabular}
+      \begin{tablenotes}[flushleft]\footnotesize
+        \item[] Correction: 10 cycles, 10\% acceptable relative degradation, 0.6\,V; other ADCs: default.
+      \end{tablenotes}
     \end{threeparttable}
   \end{table}
   \resultTakeaway{Programming correction narrows the gap between QAT and memristor-simulated performance.}
@@ -1170,39 +1170,39 @@
   \end{itemize}
   \begin{table}
     \begin{threeparttable}
-    \caption{From-scratch vs.\ fine-tuned models on LibriSpeech dev-other: QAT and memristor-simulated WER [\%], without programming correction.}
-    \vspace{6pt}
-    \footnotesize
-    \setlength{\tabcolsep}{3pt}
-    \renewcommand{\arraystretch}{1.1}
-    % QAT references: sheet experiments 10, 3, 11, and 9 (9A changes ADC only).
-    \begin{tabular}{|c|c|c|c|c||c|c|c|}
-      \hline
-      \multirow{2}{*}{\textbf{Weights}} & \multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Training}} & \multicolumn{2}{c||}{\textbf{Joiner ADC Config}} & \multicolumn{3}{c|}{\textbf{WER [\%]}} \\
-      \cline{4-8}
-                                        & & & \shortstack{\textbf{Precision}\\\textbf{bits}} & \shortstack{\textbf{Range}\\\textbf{bits}} & \textbf{Lex-Free} & \textbf{Tree} & \textbf{Tree + 4-gram} \\
-      \hline\noalign{\vskip 2pt}\hline
-      \multirow{4}{*}{8-bit} & \multirow{2}{*}{QAT} & From scratch & \multicolumn{2}{c||}{--} & 6.4 & 6.2 & 4.9 \\
-      \cline{3-8}
-      & & FP32 $\rightarrow$ 8-bit & \multicolumn{2}{c||}{--} & 6.5 & 6.2 & 4.9 \\
-      \cline{2-8}
-      & \multirow{2}{*}{\shortstack{Memristor\\simulated}} & From scratch & \multirow{2}{*}{2} & \multirow{2}{*}{6} & \werresult{11.7}{0.50} & \werresult{9.7}{0.29} & \werresult{7.0}{0.19} \\
-      \cline{3-3}\cline{6-8}
-      & & FP32 $\rightarrow$ 8-bit & & & \werresult{8.2}{0.07} & \werresult{8.0}{0.02} & \werresult{6.0}{0.05} \\
-      \hline\hline
-      \multirow{4}{*}{4-bit} & \multirow{2}{*}{QAT} & From scratch & \multicolumn{2}{c||}{--} & 8.2 & 7.8 & 5.7 \\
-      \cline{3-8}
-      & & 8-bit $\rightarrow$ 4-bit & \multicolumn{2}{c||}{--} & 7.5 & 7.0 & 5.4 \\
-      \cline{2-8}
-      & \multirow{2}{*}{\shortstack{Memristor\\simulated}} & From scratch & 4 & 4 & \werresult{37.4}{1.33} & \werresult{29.6}{2.39} & \ffnnFourBitFullDeviceLmWer \\
-      \cline{3-8}
-      % TODO: replace with pending fine-tuned ADC 4/4 results when available.
-      & & 8-bit $\rightarrow$ 4-bit & \multicolumn{2}{c||}{$\dagger$} & \werprovisional{13.8}{0.28} & \werprovisional{11.5}{0.30} & \werprovisional{7.5}{0.35} \\
-      \hline
-    \end{tabular}
-    \begin{tablenotes}[flushleft]\footnotesize
-      \item[] $*$ Two-run results. $\dagger$ ADC config update pending; other layers use default ADC config.
-    \end{tablenotes}
+      \caption{From-scratch vs.\ fine-tuned models on LibriSpeech dev-other: QAT and memristor-simulated WER [\%], without programming correction.}
+      \vspace{6pt}
+      \footnotesize
+      \setlength{\tabcolsep}{3pt}
+      \renewcommand{\arraystretch}{1.1}
+      % QAT references: sheet experiments 10, 3, 11, and 9 (9A changes ADC only).
+      \begin{tabular}{|c|c|c|c|c||c|c|c|}
+        \hline
+        \multirow{2}{*}{\textbf{Weights}} & \multirow{2}{*}{\textbf{Model}}       & \multirow{2}{*}{\textbf{Training}} & \multicolumn{2}{c||}{\textbf{Joiner ADC Config}} & \multicolumn{3}{c|}{\textbf{WER [\%]}}                                                                                    \\
+        \cline{4-8}
+                                          &                                       &                                    & \shortstack{\textbf{Precision}                                                                                                                                               \\\textbf{bits}} & \shortstack{\textbf{Range}\\\textbf{bits}} & \textbf{Lex-Free} & \textbf{Tree} & \textbf{Tree + 4-gram} \\
+        \hline\noalign{\vskip 2pt}\hline
+        \multirow{4}{*}{8-bit}            & \multirow{2}{*}{QAT}                  & From scratch                       & \multicolumn{2}{c||}{--}                         & 6.4                                    & 6.2                         & 4.9                                                \\
+        \cline{3-8}
+                                          &                                       & FP32 $\rightarrow$ 8-bit           & \multicolumn{2}{c||}{--}                         & 6.5                                    & 6.2                         & 4.9                                                \\
+        \cline{2-8}
+                                          & \multirow{2}{*}{\shortstack{Memristor                                                                                                                                                                                                                     \\simulated}} & From scratch & \multirow{2}{*}{2} & \multirow{2}{*}{6} & \werresult{11.7}{0.50} & \werresult{9.7}{0.29} & \werresult{7.0}{0.19} \\
+        \cline{3-3}\cline{6-8}
+                                          &                                       & FP32 $\rightarrow$ 8-bit           &                                                  &                                        & \werresult{8.2}{0.07}       & \werresult{8.0}{0.02}      & \werresult{6.0}{0.05} \\
+        \hline\hline
+        \multirow{4}{*}{4-bit}            & \multirow{2}{*}{QAT}                  & From scratch                       & \multicolumn{2}{c||}{--}                         & 8.2                                    & 7.8                         & 5.7                                                \\
+        \cline{3-8}
+                                          &                                       & 8-bit $\rightarrow$ 4-bit          & \multicolumn{2}{c||}{--}                         & 7.5                                    & 7.0                         & 5.4                                                \\
+        \cline{2-8}
+                                          & \multirow{2}{*}{\shortstack{Memristor                                                                                                                                                                                                                     \\simulated}} & From scratch & 4 & 4 & \werresult{37.4}{1.33} & \werresult{29.6}{2.39} & \ffnnFourBitFullDeviceLmWer \\
+        \cline{3-8}
+        % TODO: replace with pending fine-tuned ADC 4/4 results when available.
+                                          &                                       & 8-bit $\rightarrow$ 4-bit          & \multicolumn{2}{c||}{$\dagger$}                  & \werprovisional{13.8}{0.28}            & \werprovisional{11.5}{0.30} & \werprovisional{7.5}{0.35}                         \\
+        \hline
+      \end{tabular}
+      \begin{tablenotes}[flushleft]\footnotesize
+        \item[] $*$ Two-run results. $\dagger$ ADC config update pending; other layers use default ADC config.
+      \end{tablenotes}
     \end{threeparttable}
   \end{table}
 \end{frame}
