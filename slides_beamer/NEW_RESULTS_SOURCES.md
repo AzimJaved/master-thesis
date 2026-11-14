@@ -6,6 +6,10 @@
 
 ### Presentation review updates
 
+- Latest user-supplied aggregates 47--49 update the fine-tuned 4-bit output-only ADC 2/6 row: 13.81343 ± 0.27787, 11.43192 ± 0.20236, 7.50046 ± 0.19958 (display: 13.8 ± 0.28, 11.4 ± 0.20, 7.5 ± 0.20). Slide 28 now explicitly separates Layer 1 and Output ADC precision/range pairs; no dagger is needed. Exploratory experiments 50--52 are not added to this slide.
+
+- User-supplied aggregates (experiments 44--46, dev-other) add fine-tuned 4-bit memristor-simulated ADC 4/4 results: Lex-Free 36.08123 ± 0.51438, Tree 28.5533 ± 3.98285, Tree + 4-gram 12.166 ± 1.21498. Displayed as 36.1 ± 0.51, 28.6 ± 3.98, 12.2 ± 1.21. Experiment names specify ADC p4/r4 and positional ADC p1/r7. The prior 13.8 / 11.5 / 7.5 row is retained as output ADC 2/6 (first joiner layer remains default 4/4), confirmed by the user; the ADC-update-pending note is removed.
+
 - Fine-tuning comparison now includes QAT references: experiment 3 / F row 28 (FP32 to 8-bit: 6.5, 6.2, 4.9) and experiment 9 / F row 35 (8-bit to 4-bit: 7.5, 7.0, 5.4). Experiment 9A / row 36 changes inference ADC settings on that fine-tuned model; its memristor-simulated scores remain provisional (two runs). No new ADC 4/4 result is inferred.
 - Single-run table values display plus/minus 0.00 with an asterisk, at the user's request. This is a single-run display convention, not a measured multi-run SD. Two-run scores retain their measured SD and an asterisk.
 - Review wording for correction tolerance: “10% acceptable relative degradation” (numeric setting remains 0.10).
