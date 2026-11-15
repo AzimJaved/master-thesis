@@ -318,6 +318,7 @@
   % pdfpagetransition = {Glitter /Di 315 /D 5}  
   % pdfpagetransition = {Box /M /O /D 1},
 } 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -814,6 +815,28 @@
   \end{table}
 \end{frame}
 
+\begin{frame}{FFNN Transducer: Breakdown due to the Joiner}
+  \begin{table}
+    \caption{Full-model 8-bit QAT: memristor-simulated results on LibriSpeech dev-other (WER [\%]).}
+    \vspace{6pt}
+    \footnotesize
+    \setlength{\tabcolsep}{5pt}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|c c c||c|U|c|}
+      \resultsTableHeader{Memristor Simulated Modules}
+      \checkmark & \checkmark & \checkmark   & \werresult{44.7}{1.95} & \werresult{56.1}{10.90} & \ffnnEightBitFullDeviceLmWer \\
+      \hline
+      \checkmark & --         & \checkmark   & \werresult{45.4}{4.99} & \werresult{55.1}{6.60}  & \werresult{21.8}{4.84}       \\
+      \hline
+      \checkmark & \checkmark & --           & \werresult{9.8}{0.03}  & \werresult{8.7}{0.10}   & \werresult{6.7}{0.03}        \\
+      \hline
+      \checkmark & \checkmark & Layer 1 Only & \werresult{11.2}{0.18} & \werresult{9.4}{0.09}   & \werresult{6.8}{0.05}        \\
+      \hline
+    \end{tabular}
+  \end{table}
+  \resultTakeaway{The breakdown is localized to the joiner. Keeping only the output layer digital recovers most of the performance.}
+\end{frame}
+
 \begin{frame}{FFNN Transducer: Error Breakdown}
   % Sources: results_1311/reports/{digital,memristor}/ffnn_transducer/qat_full_model/8bit.txt.
   % Digital experiments 1--2; memristor experiments 109--111 and 136--138.
@@ -852,27 +875,6 @@
   \resultTakeaway{\emph{Crucial Observation:} The learnt blank bias for the joiner's output layer is $+1.39$, versus $+0.40$ for the next-largest bias.}
 \end{frame}
 
-\begin{frame}{FFNN Transducer: Breakdown due to the Joiner}
-  \begin{table}
-    \caption{Full-model 8-bit QAT: memristor-simulated results on LibriSpeech dev-other (WER [\%]).}
-    \vspace{6pt}
-    \footnotesize
-    \setlength{\tabcolsep}{5pt}
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|c c c||c|U|c|}
-      \resultsTableHeader{Memristor Simulated Modules}
-      \checkmark & \checkmark & \checkmark   & \werresult{44.7}{1.95} & \werresult{56.1}{10.90} & \ffnnEightBitFullDeviceLmWer \\
-      \hline
-      \checkmark & --         & \checkmark   & \werresult{45.4}{4.99} & \werresult{55.1}{6.60}  & \werresult{21.8}{4.84}       \\
-      \hline
-      \checkmark & \checkmark & --           & \werresult{9.8}{0.03}  & \werresult{8.7}{0.10}   & \werresult{6.7}{0.03}        \\
-      \hline
-      \checkmark & \checkmark & Layer 1 Only & \werresult{11.2}{0.18} & \werresult{9.4}{0.09}   & \werresult{6.8}{0.05}        \\
-      \hline
-    \end{tabular}
-  \end{table}
-  \resultTakeaway{The breakdown is localized to the joiner. Keeping only the output layer digital recovers most of the performance.}
-\end{frame}
 
 \begin{frame}{FFNN Transducer: Joiner Output Shifts}
   \begin{figure}
@@ -976,7 +978,7 @@
         \cline{4-7}
                                         &                                                 &                                             & No  & \weronerun{18.4}       & \weronerun{12.2}      & \weronerun{8.1}        \\
         \cline{2-7}
-                                        & 2                                               & 6                                           & No  & \werresult{10.0}{0.15} & \werresult{8.6}{0.10} & \werresult{6.56}{0.13} \\
+                                        & 2                                               & 6                                           & No  & \werresult{10.0}{0.15} & \werresult{8.6}{0.10} & \werresult{6.6}{0.13} \\
         \hline
       \end{tabular}
       \adctablenotes
